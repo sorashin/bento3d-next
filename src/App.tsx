@@ -1,11 +1,11 @@
 import { Provider } from 'jotai';
-import Canvas from './components/Canvas';
-import Controls from './components/Controls';
-import Header from './components/Header';
+import Canvas from './components/3d/Canvas';
+import Controls from './components/ui/Controls';
+import Header from './components/ui/Header';
 
 function App() {
   return (
-    <Provider>
+    
       <div className="flex flex-col h-screen w-screen">
         <Header />
         <div className="flex flex-1 overflow-hidden">
@@ -13,7 +13,7 @@ function App() {
           <Canvas />
         </div>
       </div>
-    </Provider>
+    
   );
 }
 
