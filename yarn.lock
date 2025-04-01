@@ -2835,6 +2835,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nodi-modular@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "nodi-modular@npm:0.0.9"
+  checksum: 10c0/502bd4e3b53a970ef4b81280eb3ffe12372847099182299c5ae086ba2d9f9a8c9affa0f589ab81a464091145b18b353789f7b5f54db762d46c8e52a43883dafd
+  languageName: node
+  linkType: hard
+
 "nopt@npm:^8.0.0":
   version: 8.1.0
   resolution: "nopt@npm:8.1.0"
@@ -2965,6 +2972,7 @@ __metadata:
     globals: "npm:^15.15.0"
     immer: "npm:^10.1.1"
     jotai: "npm:^2.12.2"
+    nodi-modular: "npm:^0.0.9"
     postcss: "npm:^8.5.3"
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
@@ -2973,6 +2981,7 @@ __metadata:
     typescript: "npm:~5.7.2"
     typescript-eslint: "npm:^8.24.1"
     vite: "npm:^6.2.0"
+    vite-plugin-wasm: "npm:^3.4.1"
   languageName: unknown
   linkType: soft
 
@@ -3647,6 +3656,15 @@ __metadata:
   version: 3.11.0
   resolution: "utility-types@npm:3.11.0"
   checksum: 10c0/2f1580137b0c3e6cf5405f37aaa8f5249961a76d26f1ca8efc0ff49a2fc0e0b2db56de8e521a174d075758e0c7eb3e590edec0832eb44478b958f09914920f19
+  languageName: node
+  linkType: hard
+
+"vite-plugin-wasm@npm:^3.4.1":
+  version: 3.4.1
+  resolution: "vite-plugin-wasm@npm:3.4.1"
+  peerDependencies:
+    vite: ^2 || ^3 || ^4 || ^5 || ^6
+  checksum: 10c0/274bbe7bb15c596e070b3dd1caf9de3a1f16d4f6aa59a1a116b58a96dc9759d1a08e0a9d0c5923e8119147e6365490a009ceb98c99d62b6439db6549ebdde8d5
   languageName: node
   linkType: hard
 

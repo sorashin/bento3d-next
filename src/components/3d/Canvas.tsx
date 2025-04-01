@@ -1,8 +1,12 @@
 import { Canvas as ThreeCanvas } from '@react-three/fiber';
 import { OrthographicCamera, OrbitControls } from '@react-three/drei';
 import PolylineDrawer from './PolylineDrawer';
+import HangerMesh from '@/components/3d/elements/HangerMesh';
+import { useAtom } from 'jotai';
+import { geometriesAtom } from '@/stores/modular';
 
 const Canvas = () => {
+  const [geometries] = useAtom(geometriesAtom);
   return (
     <div className="flex-1 bg-gray-200 dark:bg-gray-800">
       <ThreeCanvas shadows>
@@ -30,6 +34,9 @@ const Canvas = () => {
         />
         <gridHelper args={[20, 20, '#444444', '#222222']} rotation={[Math.PI / 2, 0, 0]} />
         <PolylineDrawer />
+        {geometries.map((geometry, index) => (
+          <HangerMesh key={index} geometry={geometry} />
+        ))}
       </ThreeCanvas>
     </div>
   );
