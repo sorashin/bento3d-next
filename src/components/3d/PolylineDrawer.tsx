@@ -6,7 +6,7 @@ import { useAtom } from 'jotai';
 import { 
   polylinePointsAtom, 
   createNewPolylineAtom,
-} from '../../stores/polylineStore';
+} from '@/stores/points';
 import * as THREE from "three";
 import { Polyline } from './elements/Polyline';
 import { Cursor } from './elements/Cursor';

@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai';
-import { polylinePointsAtom } from '../../stores/polylineStore';
-import { useMemo } from 'react';
+import { polylinePointsAtom } from '@/stores/points';
+import { useEffect, useMemo } from 'react';
 import { nodesAtom, updateNodePropertyAtom, evaluateGraph, modularAtom, geometriesAtom } from '@/stores/modular';
 import { useControls } from "leva";
 import { Schema } from 'leva/dist/declarations/src/types';
@@ -13,16 +13,21 @@ const Controls = () => {
   const [geometries, setGeometries] = useAtom(geometriesAtom);
   // Levaコントロール用のパラメータを生成
   const params = useMemo(() => {
+    console.log('nodes', nodes);
     return nodes
       .map((node) => {
+        
         const { properties } = node;
-        const property = properties.find((prop: { name: string; }) => prop.name === "value");
+        
+        const property = properties.find((prop) => prop.name === "value"||prop.name === "content");
         if (property === undefined) {
           return null;
         }
+        
 
         const { value } = property;
-        if (node.label !== undefined && value.type === "Number") {
+        
+        if (node.label !== undefined && value.type === "Number") {//Number兼NumberSlider
           const range = properties.find((prop: { name: string; }) => prop.name === 'range');
           const step = properties.find((prop: { name: string; }) => prop.name === 'step');
 
@@ -40,7 +45,16 @@ const Controls = () => {
               ...parameter
             };
           }
-
+          
+          return parameter;
+        }else if(node.label !== undefined && value.type === "String"){
+          console.log('string', value);
+          const parameter = {
+            id: node.id,
+            name: node.label,
+            value: value.content,
+          };
+          
           return parameter;
         }
         return null;
@@ -61,6 +75,18 @@ const Controls = () => {
                 });
               },
             };
+          } else if(typeof(curr.value) == "string"){
+            console.log('curr', curr);
+            acc[curr.name] = {
+              value: curr.value,
+              onEditEnd: (value: string) => {
+                updateNodeProperty({ 
+                  id: curr.id, 
+                  value,
+                  evaluate: () => evaluateGraph(modular, setGeometries)
+                });
+              },
+            };
           } else {
             acc[curr.name] = {
               value: curr.value,
@@ -74,9 +100,13 @@ const Controls = () => {
             };
           }
         }
+        
         return acc;
       }, {} as Schema);
   }, [nodes, updateNodeProperty]);
+  useEffect(()=>{
+    console.log('params', params);
+  }, [params]);
 
   useControls(params, [params]);
 

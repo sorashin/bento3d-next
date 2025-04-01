@@ -1,12 +1,12 @@
 import { atom } from 'jotai';
-import { Modular } from 'nodi-modular';
+import { Modular, NodeInterop } from 'nodi-modular';
 import { BufferGeometry } from 'three';
 import { convertGeometryInterop } from '@/components/3d/utils/geometryUtils';
 import init from 'nodi-modular';
 import shelfs from "@/assets/graph/shelfs.json";
 
 export const modularAtom = atom<Modular | null>(null);
-export const nodesAtom = atom<any[]>([]);
+export const nodesAtom = atom<NodeInterop[]>([]);
 export const geometriesAtom = atom<BufferGeometry[]>([]);
 
 export const initializeModular = async (
@@ -18,7 +18,7 @@ export const initializeModular = async (
 
 export const loadGraph = (
   modular: Modular | null,
-  setNodes: (nodes: any[]) => void,
+  setNodes: (nodes: NodeInterop[]) => void,
   setGeometries: (geometries: BufferGeometry[]) => void
 ) => {
   if (!modular) return;
@@ -54,7 +54,7 @@ export const evaluateGraph = async (
 
 export const updateNodePropertyAtom = atom(
     null,
-    (get, set, { id, value, evaluate }: { id: string; value: number; evaluate: () => Promise<void> }) => {
+    (get, set, { id, value, evaluate }: { id: string; value: number|string; evaluate: () => Promise<void> }) => {
       const modular = get(modularAtom);
       if (!modular) {
         console.warn("modular is not initialized");
@@ -63,23 +63,25 @@ export const updateNodePropertyAtom = atom(
   
       try {
         
+        const property = typeof value === 'string' 
+          ? {
+              name: "content",
+              value: {
+                type: "String" as const,
+                content: value,
+              },
+            }
+          : {
+              name: "value",
+              value: {
+                type: "Number" as const,
+                content: value as number,
+              },
+            };
         
-        const property = {
-          name: "value",
-          value: {
-            type: "Number" as const,
-            content: value,
-          },
-        };
-        
-        const propertyCopy = {
-          name: property.name,
-          value: { ...property.value },
-        };
         
         
-        modular.changeNodeProperty(id, propertyCopy);
-        
+        modular.changeNodeProperty(id, property);
         
         evaluate();
         

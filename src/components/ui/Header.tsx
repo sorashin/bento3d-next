@@ -1,5 +1,5 @@
 import { useAtom } from 'jotai';
-import { clearPointsAtom, polylinePointsAtom } from '../../stores/polylineStore';
+import { clearPointsAtom, polylinePointsAtom } from '@/stores/points';
 
 const Header = () => {
   const [points] = useAtom(polylinePointsAtom);
