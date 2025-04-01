@@ -1,5 +1,5 @@
 
-import { BufferGeometry, DoubleSide, RepeatWrapping, SRGBColorSpace } from "three";
+import { BufferGeometry } from "three";
 import { useEffect } from "react";
 
 type HangerMeshProps = {

@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { Vector2 } from 'three';
+import { Vector2, Vector3 } from 'three';
 
 // ポリラインの頂点座標を格納する配列
 export interface PolylinePoint {
@@ -16,6 +16,18 @@ export interface Polyline {
 // ポリラインの配列を格納するアトム
 export const polylinePointsAtom = atom<Polyline[]>([]);
 
+// 最初のポリラインのポイントを3D配列に変換するヘルパー関数
+export const getFirstPolylinePoints3D = (polylines: Polyline[]): [number, number, number][] => {
+  if (polylines.length === 0 || polylines[0].points.length === 0) {
+    return [];
+  }
+  return polylines[0].points.map(point => [
+    point.position.x,
+    point.position.y,
+    0
+  ]);
+};
+
 // 新しいポリラインを登録するアクション
 export const createNewPolylineAtom = atom(
   null,
@@ -29,8 +41,9 @@ export const createNewPolylineAtom = atom(
       id: `polyline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       points: newPoints
     };
-    set(polylinePointsAtom, [...polylines, newPolyline]);
-    return newPolyline.id;
+    const updatedPolylines = [...polylines, newPolyline];
+    set(polylinePointsAtom, updatedPolylines);
+    return { id: newPolyline.id, polylines: updatedPolylines };
   }
 );
 

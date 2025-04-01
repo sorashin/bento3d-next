@@ -1,7 +1,7 @@
 import { useAtom } from 'jotai';
-import { polylinePointsAtom } from '@/stores/points';
+import { clearPointsAtom, polylinePointsAtom } from '@/stores/points';
 import { useEffect, useMemo } from 'react';
-import { nodesAtom, updateNodePropertyAtom, evaluateGraph, modularAtom, geometriesAtom } from '@/stores/modular';
+import { nodesAtom, updateNodePropertyAtom, evaluateGraph, modularAtom, geometriesAtom, pointNodeIdAtom } from '@/stores/modular';
 import { useControls } from "leva";
 import { Schema } from 'leva/dist/declarations/src/types';
 
@@ -10,14 +10,16 @@ const Controls = () => {
   const [,updateNodeProperty] = useAtom(updateNodePropertyAtom);
   const [nodes] = useAtom(nodesAtom);
   const [modular] = useAtom(modularAtom);
-  const [geometries, setGeometries] = useAtom(geometriesAtom);
+  const [, setGeometries] = useAtom(geometriesAtom);
+  const [,setPointNode] = useAtom(pointNodeIdAtom);
+  const [,clearPoints] = useAtom(clearPointsAtom);
   // Levaコントロール用のパラメータを生成
   const params = useMemo(() => {
     console.log('nodes', nodes);
     return nodes
       .map((node) => {
         
-        const { properties } = node;
+        const { properties, label } = node;
         
         const property = properties.find((prop) => prop.name === "value"||prop.name === "content");
         if (property === undefined) {
@@ -49,6 +51,9 @@ const Controls = () => {
           return parameter;
         }else if(node.label !== undefined && value.type === "String"){
           console.log('string', value);
+          if(label === "points"){
+            setPointNode(node.id);
+          }
           const parameter = {
             id: node.id,
             name: node.label,
@@ -111,8 +116,9 @@ const Controls = () => {
   useControls(params, [params]);
 
   return (
-    <div className="w-64 bg-gray-100 dark:bg-gray-700 p-4 overflow-auto flex flex-col">
+    <div className="w-64 bg-gray-100 dark:bg-gray-700 p-4 overflow-auto flex flex-col fixed top-0 left-0 bottom-0 z-10">
       <h2 className="text-lg font-semibold mb-4 dark:text-white">Polylines</h2>
+      <button onClick={clearPoints} className='bg-red-500 text-white px-4 py-2 rounded-md'>Clear Points</button>
       
       {polylines.length === 0 ? (
         <div className="text-gray-500 dark:text-gray-400 text-sm italic">

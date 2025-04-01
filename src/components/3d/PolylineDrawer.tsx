@@ -6,21 +6,27 @@ import { useAtom } from 'jotai';
 import { 
   polylinePointsAtom, 
   createNewPolylineAtom,
+  getFirstPolylinePoints3D,
 } from '@/stores/points';
 import * as THREE from "three";
 import { Polyline } from './elements/Polyline';
 import { Cursor } from './elements/Cursor';
 import { useKey } from '@/hooks/useKey';
+import { evaluateGraph, geometriesAtom, modularAtom, pointNodeIdAtom } from '@/stores/modular';
+import { updateNodePropertyAtom } from '@/stores/modular';
 
 const PolylineDrawer = () => {
   const [polylines] = useAtom(polylinePointsAtom);
-  
+  const [pointNodeId] = useAtom(pointNodeIdAtom);
   const [currentCursorPoint, setCurrentCursorPoint] = useState<THREE.Vector2>(
     new THREE.Vector2(0, 0),
   );
   const [points, setPoints] = useState<THREE.Vector2[]>([]);
   const [previewPoints, setPreviewPoints] = useState<THREE.Vector2[]>([]);
   const [, createNewPolyline] = useAtom(createNewPolylineAtom);
+  const [, updateNodeProperty] = useAtom(updateNodePropertyAtom);
+  const [modular] = useAtom(modularAtom);
+  const [, setGeometries] = useAtom(geometriesAtom);
 
   const { isPressed: isPressedEscape } = useKey({
     conditions: (e) => e.key === "Escape"
@@ -33,10 +39,18 @@ const PolylineDrawer = () => {
 
   // 新しいポリラインの作成
   const complete = useCallback(() => {
-    createNewPolyline({ points: points })
+    const result = createNewPolyline({ points: points });
+    if (result) {
+      //Panel nodeの値を更新
+      updateNodeProperty({
+        id: pointNodeId!,
+        value: `{"points":${JSON.stringify(getFirstPolylinePoints3D(result.polylines))}}`,
+        evaluate: () => evaluateGraph(modular, setGeometries)
+      });
+    }
     setPreviewPoints([]);
     setPoints([]);
-  }, [points, createNewPolyline]);
+  }, [points, createNewPolyline, pointNodeId, modular, setGeometries]);
 
   const cancel = useCallback(() => {
     setPreviewPoints([]);
@@ -103,10 +117,15 @@ const PolylineDrawer = () => {
     }
   }, [isPressedEscape]);
 
+  useEffect(() => {
+    console.log("polylines", polylines);
+  }, [polylines]);
+
   return (
     <>
       <Plane
         position={[0, 0, 0]}
+        rotation={[0, 0, Math.PI / 2]}
         scale={1000}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}

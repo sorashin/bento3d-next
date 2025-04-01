@@ -1,7 +1,7 @@
 import { useAtom } from 'jotai';
 import Canvas from './components/3d/Canvas';
 import Controls from './components/ui/Controls';
-import Header from './components/ui/Header';
+
 import { useEffect } from 'react';
 import { 
   modularAtom, 
@@ -28,9 +28,9 @@ function App() {
 
   return (
     <div className="flex flex-col h-screen w-screen">
-      <Header />
-      <div className="flex flex-1 overflow-hidden">
+      
         <Controls />
+      <div className="flex flex-1 overflow-hidden">
         <Canvas />
       </div>
     </div>

@@ -8,6 +8,7 @@ import shelfs from "@/assets/graph/shelfs.json";
 export const modularAtom = atom<Modular | null>(null);
 export const nodesAtom = atom<NodeInterop[]>([]);
 export const geometriesAtom = atom<BufferGeometry[]>([]);
+export const pointNodeIdAtom = atom<string|null>(null);
 
 export const initializeModular = async (
   setModular: (modular: Modular) => void
@@ -84,7 +85,7 @@ export const updateNodePropertyAtom = atom(
         modular.changeNodeProperty(id, property);
         
         evaluate();
-        
+        console.log("value updated", value);
       } catch (error) {
         console.error("Error in changeNodeProperty:", error);
       }
