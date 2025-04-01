@@ -27,7 +27,7 @@ const Canvas = () => {
           far={1000}
         />
         <OrbitControls
-          enableRotate={false}
+          enableRotate={true}
           enablePan={true}
           enableZoom={true}
           zoomSpeed={0.5}

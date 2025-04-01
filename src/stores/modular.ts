@@ -3,6 +3,7 @@ import { Modular } from 'nodi-modular';
 import { BufferGeometry } from 'three';
 import { convertGeometryInterop } from '@/components/3d/utils/geometryUtils';
 import init from 'nodi-modular';
+import shelfs from "@/assets/graph/shelfs.json";
 import hanger from "@/assets/graph/hanger.json";
 
 export const modularAtom = atom<Modular | null>(null);
@@ -23,16 +24,17 @@ export const loadGraph = (
 ) => {
   if (!modular) return;
   
-  modular.loadGraph(JSON.stringify(hanger.graph));
+  modular.loadGraph(JSON.stringify(shelfs.graph));
   const nodes = modular.getNodes();
-  const numberNodes = nodes.filter(
-    (n) => n.variant === "Number" || n.variant === "NumberSlider"
+  console.log('nodes', nodes);
+  const inputNodes = nodes.filter(
+    (n) => n.variant === "Number" || n.variant === "NumberSlider" || n.variant === "Panel"
   );
-  setNodes(numberNodes);
+  setNodes(inputNodes);
   evaluateGraph(modular, setGeometries);
 };
 
-const evaluateGraph = async (
+export const evaluateGraph = async (
   modular: Modular | null,
   setGeometries: (geometries: BufferGeometry[]) => void
 ) => {
@@ -48,7 +50,7 @@ const evaluateGraph = async (
         return interop ? convertGeometryInterop(interop) : null;
       })
       .filter((g): g is BufferGeometry => g !== null);
-    
+    console.log('evaluated', gs);
     setGeometries(gs);
   } catch (error) {
     console.error("Error evaluating graph:", error);
@@ -60,9 +62,15 @@ export const updateNodePropertyAtom = atom(
     null,
     (get, set, { id, value, evaluate }: { id: string; value: number; evaluate: () => Promise<void> }) => {
       const modular = get(modularAtom);
-      if (!modular) return;
+      if (!modular) {
+        console.warn("modular is not initialized");
+        return;
+      }
   
       try {
+        console.log("handleChange called with id:", id, "value:", value);
+        console.log("modular is initialized");
+        
         const property = {
           name: "value",
           value: {
@@ -71,17 +79,20 @@ export const updateNodePropertyAtom = atom(
           },
         };
         
+        console.log("property:", property);
         const propertyCopy = {
-          ...property,
+          name: property.name,
           value: { ...property.value },
         };
+        console.log("propertyCopy:", propertyCopy);
         
         modular.changeNodeProperty(id, propertyCopy);
+        console.log("changeNodeProperty succeeded");
         
-        // evaluateCallbackを実行
         evaluate();
+        console.log("evaluate succeeded");
       } catch (error) {
-        console.error("Error updating node property:", error);
+        console.error("Error in changeNodeProperty:", error);
       }
     }
   );
