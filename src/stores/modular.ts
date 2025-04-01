@@ -12,7 +12,7 @@ export const geometriesAtom = atom<BufferGeometry[]>([]);
 
 export const updateNodePropertyAtom = atom(
     null,
-    (get, set, { id, value }: { id: string; value: number }) => {
+    (get, set, { id, value, evaluate }: { id: string; value: number; evaluate: () => Promise<void> }) => {
       const modular = get(modularAtom);
       if (!modular) return;
   
@@ -32,8 +32,8 @@ export const updateNodePropertyAtom = atom(
         
         modular.changeNodeProperty(id, propertyCopy);
         
-        // グラフを評価して幾何学データを更新
-        evaluateGraph(modular, set);
+        // evaluateCallbackを実行
+        evaluate();
       } catch (error) {
         console.error("Error updating node property:", error);
       }
@@ -46,7 +46,7 @@ export const evaluateGraph = async (modular: Modular, set: any) => {
       const result = await modular.evaluate();
       const { geometryIdentifiers } = result;
       
-      const gs = geometryIdentifiers
+      const gs = geometryIdentifiers!
         .map((id) => {
           const interop = modular.findGeometryInteropById(id);
           return interop ? convertGeometryInterop(interop) : null;
@@ -59,3 +59,15 @@ export const evaluateGraph = async (modular: Modular, set: any) => {
       set(geometriesAtom, []);
     }
   };
+
+// 初期化関数を修正
+export const initializeModular = async (): Promise<Modular | null> => {
+  try {
+    await init();
+    const modular = Modular.new();
+    return modular;
+  } catch (error) {
+    console.error("Failed to initialize Modular:", error);
+    return null;
+  }
+};
