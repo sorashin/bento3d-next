@@ -4,7 +4,6 @@ import { BufferGeometry } from 'three';
 import { convertGeometryInterop } from '@/components/3d/utils/geometryUtils';
 import init from 'nodi-modular';
 import shelfs from "@/assets/graph/shelfs.json";
-import hanger from "@/assets/graph/hanger.json";
 
 export const modularAtom = atom<Modular | null>(null);
 export const nodesAtom = atom<any[]>([]);
@@ -26,11 +25,7 @@ export const loadGraph = (
   
   modular.loadGraph(JSON.stringify(shelfs.graph));
   const nodes = modular.getNodes();
-  console.log('nodes', nodes);
-  const inputNodes = nodes.filter(
-    (n) => n.variant === "Number" || n.variant === "NumberSlider" || n.variant === "Panel"
-  );
-  setNodes(inputNodes);
+  setNodes(nodes);
   evaluateGraph(modular, setGeometries);
 };
 
@@ -50,7 +45,6 @@ export const evaluateGraph = async (
         return interop ? convertGeometryInterop(interop) : null;
       })
       .filter((g): g is BufferGeometry => g !== null);
-    console.log('evaluated', gs);
     setGeometries(gs);
   } catch (error) {
     console.error("Error evaluating graph:", error);
@@ -68,8 +62,7 @@ export const updateNodePropertyAtom = atom(
       }
   
       try {
-        console.log("handleChange called with id:", id, "value:", value);
-        console.log("modular is initialized");
+        
         
         const property = {
           name: "value",
@@ -79,18 +72,17 @@ export const updateNodePropertyAtom = atom(
           },
         };
         
-        console.log("property:", property);
         const propertyCopy = {
           name: property.name,
           value: { ...property.value },
         };
-        console.log("propertyCopy:", propertyCopy);
+        
         
         modular.changeNodeProperty(id, propertyCopy);
-        console.log("changeNodeProperty succeeded");
+        
         
         evaluate();
-        console.log("evaluate succeeded");
+        
       } catch (error) {
         console.error("Error in changeNodeProperty:", error);
       }
