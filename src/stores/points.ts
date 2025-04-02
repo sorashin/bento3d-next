@@ -16,6 +16,10 @@ export interface Polyline {
 // ポリラインの配列を格納するアトム
 export const polylinePointsAtom = atom<Polyline[]>([]);
 
+// test 中点を格納するatom
+export const midPointAtom = atom<Vector2[]>([]);
+
+
 // 最初のポリラインのポイントを3D配列に変換するヘルパー関数
 export const getFirstPolylinePoints3D = (polylines: Polyline[]): [number, number, number][] => {
   if (polylines.length === 0 || polylines[0].points.length === 0) {

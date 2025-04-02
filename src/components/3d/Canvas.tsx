@@ -1,9 +1,10 @@
 import { Canvas as ThreeCanvas } from '@react-three/fiber';
 import {  OrbitControls, GizmoViewport, GizmoHelper } from '@react-three/drei';
-import PolylineDrawer from './PolylineDrawer';
+import PolylineDrawer from '@/components/3d/command/PolylineDrawer';
 import HangerMesh from '@/components/3d/elements/HangerMesh';
 import { useAtom } from 'jotai';
 import { geometriesAtom } from '@/stores/modular';
+import PointDrawer from './command/PointDrawer';
 
 const Canvas = () => {
   const [geometries] = useAtom(geometriesAtom);
@@ -15,7 +16,7 @@ const Canvas = () => {
         camera={{
           position: [0, 0, 100], // clipping 問題解決するため zを１００にする
           fov: 40,
-          zoom: 500,
+          zoom: 10,
           near: 0.1,
           far: 10000,
         }}
@@ -43,8 +44,9 @@ const Canvas = () => {
           enableZoom={true}
           zoomSpeed={0.5}
         />
-        <gridHelper args={[20, 20, '#444444', '#222222']} rotation={[Math.PI / 2, 0, 0]} />
+        <gridHelper args={[1, 1, '#444444', '#222222']} rotation={[Math.PI / 2, 0, 0]} />
         <PolylineDrawer />
+        <PointDrawer />
         <group rotation={[Math.PI, 0, 0]} >
           {geometries.map((geometry, index) => (
             <HangerMesh key={index} geometry={geometry} />

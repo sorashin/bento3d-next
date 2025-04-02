@@ -1,22 +1,29 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useThree, ThreeEvent } from '@react-three/fiber';
 import { Vector2, Vector3 } from 'three';
-import { Line, Plane, Sphere } from '@react-three/drei';
-import { useAtom } from 'jotai';
+import { Line, Plane,  Sphere } from '@react-three/drei';
+import { useAtom, useAtomValue } from 'jotai';
 import { 
   polylinePointsAtom, 
   createNewPolylineAtom,
   getFirstPolylinePoints3D,
+  midPointAtom,
 } from '@/stores/points';
 import * as THREE from "three";
-import { Polyline } from './elements/Polyline';
-import { Cursor } from './elements/Cursor';
+import { Polyline } from '@/components/3d/elements/Polyline';
+import { Cursor } from '@/components/3d/elements/Cursor';
+import { Point } from '@/components/3d/elements/Point';
 import { useKey } from '@/hooks/useKey';
-import { evaluateGraph, geometriesAtom, modularAtom, pointNodeIdAtom } from '@/stores/modular';
+import { geometriesAtom, modularAtom, pointNodeIdAtom } from '@/stores/modular';
 import { updateNodePropertyAtom } from '@/stores/modular';
+import { snapAtom, snapLengthAtom } from '@/stores/controls';
+
+
+
 
 const PolylineDrawer = () => {
   const [polylines] = useAtom(polylinePointsAtom);
+  const [midPoint] = useAtom(midPointAtom);
   const [pointNodeId] = useAtom(pointNodeIdAtom);
   const [currentCursorPoint, setCurrentCursorPoint] = useState<THREE.Vector2>(
     new THREE.Vector2(0, 0),
@@ -27,7 +34,8 @@ const PolylineDrawer = () => {
   const [, updateNodeProperty] = useAtom(updateNodePropertyAtom);
   const [modular] = useAtom(modularAtom);
   const [, setGeometries] = useAtom(geometriesAtom);
-
+  const snap = useAtomValue(snapAtom);
+  const snapLength = useAtomValue(snapLengthAtom);
   const { isPressed: isPressedEscape } = useKey({
     conditions: (e) => e.key === "Escape"
   });
@@ -44,18 +52,25 @@ const PolylineDrawer = () => {
       //Panel nodeの値を更新
       updateNodeProperty({
         id: pointNodeId!,
-        value: `{"points":${JSON.stringify(getFirstPolylinePoints3D(result.polylines))}}`,
-        evaluate: () => evaluateGraph(modular, setGeometries)
+        value: `{"points":${JSON.stringify(getFirstPolylinePoints3D(result.polylines))}}`
       });
     }
     setPreviewPoints([]);
     setPoints([]);
   }, [points, createNewPolyline, pointNodeId, modular, setGeometries]);
-
+  //キャンセル処理
   const cancel = useCallback(() => {
     setPreviewPoints([]);
     setPoints([]);
   }, []);
+
+  // グリッドにスナップさせる関数
+  const snapToGrid = useCallback(
+    (value: number) => {
+      return Math.round(value / snapLength) * snapLength;
+    },
+    [snapLength],
+  );
 
   const onPointerDown = useCallback(
     (e: ThreeEvent<PointerEvent>) => {
@@ -90,6 +105,10 @@ const PolylineDrawer = () => {
         e.intersections[0].point.x,
         e.intersections[0].point.y,
       );
+      if (snap) {
+        currentPt.x = snapToGrid(currentPt.x);
+        currentPt.y = snapToGrid(currentPt.y);
+      }
 
       setCurrentCursorPoint(currentPt);
 
@@ -146,6 +165,11 @@ const PolylineDrawer = () => {
       {previewPoints.length > 0 && (
         <Polyline points={previewPoints} color="tomato" />
       )}
+      {
+        midPoint.map((point) => (
+          <Point point={point} />
+        ))
+      }
       <Cursor point={currentCursorPoint} />
     </>
   );

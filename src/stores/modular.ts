@@ -55,7 +55,7 @@ export const evaluateGraph = async (
 
 export const updateNodePropertyAtom = atom(
     null,
-    (get, set, { id, value, evaluate }: { id: string; value: number|string; evaluate: () => Promise<void> }) => {
+    (get, set, { id, value }: { id: string; value: number|string }) => {
       const modular = get(modularAtom);
       if (!modular) {
         console.warn("modular is not initialized");
@@ -63,7 +63,6 @@ export const updateNodePropertyAtom = atom(
       }
   
       try {
-        
         const property = typeof value === 'string' 
           ? {
               name: "content",
@@ -80,14 +79,41 @@ export const updateNodePropertyAtom = atom(
               },
             };
         
-        
-        
         modular.changeNodeProperty(id, property);
+        evaluateGraph(modular, (geometries) => set(geometriesAtom, geometries));
         
-        evaluate();
-        console.log("value updated", value);
       } catch (error) {
         console.error("Error in changeNodeProperty:", error);
       }
     }
   );
+
+export const getNodePropertyAtom = atom((get) => {
+  return (label: string) => {
+    
+    
+    const nodes = get(nodesAtom);
+    const targetNode = nodes.find(node => node.label === label);
+    
+    if (!targetNode) {
+      return null;
+    }
+
+    // const property = targetNode.properties.find(
+    //   prop => prop.name === "value" || prop.name === "content"
+    // );
+
+    // if (!property) {
+    //   return null;
+    // }
+
+    return {
+      id: targetNode.id,
+      // value: property.value.type === "String" 
+      //   ? property.value.content as string
+      //   : property.value.content as number,
+      outputs: targetNode.outputs
+    };
+  };
+});
+

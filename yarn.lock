@@ -3437,7 +3437,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodi-modular@npm:^0.0.10":
+"nodi-modular@npm:0.0.10":
   version: 0.0.10
   resolution: "nodi-modular@npm:0.0.10"
   checksum: 10c0/04acf80d1fecf217937f022e0098325eb73bb907db0cac595449b6f0f8e3482335e950f8780a4be7e365291bf412b46e168f7a30a10556b2f1797cfb93fbe3c4
@@ -3561,40 +3561,6 @@ __metadata:
   checksum: 10c0/26c02b8d06f03206fc2ab8d16f19960f2ff9e81a658f831ecb656d8f17d9edc799e8364b1f4a7873e89d9702dff96204be0fa26fe4181f6843f040f819dac4be
   languageName: node
   linkType: hard
-
-"polyline-editor@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "polyline-editor@workspace:."
-  dependencies:
-    "@eslint/js": "npm:^9.21.0"
-    "@react-three/drei": "npm:^10.0.5"
-    "@react-three/fiber": "npm:^9.1.0"
-    "@tailwindcss/vite": "npm:^4.0.17"
-    "@types/react": "npm:^19.0.10"
-    "@types/react-dom": "npm:^19.0.4"
-    "@types/three": "npm:^0.175.0"
-    "@vitejs/plugin-react": "npm:^4.3.4"
-    autoprefixer: "npm:^10.4.21"
-    eslint: "npm:^9.21.0"
-    eslint-plugin-react-hooks: "npm:^5.1.0"
-    eslint-plugin-react-refresh: "npm:^0.4.19"
-    globals: "npm:^15.15.0"
-    immer: "npm:^10.1.1"
-    jotai: "npm:^2.12.2"
-    leva: "npm:^0.10.0"
-    nodi-modular: "npm:^0.0.10"
-    postcss: "npm:^8.5.3"
-    react: "npm:^19.0.0"
-    react-dom: "npm:^19.0.0"
-    tailwindcss: "npm:^4.0.17"
-    three: "npm:^0.175.0"
-    typescript: "npm:~5.7.2"
-    typescript-eslint: "npm:^8.24.1"
-    vite: "npm:6"
-    vite-plugin-top-level-await: "npm:^1.5.0"
-    vite-plugin-wasm: "npm:^3.4.1"
-  languageName: unknown
-  linkType: soft
 
 "postcss-value-parser@npm:^4.2.0":
   version: 4.2.0
@@ -3955,6 +3921,40 @@ __metadata:
   checksum: 10c0/1dbed0726dd0e1152a92696c76c7f06084eb32a90f0528d11acd764043aacf76994b2fb30aa1291a21bd019d6699164d048286309a278855ee7bec06cf6fb690
   languageName: node
   linkType: hard
+
+"shelf-editor@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "shelf-editor@workspace:."
+  dependencies:
+    "@eslint/js": "npm:^9.21.0"
+    "@react-three/drei": "npm:^10.0.5"
+    "@react-three/fiber": "npm:^9.1.0"
+    "@tailwindcss/vite": "npm:^4.0.17"
+    "@types/react": "npm:^19.0.10"
+    "@types/react-dom": "npm:^19.0.4"
+    "@types/three": "npm:^0.175.0"
+    "@vitejs/plugin-react": "npm:^4.3.4"
+    autoprefixer: "npm:^10.4.21"
+    eslint: "npm:^9.21.0"
+    eslint-plugin-react-hooks: "npm:^5.1.0"
+    eslint-plugin-react-refresh: "npm:^0.4.19"
+    globals: "npm:^15.15.0"
+    immer: "npm:^10.1.1"
+    jotai: "npm:^2.12.2"
+    leva: "npm:^0.10.0"
+    nodi-modular: "npm:0.0.10"
+    postcss: "npm:^8.5.3"
+    react: "npm:^19.0.0"
+    react-dom: "npm:^19.0.0"
+    tailwindcss: "npm:^4.0.17"
+    three: "npm:^0.175.0"
+    typescript: "npm:~5.7.2"
+    typescript-eslint: "npm:^8.24.1"
+    vite: "npm:6"
+    vite-plugin-top-level-await: "npm:^1.5.0"
+    vite-plugin-wasm: "npm:^3.4.1"
+  languageName: unknown
+  linkType: soft
 
 "signal-exit@npm:^4.0.1":
   version: 4.1.0

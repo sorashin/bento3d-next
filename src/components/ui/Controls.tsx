@@ -9,8 +9,7 @@ const Controls = () => {
   const [polylines] = useAtom(polylinePointsAtom);
   const [,updateNodeProperty] = useAtom(updateNodePropertyAtom);
   const [nodes] = useAtom(nodesAtom);
-  const [modular] = useAtom(modularAtom);
-  const [, setGeometries] = useAtom(geometriesAtom);
+  
   const [,setPointNode] = useAtom(pointNodeIdAtom);
   const [,clearPoints] = useAtom(clearPointsAtom);
   // Levaコントロール用のパラメータを生成
@@ -75,8 +74,7 @@ const Controls = () => {
               onEditEnd: (value: number) => {
                 updateNodeProperty({ 
                   id: curr.id, 
-                  value,
-                  evaluate: () => evaluateGraph(modular, setGeometries)
+                  value
                 });
               },
             };
@@ -87,8 +85,7 @@ const Controls = () => {
               onEditEnd: (value: string) => {
                 updateNodeProperty({ 
                   id: curr.id, 
-                  value,
-                  evaluate: () => evaluateGraph(modular, setGeometries)
+                  value
                 });
               },
             };
@@ -98,8 +95,7 @@ const Controls = () => {
               onEditEnd: (value: number) => {
                 updateNodeProperty({ 
                   id: curr.id, 
-                  value,
-                  evaluate: () => evaluateGraph(modular, setGeometries)
+                  value
                 });
               },
             };
