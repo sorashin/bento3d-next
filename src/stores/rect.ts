@@ -1,7 +1,7 @@
 import { atom } from "jotai";
 import { Vector2 } from "three";
 import { polylinePointsAtom } from './points';
-import { defaultShelfSizeAtom } from './settings';
+import { defaultShelfSizeAtom, unitAtom } from './settings';
 
 export interface Wall {
   start: Vector2;
@@ -25,7 +25,7 @@ export const wallOverridesAtom = atom<Record<string, Partial<Wall>>>({});
 export const wallAtom = atom((get) => {
   console.log("wallAtom derived calculation running");
   const polylines = get(polylinePointsAtom);
-  const defaultShelfSize = get(defaultShelfSizeAtom);
+  const defaultShelfSize = get(defaultShelfSizeAtom)/get(unitAtom);
   const overrides = get(wallOverridesAtom);
   
   if (polylines.length === 0) return [];

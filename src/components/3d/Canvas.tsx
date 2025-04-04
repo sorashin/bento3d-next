@@ -1,10 +1,11 @@
 import { Canvas as ThreeCanvas } from '@react-three/fiber';
 import {  OrbitControls, GizmoViewport, GizmoHelper, } from '@react-three/drei';
 import PolylineDrawer from '@/components/3d/command/PolylineDrawer';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { geometriesAtom } from '@/stores/modular';
 import { wallAtom } from '@/stores/rect';
 import { WallElem } from './elements/Wall';
+import { clearSelectedAtom } from '@/stores/select';
 
 
 
@@ -12,6 +13,7 @@ import { WallElem } from './elements/Wall';
 const Canvas = () => {
   const [geometries] = useAtom(geometriesAtom);
   const walls = useAtomValue(wallAtom);
+  const clearSelected = useSetAtom(clearSelectedAtom);
   
   
   
@@ -28,6 +30,7 @@ const Canvas = () => {
           far: 10000,
         }}
         frameloop="demand"
+        onPointerMissed={() => clearSelected()} // 中空クリック時にclearSelectedを実行
       >
         <color attach="background" args={['#1e293b']} />
         <ambientLight intensity={0.8} />

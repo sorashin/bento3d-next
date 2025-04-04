@@ -1,12 +1,14 @@
 import { Line } from "@react-three/drei";
 import { Vector2, Vector3 } from "three";
-import { Wall } from "@/stores/rect";
+import { Wall, wallAtom } from "@/stores/rect";
 import * as THREE from "three";
 import { Rect } from "./Rect";
 import { use, useCallback } from "react";
 import { shelfDepthAtom } from "@/stores/settings";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { mutableWallAtom } from "@/stores/rect";
+import { GeometrySelection, selectedGeometryAtom } from "@/stores/select";
+import { WallPoint } from "./WallPoint";
 
 type WallProps = {
   wall: Wall;
@@ -18,10 +20,49 @@ export const WallElem = (props: WallProps) => {
   const wallThickness = 1; // 壁の厚さ
   const shelfDepth = useAtomValue(shelfDepthAtom);
   const setMutableWall = useSetAtom(mutableWallAtom);
+  const [selectedElement, setSelectedElement] = useAtom(selectedGeometryAtom);
 
-  // Rectを削除する関数
+
+
   const walls = useAtomValue(mutableWallAtom);
-  const handleRectClick = useCallback(
+
+  const wallPoints = [start, end];
+  // Rectを削除する関数
+  const handleRectSelect = useCallback(
+    (rectId: string) => {
+      console.log("Rect selected:", rectId);
+      const updatedSelectState:GeometrySelection ={
+        id: rectId,
+        type: "rect",
+        fit_view: false,
+      }
+      setSelectedElement(updatedSelectState)
+      
+    },
+    [props.wall.id, setMutableWall, walls]
+  );
+  const handleRectResize = useCallback(
+    (rectId: string, newWidth: number) => {
+      console.log("Rect resized:", rectId, newWidth);
+      const updatedWalls = walls.map((wall) => {
+        if (wall.id === props.wall.id) {
+          return {
+            ...wall,
+            grid: wall.grid.map((gridItem) => {
+              if (gridItem.id === rectId) {
+                return { ...gridItem, width: newWidth };
+              }
+              return gridItem;
+            }),
+          };
+        }
+        return wall;
+      });
+      setMutableWall(updatedWalls);
+    },
+    [props.wall.id, setMutableWall, walls]
+  );
+  const handleRectDelete = useCallback(
     (rectId: string) => {
       console.log("Rect clicked:", rectId);
       const updatedWalls = walls.map((wall) => {
@@ -80,6 +121,14 @@ export const WallElem = (props: WallProps) => {
           opacity={1}
         />
       </mesh>
+      {
+        wallPoints.map((point, index) => (
+          <WallPoint
+            key={index}
+            point={point} // 縦線を描画
+          />
+        ))}
+      
       {grid.map((g, index) => {
         // 前のグリッドの幅の合計を計算（現在のインデックスまで）
         const previousWidths = grid
@@ -100,7 +149,9 @@ export const WallElem = (props: WallProps) => {
             height={shelfDepth}
             startPos={gridStartPoint}
             dir={direction}
-            onClick={() => handleRectClick(g.id)} // クリックイベントを追加
+            onClick={() => handleRectSelect(g.id)} // クリックイベントを追加
+            onResize={(id, width) => handleRectResize(id, width)} // リサイズイベントを追加
+            onDelete={() => handleRectDelete(g.id)} // 選択イベントを追加
           />
         );
       })}

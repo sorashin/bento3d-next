@@ -12,6 +12,7 @@ export const snapLengthAtom = atom<number>(0.1);
 export const setSnapLength = atom(null, (get, set, mmSize: number) => {
     set(snapLengthAtom, mmSize/get(unitAtom));
 });
-export const defaultShelfSizeAtom = atom<number>(1);//100cm
+export type shelfSize = 50 | 60 | 70 | 80 | 90 | 100 | 110 | 120;
+export const defaultShelfSizeAtom = atom<shelfSize>(100); // 100cm
 export const shelfDepthAtom = atom<number>(0.5);//50cm
 export const isDrawAtom = atom<boolean>(false);
