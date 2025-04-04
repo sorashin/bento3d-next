@@ -10,6 +10,7 @@ type RectProps = {
   height: number;
   dir: Vector2;
   startPos: Vector2;
+  onClick?: (id: string) => void;
 };
 
 export const Rect = (props: RectProps) => {
@@ -57,6 +58,10 @@ export const Rect = (props: RectProps) => {
     
   return (
     <group
+      onClick={(e) => {
+        e.stopPropagation();
+        if (props.onClick) props.onClick(id);
+      }}
       onPointerOver={(e) => {
         e.stopPropagation();
         setHovered(true);
