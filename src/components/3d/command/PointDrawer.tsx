@@ -10,7 +10,7 @@ import {
 import { Point } from '@/components/3d/elements/Point';
 import { polylinePointsAtom } from '@/stores/points';
 import { getNodePropertyAtom} from '@/stores/modular';
-import { IOInterop } from 'nodi-modular';
+
 
 
 
