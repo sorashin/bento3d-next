@@ -1,4 +1,4 @@
-import { unitAtom } from "@/stores/controls";
+import { unitAtom } from "@/stores/settings";
 
 import { useAtomValue } from "jotai";
 

@@ -4,7 +4,8 @@ import PolylineDrawer from '@/components/3d/command/PolylineDrawer';
 import HangerMesh from '@/components/3d/elements/HangerMesh';
 import { useAtom } from 'jotai';
 import { geometriesAtom } from '@/stores/modular';
-import PointDrawer from './command/PointDrawer';
+
+import { ResizableRectangle } from './elements/ResizableRect';
 
 const Canvas = () => {
   const [geometries] = useAtom(geometriesAtom);
@@ -39,14 +40,19 @@ const Canvas = () => {
         </GizmoHelper>
         
         <OrbitControls
-          enableRotate={true}
+          enableRotate={false}
           enablePan={true}
           enableZoom={true}
           zoomSpeed={0.5}
         />
         <gridHelper args={[1, 1, '#444444', '#222222']} rotation={[Math.PI / 2, 0, 0]} />
         <PolylineDrawer />
-        <PointDrawer />
+        {/* <ResizableRectangle 
+          initialWidth={3} 
+          height={1.5} 
+          color="#1e90ff" 
+          rotation={[0, Math.PI / 6, 0]} 
+        /> */}
         <group rotation={[Math.PI, 0, 0]} >
           {geometries.map((geometry, index) => (
             <HangerMesh key={index} geometry={geometry} />

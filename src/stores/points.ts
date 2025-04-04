@@ -1,5 +1,6 @@
 import { atom } from 'jotai';
-import { Vector2, Vector3 } from 'three';
+import { Vector2 } from 'three';
+import { wallAtom } from './rect'; // wallAtomをインポート
 
 // ポリラインの頂点座標を格納する配列
 export interface PolylinePoint {
@@ -37,7 +38,7 @@ export const createNewPolylineAtom = atom(
   null,
   (get, set,{points}:{points:Vector2[]}) => {
     const polylines = get(polylinePointsAtom);
-    const newPoints = points.map((point, index) => ({
+    const newPoints = points.map((point) => ({
       id: `point-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       position: point
     }));
@@ -109,3 +110,4 @@ export const addHistoryActionAtom = atom(
     set(historyAtom, [...history, newAction]);
   }
 );
+

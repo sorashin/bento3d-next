@@ -16,14 +16,16 @@ import { Point } from '@/components/3d/elements/Point';
 import { useKey } from '@/hooks/useKey';
 import { geometriesAtom, modularAtom, pointNodeIdAtom } from '@/stores/modular';
 import { updateNodePropertyAtom } from '@/stores/modular';
-import { snapAtom, snapLengthAtom } from '@/stores/controls';
+import { snapAtom, snapLengthAtom } from '@/stores/settings';
+import { wallAtom } from '@/stores/rect';
+import { WallElem } from '../elements/Wall';
 
 
 
 
 const PolylineDrawer = () => {
   const [polylines] = useAtom(polylinePointsAtom);
-  const [midPoint] = useAtom(midPointAtom);
+  const walls = useAtomValue(wallAtom);
   const [pointNodeId] = useAtom(pointNodeIdAtom);
   const [currentCursorPoint, setCurrentCursorPoint] = useState<THREE.Vector2>(
     new THREE.Vector2(0, 0),
@@ -161,15 +163,20 @@ const PolylineDrawer = () => {
           />
         )
       ))}
+      {walls.length > 0 && (
+        walls.map((wall, index) => (
+          <WallElem 
+            key={wall.id} 
+            wall ={wall}
+          />
+        ))
+      )}
+      
       {/* プレビューの表示 */}
       {previewPoints.length > 0 && (
         <Polyline points={previewPoints} color="tomato" />
       )}
-      {
-        midPoint.map((point) => (
-          <Point point={point} />
-        ))
-      }
+      
       <Cursor point={currentCursorPoint} />
     </>
   );

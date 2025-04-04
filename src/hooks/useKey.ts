@@ -1,4 +1,4 @@
-import { isInputFocusedAtom, isIgnoreKeyAtom } from "@/stores/controls";
+import { isInputFocusedAtom, isIgnoreKeyAtom } from "@/stores/settings";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useState } from "react";
 
