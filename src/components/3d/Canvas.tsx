@@ -9,17 +9,11 @@ import { clearSelectedAtom } from '@/stores/select';
 import { polylinePointsAtom } from '@/stores/points';
 import { WallPoint } from './elements/WallPoint';
 
-
-
-
 const Canvas = () => {
   const [geometries] = useAtom(geometriesAtom);
   const walls = useAtomValue(wallAtom);
   const clearSelected = useSetAtom(clearSelectedAtom);
   const points = useAtomValue(polylinePointsAtom)
-  
-  
-  
   
   return (
     <div className="flex-1 bg-gray-200 dark:bg-gray-800">
@@ -57,13 +51,15 @@ const Canvas = () => {
           enableZoom={true}
           zoomSpeed={0.5}
         />
-        <gridHelper args={[1, 1, '#444444', '#222222']} rotation={[Math.PI / 2, 0, 0]} />
+        <gridHelper args={[100, 100, '#555555', '#444444']} rotation={[Math.PI / 2, 0, 0]} />
         <PolylineDrawer />
         {points.map((polyline) => (
           polyline.points.map((point) => {
             return (<WallPoint 
               key={point.id} 
-              point={point.position} 
+              point={point.position}
+              pointId={point.id}
+              polylineId={polyline.id}
               />)
           } 
           ))
