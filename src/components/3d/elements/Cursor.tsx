@@ -11,7 +11,7 @@ export const Cursor = (props: CursorProps) => {
   return (
     <>
       <Sphere ref={sphereRef} position={[props.point.x, props.point.y, 0]}>
-        <meshStandardMaterial color="black" />
+        <meshStandardMaterial color="pink" />
       </Sphere>
     </>
   );

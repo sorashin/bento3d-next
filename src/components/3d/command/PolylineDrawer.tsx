@@ -12,20 +12,18 @@ import {
 import * as THREE from "three";
 import { Polyline } from '@/components/3d/elements/Polyline';
 import { Cursor } from '@/components/3d/elements/Cursor';
-import { Point } from '@/components/3d/elements/Point';
+
 import { useKey } from '@/hooks/useKey';
 import { geometriesAtom, modularAtom, pointNodeIdAtom } from '@/stores/modular';
 import { updateNodePropertyAtom } from '@/stores/modular';
-import { snapAtom, snapLengthAtom } from '@/stores/settings';
-import { wallAtom } from '@/stores/rect';
-import { WallElem } from '../elements/Wall';
+import { isDrawAtom, snapAtom, snapLengthAtom } from '@/stores/settings';
 
 
 
 
 const PolylineDrawer = () => {
   const [polylines] = useAtom(polylinePointsAtom);
-  const walls = useAtomValue(wallAtom);
+  
   const [pointNodeId] = useAtom(pointNodeIdAtom);
   const [currentCursorPoint, setCurrentCursorPoint] = useState<THREE.Vector2>(
     new THREE.Vector2(0, 0),
@@ -45,6 +43,8 @@ const PolylineDrawer = () => {
     conditions: (e) => e.key === "Enter",
   });
 
+  const [isDraw,setIsDraw] = useAtom(isDrawAtom);
+
   
 
   // 新しいポリラインの作成
@@ -59,11 +59,13 @@ const PolylineDrawer = () => {
     }
     setPreviewPoints([]);
     setPoints([]);
+    setIsDraw(false);
   }, [points, createNewPolyline, pointNodeId, modular, setGeometries]);
   //キャンセル処理
   const cancel = useCallback(() => {
     setPreviewPoints([]);
     setPoints([]);
+    setIsDraw(false);
   }, []);
 
   // グリッドにスナップさせる関数
@@ -141,8 +143,8 @@ const PolylineDrawer = () => {
   useEffect(() => {
     console.log("polylines", polylines);
   }, [polylines]);
-
-  return (
+  
+  return isDraw&&(
     <>
       <Plane
         position={[0, 0, 0]}
@@ -153,24 +155,8 @@ const PolylineDrawer = () => {
       >
         <meshStandardMaterial transparent={true} opacity={0.0} />
       </Plane>
-      {/* 完了したポリラインの表示 */}
-      {polylines.map(polyline => (
-        polyline.points.length > 0 && (  // ポイントが存在する場合のみ表示
-          <Polyline 
-            key={polyline.id} 
-            points={polyline.points.map(p => p.position)} 
-            color="blue" 
-          />
-        )
-      ))}
-      {walls.length > 0 && (
-        walls.map((wall, index) => (
-          <WallElem 
-            key={wall.id} 
-            wall ={wall}
-          />
-        ))
-      )}
+      
+      
       
       {/* プレビューの表示 */}
       {previewPoints.length > 0 && (

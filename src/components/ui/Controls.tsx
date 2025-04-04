@@ -1,9 +1,13 @@
 import { useAtom } from 'jotai';
 import { clearPointsAtom, polylinePointsAtom } from '@/stores/points';
 import { useEffect, useMemo } from 'react';
-import { nodesAtom, updateNodePropertyAtom, evaluateGraph, modularAtom, geometriesAtom, pointNodeIdAtom } from '@/stores/modular';
+import { nodesAtom, updateNodePropertyAtom, pointNodeIdAtom } from '@/stores/modular';
 import { useControls } from "leva";
 import { Schema } from 'leva/dist/declarations/src/types';
+import { useMachine } from '@xstate/react';
+import { machine } from '@/stores/machine';
+import { isDrawAtom } from '@/stores/settings';
+
 
 const Controls = () => {
   const [polylines] = useAtom(polylinePointsAtom);
@@ -12,6 +16,12 @@ const Controls = () => {
   
   const [,setPointNode] = useAtom(pointNodeIdAtom);
   const [,clearPoints] = useAtom(clearPointsAtom);
+  
+
+  const [isDraw,setIsDraw] = useAtom(isDrawAtom);
+
+    
+  
   // Levaコントロール用のパラメータを生成
   const params = useMemo(() => {
     console.log('nodes', nodes);
@@ -114,6 +124,19 @@ const Controls = () => {
   return (
     <div className="w-64 bg-gray-100 dark:bg-gray-700 p-4 overflow-auto flex flex-col fixed top-0 left-0 bottom-0 z-10">
       <h2 className="text-lg font-semibold mb-4 dark:text-white">Polylines</h2>
+
+      
+        <button
+          onClick={() => setIsDraw(!isDraw)}
+          className={`px-4 py-2 rounded-md ${
+            isDraw 
+              ? 'bg-green-500 text-white' 
+              : 'bg-gray-300 text-gray-700'
+          }`}
+        >
+          {isDraw ? 'Disable Drawing' : 'Enable Drawing'}
+        </button>
+
       <button onClick={clearPoints} className='bg-red-500 text-white px-4 py-2 rounded-md'>Clear Points</button>
       
       {polylines.length === 0 ? (
