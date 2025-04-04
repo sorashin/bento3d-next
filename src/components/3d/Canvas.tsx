@@ -6,6 +6,8 @@ import { geometriesAtom } from '@/stores/modular';
 import { wallAtom } from '@/stores/rect';
 import { WallElem } from './elements/Wall';
 import { clearSelectedAtom } from '@/stores/select';
+import { polylinePointsAtom } from '@/stores/points';
+import { WallPoint } from './elements/WallPoint';
 
 
 
@@ -14,6 +16,7 @@ const Canvas = () => {
   const [geometries] = useAtom(geometriesAtom);
   const walls = useAtomValue(wallAtom);
   const clearSelected = useSetAtom(clearSelectedAtom);
+  const points = useAtomValue(polylinePointsAtom)
   
   
   
@@ -56,6 +59,15 @@ const Canvas = () => {
         />
         <gridHelper args={[1, 1, '#444444', '#222222']} rotation={[Math.PI / 2, 0, 0]} />
         <PolylineDrawer />
+        {points.map((polyline) => (
+          polyline.points.map((point) => {
+            return (<WallPoint 
+              key={point.id} 
+              point={point.position} 
+              />)
+          } 
+          ))
+        )}
         
         {walls.length > 0 && (
                 walls.map((wall) => (

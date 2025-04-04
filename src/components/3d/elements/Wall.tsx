@@ -121,13 +121,6 @@ export const WallElem = (props: WallProps) => {
           opacity={1}
         />
       </mesh>
-      {
-        wallPoints.map((point, index) => (
-          <WallPoint
-            key={index}
-            point={point} // 縦線を描画
-          />
-        ))}
       
       {grid.map((g, index) => {
         // 前のグリッドの幅の合計を計算（現在のインデックスまで）
