@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { Vector2 } from 'three';
-import { wallAtom } from './rect'; // wallAtomをインポート
+import { wallAtom, wallOverridesAtom, Wall } from './rect'; // wallAtomをインポート
 
 // ポリラインの頂点座標を格納する配列
 export interface PolylinePoint {
@@ -17,8 +17,6 @@ export interface Polyline {
 // ポリラインの配列を格納するアトム
 export const polylinePointsAtom = atom<Polyline[]>([]);
 
-// test 中点を格納するatom
-export const midPointAtom = atom<Vector2[]>([]);
 
 
 // 最初のポリラインのポイントを3D配列に変換するヘルパー関数
@@ -54,6 +52,8 @@ export const createNewPolylineAtom = atom(
 
 
 // 特定のポリラインの特定のポイントの位置を更新するアクション
+
+// 特定のポリラインの特定のポイントの位置を更新するアトム
 export const updatePointPositionAtom = atom(
   null,
   (get, set, { 
@@ -61,24 +61,88 @@ export const updatePointPositionAtom = atom(
     pointId, 
     newPosition 
   }: { 
-    polylineId: string;
+    polylineId: string; 
     pointId: string; 
     newPosition: Vector2 
   }) => {
+    // 1. ポリライン情報を更新
     const polylines = get(polylinePointsAtom);
-    const updatedPolylines = polylines.map(polyline => 
-      polyline.id === polylineId
-        ? {
-            ...polyline,
-            points: polyline.points.map(point =>
-              point.id === pointId ? { ...point, position: newPosition } : point
-            )
+    const updatedPolylines = polylines.map(polyline => {
+      if (polyline.id === polylineId) {
+        const updatedPoints = polyline.points.map(point => {
+          if (point.id === pointId) {
+            return { ...point, position: newPosition };
+          } else {
+            return point;
           }
-        : polyline
-    );
+        });
+        return { ...polyline, points: updatedPoints };
+      } else {
+        return polyline;
+      }
+    });
     set(polylinePointsAtom, updatedPolylines);
+
+    // 2. wallOverrides内の関連する壁の座標も更新
+    const wallOverrides = get(wallOverridesAtom);
+    const walls = get(wallAtom);
+    const updatedOverrides: Record<string, Partial<Wall>> = { ...wallOverrides };
+    let hasOverrideUpdates = false;
+
+    walls.forEach(wall => {
+      const wallId = wall.id;
+      const wallIdParts = wallId.split('-');
+
+      // wallIdの形式が正しくない場合はスキップ
+      if (wallIdParts.length < 6) {
+        return;
+      }
+
+      
+      const wallPolylineId = wallIdParts[1] + '-' + wallIdParts[2]+'-'+wallIdParts[3];
+      const startPointId = wallIdParts[4] + '-' + wallIdParts[5]+'-'+ wallIdParts[6];
+
+      if (wallPolylineId === polylineId) {
+        // wallOverridesにwallIdが存在するか確認
+        if (wallOverrides[wallId]) {
+          const polyline = updatedPolylines.find(p => p.id === wallPolylineId);
+          if (!polyline) {
+            return;
+          }
+
+          const pointIndex = polyline.points.findIndex(p => p.id === startPointId);
+          if (pointIndex === -1) {
+            return;
+          }
+
+          // 開始点の更新
+          if (startPointId === pointId) {
+            updatedOverrides[wallId] = {
+              ...updatedOverrides[wallId],
+              start: newPosition
+            };
+            hasOverrideUpdates = true;
+          }
+
+          // 終了点の更新
+          if (pointIndex + 1 < polyline.points.length) {
+            const endPointId = polyline.points[pointIndex + 1].id;
+            if (endPointId === pointId) {
+              updatedOverrides[wallId] = {
+                ...updatedOverrides[wallId],
+                end: newPosition
+              };
+              hasOverrideUpdates = true;
+            }
+          }
+        }
+      }
+    });
+
+    if (hasOverrideUpdates) {
+      set(wallOverridesAtom, updatedOverrides);
+    }
   }
-  
 );
 
 // すべてのポリラインをクリアするアクション

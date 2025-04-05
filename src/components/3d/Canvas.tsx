@@ -22,7 +22,7 @@ const Canvas = () => {
         camera={{
           position: [0, 0, 100], // clipping 問題解決するため zを１００にする
           fov: 40,
-          zoom: 10,
+          zoom: 50,
           near: 0.1,
           far: 10000,
         }}
