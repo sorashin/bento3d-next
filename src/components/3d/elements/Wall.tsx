@@ -17,7 +17,7 @@ type WallProps = {
 export const WallElem = (props: WallProps) => {
   //console.log("PreviewPolyline");
   const { start, end, id, align, grid } = props.wall;
-  const wallThickness = 1; // 壁の厚さ
+  const wallThickness = 0.5; // 壁の厚さ
   const shelfDepth = useAtomValue(shelfDepthAtom);
   const setMutableWall = useSetAtom(mutableWallAtom);
   const [selectedElement, setSelectedElement] = useAtom(selectedGeometryAtom);

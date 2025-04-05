@@ -117,12 +117,15 @@ export const Rect = (props: RectProps) => {
               normalizedDir.x
             )}rad)`,
             cursor: "pointer",
+            pointerEvents: "auto",
           }}
           value={props.width}
           onChange={(e) => {
             const newWidth = parseFloat(e.target.value)/unit;
             if (props.onResize) props.onResize(id, newWidth);
           }}
+          //背後のキャンセルEventを防ぐ
+          onClick={(e) => e.stopPropagation()}
         >
           {(Object.values([50, 60, 70, 80, 90, 100, 110, 120]) as shelfSize[]).map((size) => (
             <option key={size} value={size}>

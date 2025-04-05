@@ -7,7 +7,7 @@ import { wallAtom } from '@/stores/rect';
 import { WallElem } from './elements/Wall';
 import { clearSelectedAtom } from '@/stores/select';
 import { polylinePointsAtom } from '@/stores/points';
-import { WallPoint } from './elements/WallPoint';
+import { Point } from './elements/Point';
 
 const Canvas = () => {
   const [geometries] = useAtom(geometriesAtom);
@@ -55,7 +55,7 @@ const Canvas = () => {
         <PolylineDrawer />
         {points.map((polyline) => (
           polyline.points.map((point) => {
-            return (<WallPoint 
+            return (<Point 
               key={point.id} 
               point={point.position}
               pointId={point.id}

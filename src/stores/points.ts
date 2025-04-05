@@ -78,6 +78,7 @@ export const updatePointPositionAtom = atom(
     );
     set(polylinePointsAtom, updatedPolylines);
   }
+  
 );
 
 // すべてのポリラインをクリアするアクション
