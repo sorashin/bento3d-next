@@ -16,3 +16,5 @@ export type shelfSize = 50 | 60 | 70 | 80 | 90 | 100 | 110 | 120;
 export const defaultShelfSizeAtom = atom<shelfSize>(100); // 100cm
 export const shelfDepthAtom = atom<number>(0.5);//50cm
 export const isDrawAtom = atom<boolean>(false);
+export type viewType = '2D' | '3D';
+export const viewTypeAtom = atom<viewType>('2D');

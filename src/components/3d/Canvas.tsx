@@ -1,23 +1,27 @@
-import { Canvas as ThreeCanvas } from '@react-three/fiber';
-import {  OrbitControls, GizmoViewport, GizmoHelper, } from '@react-three/drei';
-import PolylineDrawer from '@/components/3d/command/PolylineDrawer';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { geometriesAtom } from '@/stores/modular';
-import { wallAtom } from '@/stores/rect';
-import { WallElem } from './elements/Wall';
-import { clearSelectedAtom } from '@/stores/select';
-import { polylinePointsAtom } from '@/stores/points';
-import { Point } from './elements/Point';
+import { Canvas as ThreeCanvas } from "@react-three/fiber"
+import { OrbitControls, GizmoViewport, GizmoHelper } from "@react-three/drei"
+import PolylineDrawer from "@/components/3d/command/PolylineDrawer"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { geometriesAtom } from "@/stores/modular"
+import { wallAtom } from "@/stores/rect"
+import { WallElem } from "./elements/Wall"
+import { clearSelectedAtom } from "@/stores/select"
+import { polylinePointsAtom } from "@/stores/points"
+import { Point } from "./elements/Point"
+
+import { viewTypeAtom } from "@/stores/settings"
+import ShelfMesh from "./elements/ShelfMesh"
 
 const Canvas = () => {
-  const [geometries] = useAtom(geometriesAtom);
-  const walls = useAtomValue(wallAtom);
-  const clearSelected = useSetAtom(clearSelectedAtom);
+  const [geometries] = useAtom(geometriesAtom)
+  const walls = useAtomValue(wallAtom)
+  const clearSelected = useSetAtom(clearSelectedAtom)
   const points = useAtomValue(polylinePointsAtom)
-  
+  const viewType = useAtomValue(viewTypeAtom)
+
   return (
     <div className="flex-1 bg-gray-200 dark:bg-gray-800">
-      <ThreeCanvas 
+      <ThreeCanvas
         orthographic
         camera={{
           position: [0, 0, 100], // clipping 問題解決するため zを１００にする
@@ -29,7 +33,7 @@ const Canvas = () => {
         frameloop="demand"
         onPointerMissed={() => clearSelected()} // 中空クリック時にclearSelectedを実行
       >
-        <color attach="background" args={['#1e293b']} />
+        <color attach="background" args={["#1e293b"]} />
         <ambientLight intensity={0.8} />
         <directionalLight
           position={[5, 5, 5]}
@@ -44,38 +48,45 @@ const Canvas = () => {
             labelColor="black"
           />
         </GizmoHelper>
-        
+
         <OrbitControls
-          enableRotate={false}
+          enableRotate={viewType === "2D" ? false : true}
           enablePan={true}
           enableZoom={true}
           zoomSpeed={0.5}
         />
-        <gridHelper args={[100, 100, '#555555', '#444444']} rotation={[Math.PI / 2, 0, 0]} />
-        <PolylineDrawer />
-        {points.map((polyline) => (
-          polyline.points.map((point) => {
-            return (<Point 
-              key={point.id} 
-              point={point.position}
-              pointId={point.id}
-              polylineId={polyline.id}
-              />)
-          } 
-          ))
-        )}
-        
-        {walls.length > 0 && (
-                walls.map((wall) => (
-                  <WallElem 
-                    key={wall.id} 
-                    wall ={wall}
+        <gridHelper
+          args={[100, 100, "#555555", "#444444"]}
+          rotation={[Math.PI / 2, 0, 0]}
+        />
+        {viewType === "2D" ? (
+          <>
+            <PolylineDrawer />
+
+            {points.map((polyline) =>
+              polyline.points.map((point) => {
+                return (
+                  <Point
+                    key={point.id}
+                    point={point.position}
+                    pointId={point.id}
+                    polylineId={polyline.id}
                   />
-                ))
-              )}
+                )
+              })
+            )}
+
+            {walls.length > 0 &&
+              walls.map((wall) => <WallElem key={wall.id} wall={wall} />)}
+          </>
+        ) : (
+          <>
+            <ShelfMesh geometries={geometries} />
+          </>
+        )}
       </ThreeCanvas>
     </div>
-  );
-};
+  )
+}
 
-export default Canvas;
+export default Canvas

@@ -3,12 +3,13 @@ import { Modular, NodeInterop } from 'nodi-modular';
 import { BufferGeometry } from 'three';
 import { convertGeometryInterop } from '@/components/3d/utils/geometryUtils';
 import init from 'nodi-modular';
-import shelfs from "@/assets/graph/shelfs.json";
+import shelfs from "@/assets/graph/shelf-preview.json";
 
 export const modularAtom = atom<Modular | null>(null);
 export const nodesAtom = atom<NodeInterop[]>([]);
 export const geometriesAtom = atom<BufferGeometry[]>([]);
 export const pointNodeIdAtom = atom<string|null>(null);
+export const rectNodeIdAtom = atom<string|null>(null);//grid情報を格納するAtom
 
 export const initializeModular = async (
   setModular: (modular: Modular) => void
@@ -63,6 +64,14 @@ export const updateNodePropertyAtom = atom(
       }
   
       try {
+        // ノードの存在を確認
+        const nodes = get(nodesAtom);
+        const targetNode = nodes.find(node => node.id === id);
+        if (!targetNode) {
+          console.error(`Node with ID ${id} not found`);
+          return;
+        }
+        
         const property = typeof value === 'string' 
           ? {
               name: "content",
@@ -79,11 +88,12 @@ export const updateNodePropertyAtom = atom(
               },
             };
         
+        console.log(`Updating node ${id} with property:`, property);
         modular.changeNodeProperty(id, property);
         evaluateGraph(modular, (geometries) => set(geometriesAtom, geometries));
         
       } catch (error) {
-        console.error("Error in changeNodeProperty:", error);
+        console.error(`Error in changeNodeProperty for node ${id}:`, error);
       }
     }
   );

@@ -19,17 +19,6 @@ export const polylinePointsAtom = atom<Polyline[]>([]);
 
 
 
-// 最初のポリラインのポイントを3D配列に変換するヘルパー関数
-export const getFirstPolylinePoints3D = (polylines: Polyline[]): [number, number, number][] => {
-  if (polylines.length === 0 || polylines[0].points.length === 0) {
-    return [];
-  }
-  return polylines[0].points.map(point => [
-    point.position.x,
-    point.position.y,
-    0
-  ]);
-};
 
 // 新しいポリラインを登録するアクション
 export const createNewPolylineAtom = atom(

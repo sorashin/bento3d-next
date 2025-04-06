@@ -1,7 +1,8 @@
 import { atom } from "jotai";
 import { Vector2 } from "three";
 import { polylinePointsAtom } from './points';
-import { defaultShelfSizeAtom, unitAtom } from './settings';
+import { defaultShelfSizeAtom, shelfDepthAtom, unitAtom } from './settings';
+
 
 export interface Wall {
   start: Vector2;
@@ -14,7 +15,6 @@ export interface Wall {
   }[]
 }
 
-
 // 手動編集された壁のオーバーライド情報を保持するアトム
 export const wallOverridesAtom = atom<Record<string, Partial<Wall>>>({});
 
@@ -23,7 +23,6 @@ export const wallOverridesAtom = atom<Record<string, Partial<Wall>>>({});
 
 // 元のwallAtomを、オーバーライド情報を考慮するように修正
 export const wallAtom = atom((get) => {
-  console.log("wallAtom derived calculation running");
   const polylines = get(polylinePointsAtom);
   const defaultShelfSize = get(defaultShelfSizeAtom)/get(unitAtom);
   const overrides = get(wallOverridesAtom);
@@ -94,6 +93,36 @@ export const mutableWallAtom = atom(
   }
 );
 
+export const rectAtom = atom(
+  (get) => {
+    const walls = get(wallAtom);
+    
+    const rects = walls.flatMap(wall => {
+      const rectWidth = wall.grid[0].width;
+      const rectHeight = get(shelfDepthAtom);
+      const rects = wall.grid.map((gridItem, index) => {
+        const start = wall.start.clone().add(
+          wall.end.clone().sub(wall.start).normalize().multiplyScalar(index * rectWidth)
+        );
+        const end = wall.start.clone().add(
+          wall.end.clone().sub(wall.start).normalize().multiplyScalar((index + 1) * rectWidth)
+        );
+        // 正規化された方向ベクトル
+        const normalizedDir = end.clone().sub(start).normalize();
+        // 直角方向のベクトル（dirを90度回転）
+        const perpDir = new Vector2(-normalizedDir.y, normalizedDir.x);
+        return [
+          start,//posA
+          end,//posB
+          end.clone().add(perpDir.clone().multiplyScalar(rectHeight)),//posC
+          start.clone().add(perpDir.clone().multiplyScalar(rectHeight))//posD
+        ];
+      });
+      return rects;
+    });
+    return rects;
+  })
+
 // オーバーライドをクリアするアトム
 export const clearWallOverrideAtom = atom(
   null,
@@ -111,3 +140,10 @@ export const clearWallOverrideAtom = atom(
     set(wallOverridesAtom, overrides);
   }
 );
+
+
+
+
+
+// アプリケーション起動時にこのatomを購読するようにするコード
+// 通常はルートコンポーネントか適切な場所でuseAtomを使って購読します
