@@ -1,37 +1,47 @@
-import { useAtom } from "jotai"
 import Canvas from "./components/3d/Canvas"
+import { useEffect } from "react"
+import { useModularStore } from "@/stores/modular"
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useParams,
+} from "react-router-dom"
 import Controls from "./components/ui/Controls"
 
-import { useEffect } from "react"
-import {
-  modularAtom,
-  nodesAtom,
-  geometriesAtom,
-  initializeModular,
-  loadGraph,
-} from "@/stores/modular"
-
-function App() {
-  const [modular, setModular] = useAtom(modularAtom)
-  const [nodes, setNodes] = useAtom(nodesAtom)
-  const [geometries, setGeometries] = useAtom(geometriesAtom)
+// グラフを表示するコンポーネント
+function GraphRenderer() {
+  const { slug } = useParams<{ slug: string }>()
+  const { modular, initializeModular, loadGraph } = useModularStore()
 
   useEffect(() => {
-    initializeModular(setModular)
+    initializeModular()
   }, [])
 
   useEffect(() => {
-    if (modular) {
-      loadGraph(modular, setNodes, setGeometries)
+    if (modular && slug) {
+      loadGraph(slug)
     }
-  }, [modular])
+  }, [modular, slug])
 
   return (
-    <div className="flex flex-col h-screen w-screen">
+    <div className="flex flex-1 overflow-hidden">
+      <Canvas />
       <Controls />
-      <div className="flex flex-1 overflow-hidden">
-        <Canvas />
-      </div>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <div className="flex flex-col h-screen w-screen">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/gridfinity" replace />} />
+          <Route path="/:slug" element={<GraphRenderer />} />
+        </Routes>
+      </BrowserRouter>
     </div>
   )
 }

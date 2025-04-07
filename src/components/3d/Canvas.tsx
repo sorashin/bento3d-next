@@ -1,26 +1,14 @@
 import { Canvas as ThreeCanvas } from "@react-three/fiber"
 import { OrbitControls, GizmoViewport, GizmoHelper } from "@react-three/drei"
-import PolylineDrawer from "@/components/3d/command/PolylineDrawer"
-import { useAtom, useAtomValue, useSetAtom } from "jotai"
-import { geometriesAtom } from "@/stores/modular"
-import { wallAtom } from "@/stores/rect"
-import { WallElem } from "./elements/Wall"
-import { clearSelectedAtom } from "@/stores/select"
-import { polylinePointsAtom } from "@/stores/points"
-import { Point } from "./elements/Point"
 
-import { viewTypeAtom } from "@/stores/settings"
-import ShelfMesh from "./elements/ShelfMesh"
+import { useModularStore } from "@/stores/modular"
+import Model from "./Model"
 
 const Canvas = () => {
-  const [geometries] = useAtom(geometriesAtom)
-  const walls = useAtomValue(wallAtom)
-  const clearSelected = useSetAtom(clearSelectedAtom)
-  const points = useAtomValue(polylinePointsAtom)
-  const viewType = useAtomValue(viewTypeAtom)
+  const { geometries } = useModularStore()
 
   return (
-    <div className="flex-1 bg-gray-200 dark:bg-gray-800">
+    <div className="flex-1 bg-gray-200">
       <ThreeCanvas
         orthographic
         camera={{
@@ -30,10 +18,8 @@ const Canvas = () => {
           near: 0.1,
           far: 10000,
         }}
-        frameloop="demand"
-        onPointerMissed={() => clearSelected()} // 中空クリック時にclearSelectedを実行
-      >
-        <color attach="background" args={["#1e293b"]} />
+        frameloop="demand">
+        {/* <color attach="background" args={["#1e293b"]} /> */}
         <ambientLight intensity={0.8} />
         <directionalLight
           position={[5, 5, 5]}
@@ -50,7 +36,7 @@ const Canvas = () => {
         </GizmoHelper>
 
         <OrbitControls
-          enableRotate={viewType === "2D" ? false : true}
+          enableRotate={true}
           enablePan={true}
           enableZoom={true}
           zoomSpeed={0.5}
@@ -59,31 +45,7 @@ const Canvas = () => {
           args={[100, 100, "#555555", "#444444"]}
           rotation={[Math.PI / 2, 0, 0]}
         />
-        {viewType === "2D" ? (
-          <>
-            <PolylineDrawer />
-
-            {points.map((polyline) =>
-              polyline.points.map((point) => {
-                return (
-                  <Point
-                    key={point.id}
-                    point={point.position}
-                    pointId={point.id}
-                    polylineId={polyline.id}
-                  />
-                )
-              })
-            )}
-
-            {walls.length > 0 &&
-              walls.map((wall) => <WallElem key={wall.id} wall={wall} />)}
-          </>
-        ) : (
-          <>
-            <ShelfMesh geometries={geometries} />
-          </>
-        )}
+        <Model geometries={geometries} />
       </ThreeCanvas>
     </div>
   )

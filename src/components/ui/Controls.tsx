@@ -1,27 +1,11 @@
-import { useAtom, useSetAtom } from "jotai"
-import { clearPointsAtom, polylinePointsAtom } from "@/stores/points"
 import { useEffect, useMemo } from "react"
-import {
-  nodesAtom,
-  updateNodePropertyAtom,
-  pointNodeIdAtom,
-  rectNodeIdAtom,
-} from "@/stores/modular"
+import { useModularStore } from "@/stores/modular"
 import { useControls } from "leva"
 import { Schema } from "leva/dist/declarations/src/types"
-import { isDrawAtom, viewTypeAtom } from "@/stores/settings"
 
 const Controls = () => {
-  const [polylines] = useAtom(polylinePointsAtom)
-  const [, updateNodeProperty] = useAtom(updateNodePropertyAtom)
-  const [nodes] = useAtom(nodesAtom)
-
-  const [, setPointNode] = useAtom(pointNodeIdAtom)
-  const [, setRectNode] = useAtom(rectNodeIdAtom)
-  const [, clearPoints] = useAtom(clearPointsAtom)
-
-  const [isDraw, setIsDraw] = useAtom(isDrawAtom)
-  const [viewType, setViewType] = useAtom(viewTypeAtom)
+  // zustandから状態とアクションを取得
+  const { nodes, updateNodeProperty } = useModularStore()
 
   // Levaコントロール用のパラメータを生成
   const params = useMemo(() => {
@@ -68,11 +52,6 @@ const Controls = () => {
 
           return parameter
         } else if (node.label !== undefined && value.type === "String") {
-          if (label === "points") {
-            setPointNode(node.id)
-          } else if (label === "rect") {
-            setRectNode(node.id)
-          }
           const parameter = {
             id: node.id,
             name: node.label,
@@ -92,10 +71,7 @@ const Controls = () => {
               max: curr.max,
               step: curr.step,
               onEditEnd: (value: number) => {
-                updateNodeProperty({
-                  id: curr.id,
-                  value,
-                })
+                updateNodeProperty(curr.id, value)
               },
             }
           } else if (typeof curr.value == "string") {
@@ -103,20 +79,14 @@ const Controls = () => {
             acc[curr.name] = {
               value: curr.value,
               onEditEnd: (value: string) => {
-                updateNodeProperty({
-                  id: curr.id,
-                  value,
-                })
+                updateNodeProperty(curr.id, value)
               },
             }
           } else {
             acc[curr.name] = {
               value: curr.value,
               onEditEnd: (value: number) => {
-                updateNodeProperty({
-                  id: curr.id,
-                  value,
-                })
+                updateNodeProperty(curr.id, value)
               },
             }
           }
@@ -125,79 +95,14 @@ const Controls = () => {
         return acc
       }, {} as Schema)
   }, [nodes, updateNodeProperty])
+
   useEffect(() => {
     console.log("params", params)
   }, [params])
 
   useControls(params, [params])
 
-  return (
-    <div className="w-64 bg-gray-100 dark:bg-gray-700 p-4 overflow-auto flex flex-col fixed top-0 left-0 bottom-0 z-10">
-      <h2 className="text-lg font-semibold mb-4 dark:text-white">Polylines</h2>
-      <div className="flex flex-row gap-4">
-        <button
-          className={`px-4 py-2 rounded-sm   ${
-            viewType === "2D" ? "bg-gray-200 hover:bg-gray-300" : "bg-gray-300"
-          }`}
-          onClick={() => setViewType("2D")}>
-          2D
-        </button>
-        <button
-          className={`px-4 py-2 rounded-sm   ${
-            viewType === "3D" ? "bg-gray-200 hover:bg-gray-300" : "bg-gray-300"
-          }`}
-          onClick={() => setViewType("3D")}>
-          3D
-        </button>
-      </div>
-      <button
-        onClick={() => setIsDraw(!isDraw)}
-        className={`px-4 py-2 rounded-md ${
-          isDraw ? "bg-green-500 text-white" : "bg-gray-300 text-gray-700"
-        }`}>
-        {isDraw ? "Disable Drawing" : "Enable Drawing"}
-      </button>
-
-      <button
-        onClick={clearPoints}
-        className="bg-red-500 text-white px-4 py-2 rounded-md">
-        Clear Points
-      </button>
-
-      {polylines.length === 0 ? (
-        <div className="text-gray-500 dark:text-gray-400 text-sm italic">
-          No polylines yet. Click on the canvas to start drawing.
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {polylines.map((polyline, polylineIndex) => (
-            <div
-              key={polyline.id}
-              className="bg-white dark:bg-gray-600 p-2 rounded shadow-sm">
-              <div className="text-sm font-medium dark:text-white">
-                Polyline {polylineIndex + 1}
-              </div>
-              <div className="space-y-2 mt-2">
-                {polyline.points.map((point, pointIndex) => (
-                  <div
-                    key={point.id}
-                    className="text-xs text-gray-500 dark:text-gray-300">
-                    Point {pointIndex + 1}: X: {point.position.x.toFixed(2)}, Y:{" "}
-                    {point.position.y.toFixed(2)}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="mt-auto pt-4 text-xs text-gray-500 dark:text-gray-400">
-        <p>Click on the canvas to add points.</p>
-        <p className="mt-1">Press Enter to complete a polyline.</p>
-      </div>
-    </div>
-  )
+  return <></>
 }
 
 export default Controls

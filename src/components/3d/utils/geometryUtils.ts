@@ -1,8 +1,7 @@
 import {
     BufferAttribute,
     BufferGeometry,
-    CatmullRomCurve3,
-    Vector3,
+    
   } from "three";
   
   // Modularの幾何学インターフェイスをThree.jsのBufferGeometryに変換
