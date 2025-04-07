@@ -1,4 +1,4 @@
-import Canvas from "./Canvas"
+import Canvas from "@/components/gridfinity/3d/Canvas"
 
 export function Page() {
   return (

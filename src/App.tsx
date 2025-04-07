@@ -7,7 +7,7 @@ import {
   Navigate,
   useParams,
 } from "react-router-dom"
-import Controls from "./components/ui/Controls"
+import Controls from "./components/common/ui/Controls"
 
 // NotFoundコンポーネント作成
 const NotFound = () => (

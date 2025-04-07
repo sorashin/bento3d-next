@@ -1,4 +1,4 @@
-import Canvas from "./Canvas"
+import Canvas from "@/components/bento3d/3d/Canvas"
 
 export function Page() {
   return (
