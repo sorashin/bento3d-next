@@ -2,9 +2,7 @@
 import {
     BufferAttribute,
     BufferGeometry,
-    DoubleSide,
-    Mesh,
-    MeshStandardMaterial,
+    
     
   } from "three";
   
@@ -37,48 +35,6 @@ import {
         return null;
     }
   };
-// / Modularの幾何学インターフェイスをThree.jsのMeshに変換
-  const convertGeometryInteropForExport = (interop:any):Mesh | null => {
-  switch(interop?.variant) {
-    case "Mesh": {
-      const { data } = interop;
-      const { vertices, normals, uv, faces } = data
-                const geometry = new BufferGeometry()
-                const positionAttrib = new BufferAttribute(
-                  new Float32Array(vertices.flat()),
-                  3
-                )
-                const normalAttrib = new BufferAttribute(
-                  new Float32Array(normals.flat()),
-                  3
-                )
-                geometry.setAttribute("position", positionAttrib)
-                geometry.setAttribute("normal", normalAttrib)
-                if (uv !== undefined) {
-                  const uvAttrib = new BufferAttribute(
-                    new Float32Array(uv.flat()),
-                    2
-                  )
-                  geometry.setAttribute("uv", uvAttrib)
-                }
-                if (faces !== undefined) {
-                  const index = new BufferAttribute(
-                    new Uint32Array(faces.flat()),
-                    1
-                  )
-                  geometry.setIndex(index)
-                }
-      
-      return new Mesh(
-        new BufferGeometry(),
-        new MeshStandardMaterial({
-          side: DoubleSide,
-        })
-      );
-    }
-    default:
-      return null;
-  }}
 
 
-  export {convertGeometryInterop, convertGeometryInteropForExport}
+  export {convertGeometryInterop}

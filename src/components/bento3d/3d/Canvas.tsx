@@ -8,6 +8,12 @@ import { Object3D } from "three"
 
 const Canvas = () => {
   const { geometries } = useModularStore()
+  const renderGeometries = () => {
+    return geometries.map((geometry) => {
+      return geometry.geometry
+    })
+  }
+
   useEffect(() => {
     Object3D.DEFAULT_UP.set(0, 0, 1) //Z軸を上にする
   }, [])
@@ -49,7 +55,7 @@ const Canvas = () => {
           args={[100, 100, "#555555", "#444444"]}
           rotation={[Math.PI / 2, 0, 0]}
         />
-        <Model geometries={geometries} />
+        <Model geometries={renderGeometries()} />
       </ThreeCanvas>
     </div>
   )

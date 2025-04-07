@@ -1,39 +1,12 @@
 import { useModularStore } from "@/stores/modular"
 import { showSaveFilePicker } from "@/utils/filePicker"
-import { FC, useCallback, useMemo, useState } from "react"
-import {
-  BufferAttribute,
-  BufferGeometry,
-  DoubleSide,
-  Mesh,
-  MeshStandardMaterial,
-  Object3D,
-} from "three"
-import {
-  GLTFExporter,
-  OBJExporter,
-  PLYExporter,
-  STLExporter,
-} from "three-stdlib"
+import { FC, useCallback, useState } from "react"
+import { DoubleSide, Mesh, MeshStandardMaterial, Object3D } from "three"
+import { STLExporter } from "three-stdlib"
 
 const GeometryExporter: FC = () => {
   const [format, setFormat] = useState<string | null>("stl")
-  const modular = useModularStore((state) => state.modular)
-  const handle = modular
-
-  const variant = useMemo(() => {
-    const { surfaces, curves, meshes, points } = spreadsheet ?? {}
-    if (surfaces !== undefined && surfaces.length > 0) {
-      return "surface"
-    } else if (curves !== undefined && curves.length > 0) {
-      return "curve"
-    } else if (meshes !== undefined && meshes.length > 0) {
-      return "mesh"
-    } else if (points !== undefined && points.length > 0) {
-      return "point"
-    }
-    return null
-  }, [spreadsheet])
+  const geometries = useModularStore((state) => state.geometries)
 
   const parseMesh = useCallback(
     async (object: Object3D) => {
@@ -41,210 +14,108 @@ const GeometryExporter: FC = () => {
         case "stl": {
           return new STLExporter().parse(object)
         }
-        case "obj": {
-          return new OBJExporter().parse(object)
-        }
-        case "gltf":
-        case "glb": {
-          const buffer = await new GLTFExporter().parseAsync(object, {
-            binary: format === "glb",
-          })
-          if (buffer instanceof ArrayBuffer) {
-            return buffer
-          }
-          return JSON.stringify(buffer)
-        }
-        case "ply": {
-          return new PLYExporter().parse(object, () => {}, {
-            binary: true,
-          })
-        }
       }
       return null
     },
     [format]
   )
 
-  const handleExport = useCallback(async () => {
-    const { surfaces, curves, meshes, points } = spreadsheet ?? {}
-    switch (variant) {
-      // case "surface": {
-      //   if (format === "json") {
-      //     await showSaveFilePicker({
-      //       generator: () => Promise.resolve(JSON.stringify(surfaces)),
-      //       suggestedName: `${variant}.${format}`,
-      //       types: [
-      //         {
-      //           description: `${format?.toUpperCase()} file`,
-      //           accept: {
-      //             "application/octet-stream": [`.${format}`],
-      //           },
-      //         },
-      //       ],
-      //     })
-      //     // handleClose()
-      //   } else {
-      //     await showSaveFilePicker({
-      //       generator: async () => {
-      //         const objects = (surfaces ?? []).map((surface) => {
-      //           const tess = handle?.tessellateSurfaces(
-      //             [surface],
-      //             surfaceTesselation
-      //           )
-      //           if (tess === undefined) {
-      //             return new Object3D()
-      //           }
-      //           const { vertices, normals, faces } = tess
-      //           const geometry = new BufferGeometry()
-      //           const position = new BufferAttribute(
-      //             new Float32Array(vertices.flat()),
-      //             3
-      //           )
-      //           const normal = new BufferAttribute(
-      //             new Float32Array(normals.flat()),
-      //             3
-      //           )
-      //           geometry.setAttribute("position", position)
-      //           geometry.setAttribute("normal", normal)
-      //           if (faces !== undefined) {
-      //             const index = new BufferAttribute(
-      //               new Uint32Array(faces.flat()),
-      //               1
-      //             )
-      //             geometry.setIndex(index)
-      //           }
-      //           return new Mesh(
-      //             geometry,
-      //             new MeshStandardMaterial({
-      //               side: DoubleSide,
-      //             })
-      //           )
-      //         })
+  const handleExportSingle = useCallback(
+    async (index: number) => {
+      if (!format || !geometries[index]) return
 
-      //         const root = new Object3D()
-      //         objects.forEach((mesh) => {
-      //           root.add(mesh)
-      //         })
-      //         const data = await parseMesh(root)
-      //         return data
-      //       },
-      //       suggestedName: `${variant}.${format}`,
-      //       types: [
-      //         {
-      //           description: `${format?.toUpperCase()} file`,
-      //           accept: {
-      //             "application/octet-stream": [`.${format}`],
-      //           },
-      //         },
-      //       ],
-      //     })
-      //     // handleClose()
-      //     return
-      //   }
-      //   break
-      // }
-      // case "curve": {
-      //   await showSaveFilePicker({
-      //     generator: async () => {
-      //       const data = await parseCurve(curves ?? [])
-      //       return data
-      //     },
-      //     suggestedName: `${variant}.${format}`,
-      //     types: [
-      //       {
-      //         description: `${format?.toUpperCase()} file`,
-      //         accept: {
-      //           "application/octet-stream": [`.${format}`],
-      //         },
-      //       },
-      //     ],
-      //   })
-      //   handleClose()
-      //   return
-      // }
-      case "mesh": {
-        if (format === "json") {
-          await showSaveFilePicker({
-            generator: () => Promise.resolve(JSON.stringify(meshes)),
-            suggestedName: `${variant}.${format}`,
-            types: [
-              {
-                description: `${format?.toUpperCase()} file`,
-                accept: {
-                  "application/octet-stream": [`.${format}`],
-                },
+      const { id, geometry } = geometries[index]
+      // IDを含めたファイル名にする - IDは文字列として扱う
+      const fileName = `geometry_${String(id).slice(0, 8)}`
+
+      if (format === "json") {
+        await showSaveFilePicker({
+          generator: () => Promise.resolve(JSON.stringify(geometry)),
+          suggestedName: `${fileName}.${format}`,
+          types: [
+            {
+              description: `${format?.toUpperCase()} file`,
+              accept: {
+                "application/octet-stream": [`.${format}`],
               },
-            ],
-          })
-          // handleClose()
-        } else {
-          await showSaveFilePicker({
-            generator: async () => {
-              const objects = (meshes ?? []).map((mesh) => {
-                const { vertices, normals, uv, faces } = mesh
-                const geometry = new BufferGeometry()
-                const positionAttrib = new BufferAttribute(
-                  new Float32Array(vertices.flat()),
-                  3
-                )
-                const normalAttrib = new BufferAttribute(
-                  new Float32Array(normals.flat()),
-                  3
-                )
-                geometry.setAttribute("position", positionAttrib)
-                geometry.setAttribute("normal", normalAttrib)
-                if (uv !== undefined) {
-                  const uvAttrib = new BufferAttribute(
-                    new Float32Array(uv.flat()),
-                    2
-                  )
-                  geometry.setAttribute("uv", uvAttrib)
-                }
-                if (faces !== undefined) {
-                  const index = new BufferAttribute(
-                    new Uint32Array(faces.flat()),
-                    1
-                  )
-                  geometry.setIndex(index)
-                }
-                return new Mesh(
-                  geometry,
-                  new MeshStandardMaterial({
-                    side: DoubleSide,
-                  })
-                )
-              })
-
-              const root = new Object3D()
-              objects.forEach((object) => {
-                root.add(object)
-              })
-              const data = await parseMesh(root)
-              return data
             },
-            suggestedName: `${variant}.${format}`,
-            types: [
-              {
-                description: `${format?.toUpperCase()} file`,
-                accept: {
-                  "application/octet-stream": [`.${format}`],
-                },
-              },
-            ],
-          })
-          // handleClose()
-          return
-        }
+          ],
+        })
+      } else {
+        await showSaveFilePicker({
+          generator: async () => {
+            const mesh = new Mesh(
+              geometry.clone(),
+              new MeshStandardMaterial({
+                side: DoubleSide,
+              })
+            )
 
-        break
+            const root = new Object3D()
+            root.add(mesh)
+
+            const data = await parseMesh(root)
+            return data
+          },
+          suggestedName: `${fileName}.${format}`,
+          types: [
+            {
+              description: `${format?.toUpperCase()} file`,
+              accept: {
+                "application/octet-stream": [`.${format}`],
+              },
+            },
+          ],
+        })
       }
-    }
-  }, [handle, variant, format, parseMesh])
+    },
+    [format, geometries, parseMesh]
+  )
 
   return (
-    <div>
-      <button onClick={handleExport}>Export Geometry</button>
+    <div className="p-3">
+      <div className="mb-4">
+        <select
+          className="px-2 py-1 border border-gray-300 rounded"
+          value={format || ""}
+          onChange={(e) => setFormat(e.target.value || null)}>
+          <option value="stl">STL</option>
+          <option value="obj">OBJ</option>
+          <option value="gltf">GLTF</option>
+          <option value="glb">GLB</option>
+          <option value="ply">PLY</option>
+          <option value="json">JSON</option>
+        </select>
+      </div>
+
+      {geometries.length > 0 ? (
+        <div className="mt-3">
+          <h4 className="font-medium text-lg mb-2">ジオメトリ一覧</h4>
+          <ul className="divide-y divide-gray-200">
+            {geometries.map(({ id, geometry }, index) => (
+              <li
+                key={index}
+                className="flex justify-between items-center py-2">
+                <div className="geometry-name">
+                  ID: {String(id.geometryId).slice(0, 8)}
+                  <span className="text-xs text-gray-500 ml-2">
+                    (頂点: {geometry.attributes.position.count})
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleExportSingle(index)}
+                  className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                  ダウンロード
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <div className="text-gray-500">ジオメトリがありません</div>
+      )}
     </div>
   )
 }
+
 export default GeometryExporter

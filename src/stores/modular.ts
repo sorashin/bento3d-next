@@ -1,21 +1,27 @@
 import { create } from 'zustand';
-import { Modular, NodeInterop } from 'nodi-modular';
+import { GeometryIdentifier, Modular, NodeInterop } from 'nodi-modular';
 import { BufferGeometry } from 'three';
 import { convertGeometryInterop } from '@/utils/geometryUtils';
 import init from 'nodi-modular';
 import gridfinity from "@/assets/graph/gridfinity.json";
 
+// ジオメトリ情報の型を定義
+interface GeometryWithId {
+  id: GeometryIdentifier;  // stringではなくGeometryIdentifier型に修正
+  geometry: BufferGeometry;
+}
+
 // Zustandストアの型定義
 interface ModularState {
   modular: Modular | null;
   nodes: NodeInterop[];
-  geometries: BufferGeometry[];
+  geometries: GeometryWithId[];
   
 
   // アクション
   setModular: (modular: Modular) => void;
   setNodes: (nodes: NodeInterop[]) => void;
-  setGeometries: (geometries: BufferGeometry[]) => void;
+  setGeometries: (geometries: GeometryWithId[]) => void;
 
   
   // 複雑な操作
@@ -83,9 +89,15 @@ export const useModularStore = create<ModularState>((set, get) => ({
       const gs = geometryIdentifiers!
         .map((id) => {
           const interop = modular.findGeometryInteropById(id);
-          return interop ? convertGeometryInterop(interop) : null;
+          const geometry = interop ? convertGeometryInterop(interop) : null;
+          
+          return geometry ? { 
+            id, // ジオメトリ識別子をIDとして保存
+            geometry 
+          } : null;
         })
-        .filter((g): g is BufferGeometry => g !== null);
+        .filter((g): g is GeometryWithId => g !== null);
+        
       setGeometries(gs);
     } catch (error) {
       console.error("Error evaluating graph:", error);

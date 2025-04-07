@@ -1,10 +1,13 @@
 import { Modular } from 'nodi-modular';
-import { BufferGeometry } from 'three';
 import { convertGeometryInterop } from './geometryUtils';
+import { GeometryWithId } from '@/stores/modular';
+
+// ジオメトリ情報の型を定義
+
 
 export const evaluateGraph = async (
   modular: Modular | null,
-  setGeometries: (geometries: BufferGeometry[]) => void
+  setGeometries: (geometries: GeometryWithId[]) => void
 ) => {
   if (!modular) return;
 
@@ -19,9 +22,14 @@ export const evaluateGraph = async (
       ? result.geometryIdentifiers
           .map((id) => {
             const interop = modular.findGeometryInteropById(id);
-            return interop ? convertGeometryInterop(interop) : null;
+            const geometry = interop ? convertGeometryInterop(interop) : null;
+            
+            return geometry ? {
+              id,
+              geometry
+            } : null;
           })
-          .filter((g): g is BufferGeometry => g !== null)
+          .filter((g): g is GeometryWithId => g !== null)
       : [];
     
     setGeometries(gs);
@@ -29,4 +37,4 @@ export const evaluateGraph = async (
     console.error("Error evaluating graph:", error);
     setGeometries([]);
   }
-}; 
+};
