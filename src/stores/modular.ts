@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { Modular, NodeInterop } from 'nodi-modular';
 import { BufferGeometry } from 'three';
-import { convertGeometryInterop } from '@/components/3d/utils/geometryUtils';
+import { convertGeometryInterop } from '@/utils/geometryUtils';
 import init from 'nodi-modular';
-import shelfs from "@/assets/graph/shelf-preview.json";
+import gridfinity from "@/assets/graph/gridfinity.json";
 
 // Zustandストアの型定義
 interface ModularState {
@@ -33,7 +33,7 @@ const importGraph = async (slug: string) => {
   } catch (error) {
     console.error(`Graph for ${slug} not found:`, error);
     // デフォルトのグラフを返す
-    return shelfs;
+    return gridfinity;
   }
 };
 

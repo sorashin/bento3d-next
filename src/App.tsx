@@ -1,5 +1,4 @@
-import Canvas from "./components/3d/Canvas"
-import { useEffect } from "react"
+import { lazy, Suspense, useEffect, memo } from "react"
 import { useModularStore } from "@/stores/modular"
 import {
   BrowserRouter,
@@ -10,10 +9,18 @@ import {
 } from "react-router-dom"
 import Controls from "./components/ui/Controls"
 
-// グラフを表示するコンポーネント
-function GraphRenderer() {
-  const { slug } = useParams<{ slug: string }>()
-  const { modular, initializeModular, loadGraph } = useModularStore()
+// NotFoundコンポーネント作成
+const NotFound = () => (
+  <div className="flex-1 flex items-center justify-center">
+    ページが見つかりません
+  </div>
+)
+
+// ModularInitializerコンポーネント - modularの初期化だけを担当
+const ModularInitializer = memo(({ slug }: { slug?: string }) => {
+  const initializeModular = useModularStore((state) => state.initializeModular)
+  const loadGraph = useModularStore((state) => state.loadGraph)
+  const modular = useModularStore((state) => state.modular)
 
   useEffect(() => {
     initializeModular()
@@ -25,11 +32,40 @@ function GraphRenderer() {
     }
   }, [modular, slug])
 
+  return null
+})
+
+// メモ化されたPageLoaderコンポーネント - slugに基づいてページを読み込む
+const PageLoader = memo(({ slug }: { slug: string }) => {
+  // 動的にPageコンポーネントを読み込む
+  const PageComponent = lazy(() => {
+    return import(`./pages/${slug}/index`)
+      .then((module) => ({ default: module.Page }))
+      .catch(() => ({ default: NotFound }))
+  })
+
   return (
-    <div className="flex flex-1 overflow-hidden">
-      <Canvas />
+    <Suspense
+      fallback={
+        <div className="flex-1 flex items-center justify-center">
+          読み込み中...
+        </div>
+      }>
+      <PageComponent />
+    </Suspense>
+  )
+})
+
+// GraphRendererコンポーネント - URLパラメータを取得しPageLoaderに渡す
+const GraphRenderer = () => {
+  const { slug } = useParams<{ slug: string }>()
+
+  return (
+    <>
+      <ModularInitializer slug={slug} />
+      <PageLoader slug={slug || ""} />
       <Controls />
-    </div>
+    </>
   )
 }
 
