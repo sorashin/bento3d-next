@@ -1,5 +1,5 @@
-import { isInputFocusedAtom, isIgnoreKeyAtom } from "@/stores/settings";
-import { useAtomValue } from "jotai";
+
+import {useSettingsStore } from "@/stores/settings";
 import { useCallback, useEffect, useState } from "react";
 
 // フックの引数の型を定義
@@ -14,8 +14,7 @@ export const useKey = ({ conditions }: KeyProps) => {
   const [isSecondPressed, setIsSecondPressed] = useState(false);
   // 指定されたキー（群）が一度でも押されたかどうかの状態
   const [isPressedOnce, setIsPressedOnce] = useState(false);
-  const isInputFocused = useAtomValue(isInputFocusedAtom);
-  const isIgnoreKey = useAtomValue(isIgnoreKeyAtom);
+  const {isInputFocused, isIgnoreKey} = useSettingsStore();
 
   // 状態をリセットする関数
   const resetState = useCallback(() => {

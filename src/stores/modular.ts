@@ -6,7 +6,7 @@ import init from 'nodi-modular';
 import gridfinity from "@/assets/graph/gridfinity.json";
 
 // ジオメトリ情報の型を定義
-interface GeometryWithId {
+export interface GeometryWithId {
   id: GeometryIdentifier;  // stringではなくGeometryIdentifier型に修正
   geometry: BufferGeometry;
 }
@@ -29,6 +29,7 @@ interface ModularState {
   loadGraph: (slug?: string) => void;
   evaluateGraph: () => Promise<void>;
   updateNodeProperty: (id: string, value: number | string) => void;
+  //↓いらないかも
   getNodeProperty: (label: string) => { id: string; outputs: any } | null;
 }
 
