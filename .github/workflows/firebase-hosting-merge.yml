@@ -11,9 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm ci
-      - run: build
+      - run: yarn install
+      - run: yarn build
       - uses: FirebaseExtended/action-hosting-deploy@v0
+        if: success()
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BENTO3D_DEV_FA0E5 }}
