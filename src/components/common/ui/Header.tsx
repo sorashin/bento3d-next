@@ -26,7 +26,7 @@ const NavButton: React.FC<{ label: string; step: number }> = ({
           ? "bg-[rgba(255,255,255,.56)] shadow-sm"
           : "transparent shadow-none hover:bg-[rgba(255,255,255,.16)]"
       } text-content-h text-xs  transition-all`}>
-      <Icon name={"react"} className="w-6 h-6" />
+      <Icon name={icon} className="w-6 h-6" />
       {label}
     </button>
   )
@@ -39,9 +39,9 @@ export const Header = () => {
 
       <div className="flex justify-between md:justify-center items-center gap-2 w-full font-display">
         <NavButton label={"Size"} step={0} />
-        <Icon name="react" className="w-4 h-4"></Icon>
+        <Icon name="chevron-right" className="w-4 h-4"></Icon>
         <NavButton label={"Grid"} step={1} />
-        <Icon name="react" className="w-4 h-4"></Icon>
+        <Icon name="chevron-right" className="w-4 h-4"></Icon>
         <NavButton label={"Download"} step={2} />
       </div>
     </header>

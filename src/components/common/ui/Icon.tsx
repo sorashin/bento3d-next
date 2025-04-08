@@ -10,19 +10,14 @@ interface IconProps {
 
 const Icon: React.FC<IconProps> = ({
   name,
-  color = "currentColor",
-  strokeWidth = 1,
+
   size = 24,
   className = "",
 }) => {
   const SvgIcon = React.lazy(() => import(`../../../assets/icons/${name}.svg`))
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <SvgIcon
-        className={`w-${size} h-${size} ${className}`}
-        fill={color}
-        strokeWidth={strokeWidth}
-      />
+      <SvgIcon className={`w-${size} h-${size} ${className}`} />
     </Suspense>
   )
 }
