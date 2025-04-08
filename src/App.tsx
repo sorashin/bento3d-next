@@ -26,6 +26,10 @@ const pageComponents: Record<string, any> = {
     import("./pages/gridfinity/index").then((module) => ({
       default: module.Page,
     })),
+  tray: () =>
+    import("./pages/tray/index").then((module) => ({
+      default: module.Page,
+    })),
 }
 
 // ModularInitializerコンポーネント - modularの初期化だけを担当

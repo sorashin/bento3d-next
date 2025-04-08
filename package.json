@@ -15,6 +15,7 @@
     "@tailwindcss/vite": "^4.0.17",
     "@xstate/react": "^5.0.3",
     "firebase-tools": "^14.1.0",
+    "framer-motion": "^12.6.3",
     "immer": "^10.1.1",
     "leva": "^0.10.0",
     "nodi-modular": "^0.0.11",

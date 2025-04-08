@@ -12,7 +12,7 @@
   --breakpoint-xl: 1440px;
 
   --color-*: initial;
-  --color-primary: #C7F5EA;
+  --color-primary: #111111;
   --color-secondary: #25FEC1;
   --color-content-h:#1C1C1C;
   --color-content-m:#707070;
@@ -75,4 +75,8 @@ html, body, #root {
   margin: 0;
   padding: 0;
   overflow: hidden;
+}
+
+.b-round-button{
+  @apply bg-primary text-content-dark-h-a rounded-full size-16 flex items-center justify-center cursor-pointer hover:scale-95 transition;
 }
