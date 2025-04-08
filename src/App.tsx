@@ -16,6 +16,18 @@ const NotFound = () => (
   </div>
 )
 
+// 動的インポートを静的にするためのマッピングオブジェクトを作成
+const pageComponents: Record<string, any> = {
+  bento3d: () =>
+    import("./pages/bento3d/index").then((module) => ({
+      default: module.Page,
+    })),
+  gridfinity: () =>
+    import("./pages/gridfinity/index").then((module) => ({
+      default: module.Page,
+    })),
+}
+
 // ModularInitializerコンポーネント - modularの初期化だけを担当
 const ModularInitializer = memo(({ slug }: { slug?: string }) => {
   const initializeModular = useModularStore((state) => state.initializeModular)
@@ -37,11 +49,9 @@ const ModularInitializer = memo(({ slug }: { slug?: string }) => {
 
 // メモ化されたPageLoaderコンポーネント - slugに基づいてページを読み込む
 const PageLoader = memo(({ slug }: { slug: string }) => {
-  // 動的にPageコンポーネントを読み込む
   const PageComponent = lazy(() => {
-    return import(`./pages/${slug}/index`)
-      .then((module) => ({ default: module.Page }))
-      .catch(() => ({ default: NotFound }))
+    const loader = pageComponents[slug]
+    return loader ? loader() : Promise.resolve({ default: NotFound })
   })
 
   return (

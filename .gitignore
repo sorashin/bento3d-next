@@ -4,6 +4,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+firebase-debug.log*
+ui-debug.log*
 
 # dependencies
 /node_modules
@@ -19,13 +21,32 @@ lerna-debug.log*
 
 # production
 /build
+/dist
+
+# Firebase
+/.firebase/
+.firebaserc
+firebase-config.json
 
 # misc
 .DS_Store
 *.pem
 
 # local env files
-.env*.local
+.env
+.env.*
+!.env.example
+
+# cache
+.cache/
+.temp/
+
+# backup and temp files
+*~
+*.bak
+*.swp
+*.tmp
+.Trash-*
 
 # vercel
 .vercel
