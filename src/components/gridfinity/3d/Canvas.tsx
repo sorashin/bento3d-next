@@ -17,7 +17,7 @@ const Canvas = () => {
     Object3D.DEFAULT_UP.set(0, 0, 1) //Z軸を上にする
   }, [])
   return (
-    <div className="flex-1 bg-gray-200">
+    <div className="flex-1">
       <ThreeCanvas
         orthographic
         camera={{
