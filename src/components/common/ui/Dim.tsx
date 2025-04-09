@@ -76,6 +76,38 @@ const Dim: React.FC<DimProps> = ({ colId, rowId, position, offset }) => {
   return (
     <div className="absolute flex items-center" style={dimStyle}>
       <div className="flex flex-col items-center w-full">
+        <div className="flex flex-row items-center bg-system-info rounded-sm z-10 px-[2px]">
+          <select
+            value={row.type}
+            onChange={handleTypeChange}
+            className="text-overline p-1 cursor-pointer focus:outline-none">
+            <option value="fill">fill(1)</option>
+            <option value="1/2">fill(1/2)</option>
+            <option value="1/3">fill(1/3)</option>
+            <option value="fixed">fixed</option>
+          </select>
+          <div className="border-r border-content-dark-l-a h-[20px] mx-[2px]"></div>
+          {row.type === "fixed" ? (
+            <input
+              type="number"
+              step="0.1"
+              value={row.width}
+              onChange={(e) => {
+                const newValue = e.target.value
+                // 小数第1位までのフォーマットに制限（正規表現で検証）
+                if (newValue && /^\d+(\.\d{0,1})?$/.test(newValue)) {
+                  const newWidth = parseFloat(newValue)
+                  if (!isNaN(newWidth)) {
+                    updateRow(rowId, { width: newWidth })
+                  }
+                }
+              }}
+              className="h-full px-1 py-[2px] text-xs hover:bg-content-dark-l-a transition w-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-[2px]"
+            />
+          ) : (
+            <p className="h-full px-1 py-[2px] text-xs">{row.width}</p>
+          )}
+        </div>
         <svg width={length} height={height} className="">
           <defs>
             <marker
@@ -114,38 +146,6 @@ const Dim: React.FC<DimProps> = ({ colId, rowId, position, offset }) => {
             markerEnd={`url(#arrowend-${colId + rowId})`}
           />
         </svg>
-        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-row items-center bg-system-info rounded-sm z-10">
-          <select
-            value={row.type}
-            onChange={handleTypeChange}
-            className="text-overline p-1 cursor-pointer focus:outline-none">
-            <option value="fill">fill(1)</option>
-            <option value="1/2">fill(1/2)</option>
-            <option value="1/3">fill(1/3)</option>
-            <option value="fixed">fixed</option>
-          </select>
-          <div className="border-r border-content-dark-l-a h-[20px] mx-[2px]"></div>
-          {row.type === "fixed" ? (
-            <input
-              type="number"
-              step="0.1"
-              value={row.width}
-              onChange={(e) => {
-                const newValue = e.target.value
-                // 小数第1位までのフォーマットに制限（正規表現で検証）
-                if (newValue && /^\d+(\.\d{0,1})?$/.test(newValue)) {
-                  const newWidth = parseFloat(newValue)
-                  if (!isNaN(newWidth)) {
-                    updateRow(rowId, { width: newWidth })
-                  }
-                }
-              }}
-              className="h-full px-1 py-[2px] text-xs hover:bg-content-dark-l-a transition w-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            />
-          ) : (
-            <p className="h-full px-1 py-[2px] text-xs">{row.width}</p>
-          )}
-        </div>
       </div>
     </div>
   )

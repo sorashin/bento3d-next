@@ -29,7 +29,7 @@ export const GridEditor = () => {
         layout
         className={`relative flex flex-row gap-4 p-4 ${
           totalWidth - totalDepth > 0 ? "w-full h-full" : "w-full h-full"
-        } rounded-md border-content-dark-l-a border-[0.5px] grid-shadow-outer font-display`}
+        } rounded-md border-content-dark-l-a border-[0.5px] grid-shadow-outer font-display bg-white`}
         data-size={`w:${totalWidth} d:${totalDepth}`}
         style={{
           padding: thickness * mm2pixel,
@@ -78,7 +78,7 @@ export const GridEditor = () => {
                       colId={JSON.stringify(i)}
                       rowId={row.id}
                       position={"top"}
-                      offset={4}
+                      offset={2}
                     />
                     <Icon
                       name="trash"
