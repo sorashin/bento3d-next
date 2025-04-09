@@ -7,7 +7,6 @@ import {
   Navigate,
   useParams,
 } from "react-router-dom"
-import Controls from "./components/common/ui/Controls"
 
 // NotFoundコンポーネント作成
 const NotFound = () => (
@@ -78,7 +77,6 @@ const GraphRenderer = () => {
     <>
       <ModularInitializer slug={slug} />
       <PageLoader slug={slug || ""} />
-      <Controls />
     </>
   )
 }

@@ -38,19 +38,21 @@
   --color-system-error: #F3785D;
   --color-system-warning: rgba(254, 161, 41, 1.0);
   --color-system-success: #00FF00;
-  --color-system-info: #0000FF;
+  --color-system-info: #4597F7;
 
   --font-sans: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   --font-display: "F5.6", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  --font-size-overline: 0.625rem;
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.5rem;
-  --font-size-2xl: 2rem;
-  --font-size-3xl: 3rem;
+  --text-overline: 0.625rem;
+  /* --text-overline--line-height: 120%; 
+  --text-overline--letter-spacing: 0rem;  */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 3rem;
   
 }
 
@@ -78,5 +80,27 @@ html, body, #root {
 }
 
 .b-round-button{
-  @apply bg-primary text-content-dark-h-a rounded-full size-16 flex items-center justify-center cursor-pointer hover:scale-95 transition;
+  @apply bg-primary text-content-dark-h-a rounded-full size-8 flex items-center justify-center cursor-pointer hover:scale-95 transition;
 }
+.grid-bottom-layer{
+  background: radial-gradient(
+      398.85% 398.85% at 54.68% -169.05%,
+      #ffffff 0%,
+      #e1e1e1 100%
+    );
+}
+.grid-shadow-inner {
+    box-shadow:
+      inset 113px 114px 45px rgba(48, 48, 48, 0.01),
+      inset 73px 73px 41px rgba(48, 48, 48, 0.02),
+      inset 41px 41px 35px rgba(48, 48, 48, 0.08),
+      inset 18px 18px 26px rgba(48, 48, 48, 0.16),
+      inset 5px 5px 14px rgba(48, 48, 48, 0.2);
+  }
+  .grid-shadow-outer {
+    box-shadow:
+      0px 324px 130px rgba(0, 0, 0, 0.01),
+      0px 182px 109px rgba(0, 0, 0, 0.05),
+      0px 81px 81px rgba(0, 0, 0, 0.09),
+      0px 20px 45px rgba(0, 0, 0, 0.1);
+  }

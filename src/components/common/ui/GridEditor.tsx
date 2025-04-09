@@ -2,6 +2,7 @@ import Icon from "@/components/common/ui/Icon"
 import { useTrayStore } from "@/stores/tray"
 import { motion } from "framer-motion"
 import { useEffect } from "react"
+import Dim from "./Dim"
 
 export const GridEditor = () => {
   const {
@@ -14,9 +15,8 @@ export const GridEditor = () => {
     grid,
     addRow,
     addColumn,
-    updateRow,
-    updateSize,
     removeColumn,
+    setSelectedColumnId,
   } = useTrayStore((state) => state)
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export const GridEditor = () => {
               {Array.from(Array(row.division).keys()).map((i) => (
                 <motion.div
                   data-row-id={row.id}
-                  data-column-id={i}
+                  data-column-id={row.id + i}
                   data-size={`w:${row.width} d:${
                     (totalDepth - (2 + row.division - 1) * thickness) /
                     row.division
@@ -71,8 +71,15 @@ export const GridEditor = () => {
 
                     borderRadius: fillet * mm2pixel,
                   }}
-                  className="group w-full flex flex-col justify-center items-center grid-bottom-layer border-content-l border-[0.5px] grid-shadow-inner">
-                  <div className="invisible group-hover:visible transition">
+                  className="group w-full flex flex-col justify-center items-center grid-bottom-layer border-content-l border-[0.5px] grid-shadow-inner"
+                  onClick={() => setSelectedColumnId(row.id + i)}>
+                  <div className="invisible group-hover:visible transition size-full flex justify-center items-center">
+                    <Dim
+                      colId={JSON.stringify(i)}
+                      rowId={row.id}
+                      position={"top"}
+                      offset={4}
+                    />
                     <Icon
                       name="trash"
                       className="cursor-pointer"
@@ -99,7 +106,7 @@ export const GridEditor = () => {
               </button>
             )}
             <button
-              className="b-round-button absolute left-1/2 -translate-x-1/2 -bottom-16"
+              className="b-round-button absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2"
               onClick={() => {
                 addColumn(row.id)
               }}>

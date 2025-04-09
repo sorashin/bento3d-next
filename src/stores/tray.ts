@@ -27,6 +27,7 @@ interface TrayStore {
   edgeFillet: number;
   thickness: number;
   mm2pixel: number; // ミリメートルからピクセルへの変換係数
+  selectedColumnId: string | null;
   
   // アクション
   addRow: (newRow: Omit<Row, 'width'>) => void;
@@ -34,7 +35,7 @@ interface TrayStore {
   removeColumn: (rowId: string) => void; // 新しく追加するアクション
   updateRow: (id: string, updates: Partial<Row>) => void;
   updateSize: (width: number, depth: number) => void;
-  removeRow: (id: string) => void;
+  setSelectedColumnId: (id: string | null) => void;
 }
 
 
@@ -77,6 +78,9 @@ const recalculateWidths = (rows: Row[], totalWidth: number, thickness:number): R
         break;
     }
     
+    // 小数第2位で四捨五入
+    newWidth = Math.round(newWidth * 100) / 100;
+    
     return { ...row, width: newWidth };
   });
 };
@@ -93,7 +97,7 @@ const getWindowSize = () => {
 // mm2pixelを計算するヘルパー関数
 const calculateMm2Pixel = (width: number, depth: number) => {
   const { width: pixelSizeW, height: pixelSizeD } = getWindowSize();
-  const screenScale = 1/2; // 画面の短辺に対して何割の大きさにするか
+  const screenScale = 2/3; // 画面の短辺に対して何割の大きさにするか
   // 大きい方の寸法に合わせてスケールを決定
   return width - depth > 0 ? pixelSizeW / width*screenScale : pixelSizeD / depth*screenScale;
 };
@@ -116,6 +120,7 @@ export const useTrayStore = create<TrayStore>((set) => ({
   edgeFillet: 1,
   thickness: 2,
   mm2pixel: calculateMm2Pixel(100, 100), // 初期値を計算
+  selectedColumnId: null,
   
   // アクション実装
   addRow: (newRow) => {
@@ -133,7 +138,7 @@ export const useTrayStore = create<TrayStore>((set) => ({
       
       // 負の幅をチェック
       if (updatedRows.some(row => row.width < 0)) {
-        alert('行を追加できません: 負の幅が発生します');
+        alert('Cannot add row: negative width would occur');
         return state;
       }
       
@@ -161,6 +166,60 @@ export const useTrayStore = create<TrayStore>((set) => ({
             ...state,
             grid: updatedGrid
         };
+    });
+  },
+  
+  updateRow: (id, updates) => {
+    set(state => {
+      // 更新する行を検索
+      const rowIndex = state.grid.findIndex(row => row.id === id);
+      if (rowIndex === -1) return state;
+      
+      // 更新された行を含む新しい配列を作成
+      const updatedGrid = [...state.grid];
+      updatedGrid[rowIndex] = { ...updatedGrid[rowIndex], ...updates };
+      
+      // 必要に応じて幅を再計算
+      const recalculatedGrid = updates.width !== undefined || updates.type !== undefined || updates.division !== undefined
+        ? recalculateWidths(updatedGrid, state.totalWidth,state.thickness)
+        : updatedGrid;
+        
+      // 負の幅をチェック
+      if (recalculatedGrid.some(row => row.width < 0)) {
+        alert('Cannot update size: negative width would occur');
+        return state;
+      }
+      
+      return {
+        ...state,
+        grid: recalculatedGrid
+      };
+    });
+  },
+  
+  updateSize: (width, depth) => {
+    set(state => {
+      // 全体のサイズを更新
+      const newState = {
+        ...state,
+        totalWidth: width,
+        totalDepth: depth,
+        mm2pixel: calculateMm2Pixel(width, depth) // mm2pixelを再計算
+      };
+      
+      // 行の幅を再計算
+      const recalculatedGrid = recalculateWidths(state.grid, width, state.thickness);
+      
+      // 負の幅をチェック
+      if (recalculatedGrid.some(row => row.width < 0)) {
+        alert('Cannot update size: negative width would occur');
+        return state;
+      }
+      
+      return {
+        ...newState,
+        grid: recalculatedGrid
+      };
     });
   },
   removeColumn: (rowId) => {
@@ -199,73 +258,9 @@ export const useTrayStore = create<TrayStore>((set) => ({
       };
     });
   },
-  updateRow: (id, updates) => {
-    set(state => {
-      // 更新する行を検索
-      const rowIndex = state.grid.findIndex(row => row.id === id);
-      if (rowIndex === -1) return state;
-      
-      // 更新された行を含む新しい配列を作成
-      const updatedGrid = [...state.grid];
-      updatedGrid[rowIndex] = { ...updatedGrid[rowIndex], ...updates };
-      
-      // 必要に応じて幅を再計算
-      const recalculatedGrid = updates.width !== undefined || updates.type !== undefined || updates.division !== undefined
-        ? recalculateWidths(updatedGrid, state.totalWidth,state.thickness)
-        : updatedGrid;
-        
-      // 負の幅をチェック
-      if (recalculatedGrid.some(row => row.width < 0)) {
-        alert('行を更新できません: 負の幅が発生します');
-        return state;
-      }
-      
-      return {
-        ...state,
-        grid: recalculatedGrid
-      };
-    });
-  },
-  
-  updateSize: (width, depth) => {
-    set(state => {
-      // 全体のサイズを更新
-      const newState = {
-        ...state,
-        totalWidth: width,
-        totalDepth: depth,
-        mm2pixel: calculateMm2Pixel(width, depth) // mm2pixelを再計算
-      };
-      
-      // 行の幅を再計算
-      const recalculatedGrid = recalculateWidths(state.grid, width, state.thickness);
-      
-      // 負の幅をチェック
-      if (recalculatedGrid.some(row => row.width < 0)) {
-        alert('サイズを更新できません: 負の幅が発生します');
-        return state;
-      }
-      
-      return {
-        ...newState,
-        grid: recalculatedGrid
-      };
-    });
-  },
-  
-  removeRow: (id) => {
-    set(state => {
-      // 行を削除
-      const filteredGrid = state.grid.filter(row => row.id !== id);
-      
-      // 幅を再計算
-      const recalculatedGrid = recalculateWidths(filteredGrid, state.totalWidth, state.thickness);
-      
-      return {
-        ...state,
-        grid: recalculatedGrid
-      };
-    });
-  }
+  setSelectedColumnId: (id) => set(state => ({
+    ...state,
+    selectedColumnId: id
+  }))
 }));
 
