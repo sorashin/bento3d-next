@@ -2,12 +2,15 @@ import { Canvas as ThreeCanvas } from "@react-three/fiber"
 import { OrbitControls, GizmoViewport, GizmoHelper } from "@react-three/drei"
 
 import { useModularStore } from "@/stores/modular"
-import Model from "./Model"
+import TrayModel from "./TrayModel"
 import { useEffect } from "react"
 import { Object3D } from "three"
+import PreviewModel from "./PreviewModel"
+import { useNavigationStore } from "@/stores/navigation"
 
 const Canvas = () => {
   const { geometries } = useModularStore()
+  const { currentNav } = useNavigationStore((state) => state)
   const renderGeometries = () => {
     return geometries.map((geometry) => {
       return geometry.geometry
@@ -24,12 +27,12 @@ const Canvas = () => {
         camera={{
           position: [100, 100, 100], // clipping 問題解決するため zを１００にする
           fov: 40,
-          zoom: 10,
+          zoom: 5,
           near: 0.1,
           far: 10000,
         }}
         frameloop="demand">
-        <color attach="background" args={["var(--color-system-info)"]} />
+        <color attach="background" args={["#cccccc"]} />
         <ambientLight intensity={0.8} />
         <directionalLight
           position={[5, 5, 5]}
@@ -55,7 +58,8 @@ const Canvas = () => {
           args={[100, 100, "#555555", "#444444"]}
           rotation={[Math.PI / 2, 0, 0]}
         />
-        <Model geometries={renderGeometries()} />
+        {currentNav == 0 && <PreviewModel />}
+        {currentNav == 2 && <TrayModel geometries={renderGeometries()} />}
       </ThreeCanvas>
     </div>
   )

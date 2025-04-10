@@ -1,5 +1,6 @@
 import Icon from "@/components/common/ui/Icon"
 import { useNavigationStore } from "@/stores/navigation"
+import React from "react"
 
 const NavButton: React.FC<{
   label: string
@@ -9,7 +10,7 @@ const NavButton: React.FC<{
 }> = ({ label, icon, isActive, onClick }) => {
   return (
     <button
-      className={`w-fit p-2 flex justify-center items-center gap-2 rounded-sm ${
+      className={`w-fit p-2 flex justify-center items-center gap-2 rounded-sm cursor-pointer ${
         isActive
           ? "bg-[rgba(255,255,255,.56)] shadow-sm"
           : "transparent shadow-none hover:bg-[rgba(255,255,255,.16)]"
@@ -29,7 +30,7 @@ export const Header = () => {
     <header className="absolute inset-x-0 top-0 pt-8 px-4 flex flex-col justify-between z-20">
       <div className="flex justify-between md:justify-center items-center gap-2 w-full font-display">
         {currentNavArray.map((item, index) => (
-          <>
+          <React.Fragment key={item.label}>
             <NavButton
               key={item.label}
               label={item.label}
@@ -44,7 +45,7 @@ export const Header = () => {
                 name="chevron-right"
                 className="w-4 h-4 text-content-m-a"></Icon>
             )}
-          </>
+          </React.Fragment>
         ))}
       </div>
     </header>

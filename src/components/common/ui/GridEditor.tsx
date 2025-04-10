@@ -1,7 +1,6 @@
 import Icon from "@/components/common/ui/Icon"
 import { useTrayStore } from "@/stores/tray"
 import { motion } from "framer-motion"
-import { useEffect } from "react"
 import Dim from "./Dim"
 
 export const GridEditor = () => {
@@ -19,10 +18,6 @@ export const GridEditor = () => {
     setSelectedColumnId,
   } = useTrayStore((state) => state)
 
-  useEffect(() => {
-    console.log("grid", grid)
-    console.log("totalWDH", totalWidth, totalDepth)
-  }, [grid])
   return (
     <>
       <motion.div

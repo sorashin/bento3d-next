@@ -10,9 +10,7 @@ import {
 
 // NotFoundコンポーネント作成
 const NotFound = () => (
-  <div className="flex-1 flex items-center justify-center">
-    ページが見つかりません
-  </div>
+  <div className="flex-1 flex items-center justify-center">Page Not Found</div>
 )
 
 // 動的インポートを静的にするためのマッピングオブジェクトを作成
@@ -61,7 +59,7 @@ const PageLoader = memo(({ slug }: { slug: string }) => {
     <Suspense
       fallback={
         <div className="flex-1 flex items-center justify-center">
-          読み込み中...
+          loading...
         </div>
       }>
       <PageComponent />

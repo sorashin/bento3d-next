@@ -16,6 +16,7 @@ interface ModularState {
   modular: Modular | null;
   nodes: NodeInterop[];
   geometries: GeometryWithId[];
+  inputNodeId:string
   
 
   // アクション
@@ -23,6 +24,7 @@ interface ModularState {
   setNodes: (nodes: NodeInterop[]) => void;
   setGeometries: (geometries: GeometryWithId[]) => void;
 
+  setInputNodeId: (inputNodeId:string) => void
   
   // 複雑な操作
   initializeModular: () => Promise<void>;
@@ -49,11 +51,13 @@ export const useModularStore = create<ModularState>((set, get) => ({
   modular: null,
   nodes: [],
   geometries: [],
+  inputNodeId: "",
   
 
   setModular: (modular) => set({ modular }),
   setNodes: (nodes) => set({ nodes }),
   setGeometries: (geometries) => set({ geometries }),
+  setInputNodeId: (inputNodeId) => set({ inputNodeId }),
   
 
   initializeModular: async () => {
@@ -62,7 +66,7 @@ export const useModularStore = create<ModularState>((set, get) => ({
   },
 
   loadGraph: async (slug = 'gridfinity') => {
-    const { modular, setNodes, setGeometries } = get();
+    const { modular, setNodes, setGeometries, setInputNodeId } = get();
     if (!modular) return;
     
     try {
@@ -73,6 +77,13 @@ export const useModularStore = create<ModularState>((set, get) => ({
       modular.loadGraph(JSON.stringify(graphData.graph));
       const nodes = modular.getNodes();
       setNodes(nodes);
+      
+      // "input" ラベルを持つノードを検索
+      const inputNode = nodes.find(node => node.label === "input");
+      if (inputNode) {
+        setInputNodeId(inputNode.id);
+      }
+      
       get().evaluateGraph();
     } catch (error) {
       console.error(`Error loading graph for ${slug}:`, error);

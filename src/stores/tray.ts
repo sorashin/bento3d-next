@@ -34,9 +34,17 @@ interface TrayStore {
   addColumn: (rowId: string) => void;
   removeColumn: (rowId: string) => void; // 新しく追加するアクション
   updateRow: (id: string, updates: Partial<Row>) => void;
-  updateSize: (width: number, depth: number) => void;
+  updateSize: (params: { width?: number, depth?: number, height?: number }) => void;
   setSelectedColumnId: (id: string | null) => void;
 }
+
+interface FakeTrayStore{
+  fakeTotalWidth: number;
+  fakeTotalDepth: number;
+  fakeTotalHeight: number;
+  updateFakeSize: (params: { width?: number, depth?: number, height?: number }) => void;
+}
+
 
 
 
@@ -197,18 +205,32 @@ export const useTrayStore = create<TrayStore>((set) => ({
     });
   },
   
-  updateSize: (width, depth) => {
+  updateSize: (params) => {
     set(state => {
+      // 指定されていない値には現在の値を使用
+      const width = params.width !== undefined ? params.width : state.totalWidth;
+      const depth = params.depth !== undefined ? params.depth : state.totalDepth;
+      const height = params.height !== undefined ? params.height : state.totalHeight;
+      
       // 全体のサイズを更新
       const newState = {
         ...state,
         totalWidth: width,
         totalDepth: depth,
+        totalHeight: height,
         mm2pixel: calculateMm2Pixel(width, depth) // mm2pixelを再計算
       };
       
       // 行の幅を再計算
-      const recalculatedGrid = recalculateWidths(state.grid, width, state.thickness);
+      let recalculatedGrid = recalculateWidths(state.grid, width, state.thickness);
+      
+      // depthが変更された場合、各行のdepthを更新
+      if (params.depth !== undefined) {
+        recalculatedGrid = recalculatedGrid.map(row => ({
+          ...row,
+          depth: depth - 2 * state.thickness
+        }));
+      }
       
       // 負の幅をチェック
       if (recalculatedGrid.some(row => row.width < 0)) {
@@ -264,3 +286,16 @@ export const useTrayStore = create<TrayStore>((set) => ({
   }))
 }));
 
+export const useFakeTrayStore = create<FakeTrayStore>((set) => ({
+  fakeTotalWidth: 100,
+  fakeTotalDepth: 100,
+  fakeTotalHeight: 20,
+  updateFakeSize: (params) => {
+    set(state => ({
+      ...state,
+      fakeTotalWidth: params.width !== undefined ? params.width : state.fakeTotalWidth,
+      fakeTotalDepth: params.depth !== undefined ? params.depth : state.fakeTotalDepth,
+      fakeTotalHeight: params.height !== undefined ? params.height : state.fakeTotalHeight,
+    }));
+  }
+}));

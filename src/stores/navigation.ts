@@ -40,7 +40,7 @@ interface NavigationState {
 setCurrentNav: (index: number) => void;
 }
 
-export const useNavigationStore = create<NavigationState>()((set, get) => ({
+export const useNavigationStore = create<NavigationState>()((set) => ({
   currentNavArray: nevigations["tray"],
   setCurrentNavArray: (current) => set({ currentNavArray: current }),
   currentNav: 0,

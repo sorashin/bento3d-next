@@ -7,7 +7,8 @@ interface SettingsState {
   setIsInputFocused: (isInputFocus: boolean) => void;
   isIgnoreKey: boolean;
   setIsIgnoreKey: (isIgnoreKey: boolean) => void;
-  
+  cameraMode: 'top'|'front'|'side'|'perspective';
+  setCameraMode: (cameraMode: 'top'|'front'|'side'|'perspective') => void;
 }
 
 export const useSettingsStore = create<SettingsState>()((set) => ({
@@ -17,4 +18,6 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   setIsInputFocused: (isInputFocused: boolean) => set({ isInputFocused }),
   isIgnoreKey: false,
   setIsIgnoreKey: (isIgnoreKey: boolean) => set({ isIgnoreKey }),
+  cameraMode: 'perspective',
+  setCameraMode: (cameraMode: 'top'|'front'|'side'|'perspective') => set({ cameraMode }),
 }));
