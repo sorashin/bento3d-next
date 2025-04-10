@@ -1,8 +1,9 @@
 import Canvas from "@/components/bento3d/3d/Canvas"
-import Controls from "@/components/common/ui/Controls"
 import GeometryExporter from "@/components/common/ui/GeometryExporter"
 import { GridEditor } from "@/components/common/ui/GridEditor"
 import { Header } from "@/components/common/ui/Header"
+import { LeftMenu } from "@/components/common/ui/LeftMenu"
+import { RightMenu } from "@/components/common/ui/RightMenu"
 import { RangeSlider } from "@/components/common/ui/Slider"
 import { useModularStore } from "@/stores/modular"
 import { useNavigationStore } from "@/stores/navigation"
@@ -12,6 +13,7 @@ import { useEffect } from "react"
 export function Page() {
   const { currentNav } = useNavigationStore()
   const trayState = useTrayStore()
+  const { thickness } = useTrayStore((state) => state)
   const { inputNodeId, updateNodeProperty } = useModularStore((state) => state)
 
   useEffect(() => {
@@ -29,7 +31,6 @@ export function Page() {
       <div className="absolute bottom-16 right-16 z-20">
         <GeometryExporter />
       </div>
-      <Controls />
 
       {/* Canvas は常に表示し続ける */}
       <Canvas />
@@ -38,7 +39,12 @@ export function Page() {
       {currentNav == 0 && (
         <div className="absolute inset-0 z-10 pointer-events-none">
           <RangeSlider min={30} max={400} label={"width"} position={"bottom"} />
-          <RangeSlider min={30} max={200} label={"height"} position={"right"} />
+          <RangeSlider
+            min={thickness}
+            max={200}
+            label={"height"}
+            position={"right"}
+          />
           <RangeSlider min={30} max={400} label={"depth"} position={"left"} />
         </div>
       )}
@@ -50,6 +56,8 @@ export function Page() {
           </div>
         </div>
       )}
+      <LeftMenu />
+      <RightMenu step={2} />
     </>
   )
 }

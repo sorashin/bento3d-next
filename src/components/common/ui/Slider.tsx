@@ -1,6 +1,7 @@
 import { useSettingsStore } from "@/stores/settings"
 import { useFakeTrayStore, useTrayStore } from "@/stores/tray"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import Icon from "./Icon"
 
 interface RangeSliderProps {
   min: number
@@ -13,6 +14,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
   const { max, min, label, position } = props
   const { updateSize, totalWidth, totalDepth, totalHeight } = useTrayStore()
   const { updateFakeSize } = useFakeTrayStore()
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // labelに基づいて適切な初期値を取得
   const getInitialValue = () => {
@@ -44,10 +46,10 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
       case "right":
         return "fixed right-8 lg:right-16 top-1/2 -translate-y-1/2 h-14"
       case "top":
-        return "fixed top-8 lg:top-16 left-1/2 -translate-x-1/2 w-14"
+        return "fixed top-8 lg:top-16 left-1/2 -translate-x-1/2 w-32"
       case "bottom":
       default:
-        return "fixed bottom-8 lg:bottom-16 left-1/2 -translate-x-1/2 w-14"
+        return "fixed bottom-8 lg:bottom-16 left-1/2 -translate-x-1/2 w-32"
     }
   }
 
@@ -80,11 +82,59 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
     }
   }
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value
+    if (/^\d*$/.test(newValue)) {
+      // 数字のみを許可
+      const numericValue = Math.floor(Number(newValue)) // 小数点以下を切り捨て
+      updateFakeSize({
+        width: label === "width" ? numericValue : undefined,
+        depth: label === "depth" ? numericValue : undefined,
+        height: label === "height" ? numericValue : undefined,
+      })
+      updateSize({
+        width: label === "width" ? numericValue : undefined,
+        depth: label === "depth" ? numericValue : undefined,
+        height: label === "height" ? numericValue : undefined,
+      })
+    } else {
+      inputRef.current!.value = String(value)
+    }
+  }
+
+  // set input value to phantomSize.depth
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.value = String(value)
+    }
+  }, [value])
+
   return (
     <>
       <div
-        className={`group ${getPositionClasses()} transition font-display text-content-dark-h-a pointer-events-auto`}>
-        <p>{value}</p>
+        className={`group ${getPositionClasses()} transition font-display text-content-dark-h-a pointer-events-auto flex justify-center`}>
+        <Icon
+          name={
+            ["top", "bottom"].includes(position) ? "chevron-left" : "chevron-up"
+          }
+          className={`absolute ${
+            ["top", "bottom"].includes(position)
+              ? "-left-6 w-4 h-full group-hover:-left-8"
+              : "-top-6 w-full h-4 group-hover:-top-8"
+          } transition-all text-content-m-a`}
+        />
+        <Icon
+          name={
+            ["top", "bottom"].includes(position)
+              ? "chevron-right"
+              : "chevron-down"
+          }
+          className={`absolute ${
+            ["top", "bottom"].includes(position)
+              ? "-right-6 w-4 h-full group-hover:-right-8"
+              : "-bottom-6 w-full h-4 group-hover:-bottom-8"
+          } transition-all text-content-m-a`}
+        />
         <input
           type="range"
           className={`range-slider ${getSliderOrientation()}`}
@@ -101,18 +151,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
               calculateNewValue(
                 ["left", "right"].includes(position) ? e.clientY : e.clientX
               )
-              const fakeSizeUpdate: {
-                width?: number
-                depth?: number
-                height?: number
-              } = {}
-              if (label === "width") {
-                fakeSizeUpdate.width = value
-              } else if (label === "depth") {
-                fakeSizeUpdate.depth = value
-              } else if (label === "height") {
-                fakeSizeUpdate.height = value
-              }
+
               updateFakeSize({
                 width: label === "width" ? value : undefined,
                 depth: label === "depth" ? value : undefined,
@@ -180,6 +219,24 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
             setCameraMode("perspective")
           }}
         />
+        <div className="absolute flex flex-col justify-center items-center gap-[2px] inset-0 h-[56px] w-[128px] text-center pointer-events-none  text-white">
+          <p className="text-xs relative text-content-dark-m-a">
+            {label.charAt(0).toUpperCase() + label.slice(1)}
+          </p>
+          <p className="relative items-center flex">
+            <input
+              type="text"
+              className="text-lg max-w-[50px] text-content-white pointer-events-auto bg-transparent hover:bg-content-dark-xl-a rounded-[4px] focus:bg-content-dark-xl-a text-center focus:ring-1 focus:ring-content-dark-l-a focus:outline-none"
+              defaultValue={String(value)}
+              ref={inputRef}
+              onFocus={(e) => e.target.select()}
+              onChange={handleInputChange}
+            />
+            <span className="absolute -right-5 text-overline text-content-dark-m-a">
+              mm
+            </span>
+          </p>
+        </div>
       </div>
     </>
   )
