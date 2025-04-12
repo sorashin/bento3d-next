@@ -31,9 +31,6 @@ export function Page() {
   return (
     <>
       <Header />
-      <div className="absolute bottom-16 right-16 z-20">
-        <GeometryExporter />
-      </div>
 
       {/* Canvas は常に表示し続ける */}
       <Canvas />

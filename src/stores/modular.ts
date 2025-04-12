@@ -77,6 +77,7 @@ export const useModularStore = create<ModularState>((set, get) => ({
       modular.loadGraph(JSON.stringify(graphData.graph));
       const nodes = modular.getNodes();
       setNodes(nodes);
+      console.log("nodes:", nodes);
       
       // "input" ラベルを持つノードを検索
       const inputNode = nodes.find(node => node.label === "input");

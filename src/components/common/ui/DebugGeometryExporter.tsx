@@ -1,24 +1,12 @@
 import { useModularStore } from "@/stores/modular"
 import { showSaveFilePicker } from "@/utils/filePicker"
-import { FC, useCallback, useEffect, useMemo, useState } from "react"
+import { FC, useCallback, useState } from "react"
 import { DoubleSide, Mesh, MeshStandardMaterial, Object3D } from "three"
 import { STLExporter } from "three-stdlib"
-import Icon from "./Icon"
 
-const GeometryExporter: FC = () => {
-  const [format] = useState<string | null>("stl")
+const DebugGeometryExporter: FC = () => {
+  const [format, setFormat] = useState<string | null>("stl")
   const geometries = useModularStore((state) => state.geometries)
-  const nodes = useModularStore((state) => state.nodes)
-
-  const geometriesWithInfo = useMemo(() => {
-    return geometries.map((geometry) => {
-      const gn = nodes.filter(
-        (node) => node.id === geometry.id.graphNodeSet?.nodeId
-      )
-      const label = gn?.[0]?.label
-      return { ...geometry, label }
-    })
-  }, [geometries, nodes])
 
   const parseMesh = useCallback(
     async (object: Object3D) => {
@@ -34,15 +22,16 @@ const GeometryExporter: FC = () => {
 
   const handleExportSingle = useCallback(
     async (index: number) => {
-      if (!format || !geometriesWithInfo[index]) return
+      if (!format || !geometries[index]) return
 
-      const { id, geometry, label } = geometriesWithInfo[index]
+      const { id, geometry } = geometries[index]
       // IDを含めたファイル名にする - IDは文字列として扱う
+      const fileName = `geometry_${String(id).slice(0, 8)}`
 
       if (format === "json") {
         await showSaveFilePicker({
           generator: () => Promise.resolve(JSON.stringify(geometry)),
-          suggestedName: `${label}.${format}`,
+          suggestedName: `${fileName}.${format}`,
           types: [
             {
               description: `${format?.toUpperCase()} file`,
@@ -68,7 +57,7 @@ const GeometryExporter: FC = () => {
             const data = await parseMesh(root)
             return data
           },
-          suggestedName: `${label}.${format}`,
+          suggestedName: `${fileName}.${format}`,
           types: [
             {
               description: `${format?.toUpperCase()} file`,
@@ -82,37 +71,51 @@ const GeometryExporter: FC = () => {
     },
     [format, geometries, parseMesh]
   )
-  useEffect(() => {
-    console.log("geometries", geometries)
-  }, [geometries])
 
   return (
     <div className="p-3">
-      {geometriesWithInfo.length > 0 ? (
+      <div className="mb-4">
+        <select
+          className="px-2 py-1 border border-gray-300 rounded"
+          value={format || ""}
+          onChange={(e) => setFormat(e.target.value || null)}>
+          <option value="stl">STL</option>
+          <option value="obj">OBJ</option>
+          <option value="gltf">GLTF</option>
+          <option value="glb">GLB</option>
+          <option value="ply">PLY</option>
+          <option value="json">JSON</option>
+        </select>
+      </div>
+
+      {geometries.length > 0 ? (
         <div className="mt-3">
+          <h4 className="font-medium text-lg mb-2">ジオメトリ一覧</h4>
           <ul className="divide-y divide-gray-200">
-            {geometriesWithInfo.map((geometry, index) => (
+            {geometries.map(({ id, geometry }, index) => (
               <li
                 key={index}
-                className="flex justify-between items-center p-2 flex-col gap-1 cursor-pointer rounded-md hover:bg-surface-sheet-m transition"
-                onClick={() => handleExportSingle(index)}>
-                <Icon
-                  name={geometry.label || ""}
-                  className="stroke-[2px] stroke-content-m size-2/3"
-                />
-                <button className="b-button bg-surface-ev1 !text-white items-center !py-1 w-full justify-center hover:!bg-content-h-a">
-                  <Icon name="download" className="size-4" />
-                  {geometry.label || `geometry ${index + 1}`}
+                className="flex justify-between items-center py-2">
+                <div className="geometry-name">
+                  ID: {String(id.geometryId).slice(0, 8)}
+                  <span className="text-xs text-gray-500 ml-2">
+                    (頂点: {geometry.attributes.position.count})
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleExportSingle(index)}
+                  className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                  ダウンロード
                 </button>
               </li>
             ))}
           </ul>
         </div>
       ) : (
-        <div className="text-gray-500">No Geometry Found</div>
+        <div className="text-gray-500">ジオメトリがありません</div>
       )}
     </div>
   )
 }
 
-export default GeometryExporter
+export default DebugGeometryExporter

@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { Ad } from "@/components/common/ui/Ad"
 import { useSettingsStore } from "@/stores/settings"
 import { useTrayStore } from "@/stores/tray"
+import GeometryExporter from "./GeometryExporter"
 
 interface RightMenuProps {
   children?: ReactNode
@@ -77,7 +78,7 @@ export const RightMenu: React.FC<RightMenuProps> = ({ children, step }) => {
             <p className="w-full my-2 text-center text-xs text-content-m-a font-display">
               Download STLs
             </p>
-
+            <GeometryExporter />
             <div className="flex w-full flex-col items-end px-2">
               <div className="flex flex-row items-center gap-1 text-sm relative group py-0.5 text-content-m w-fit">
                 <a

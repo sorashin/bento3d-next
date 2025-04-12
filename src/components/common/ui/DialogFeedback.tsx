@@ -83,7 +83,7 @@ export const DialogFeedback: FC = () => {
     <Dialog isOpen={isOpen} onClose={() => closeDialog()} className="max-w-sm">
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col font-sans p-4 w-full gap-6">
+        className="flex flex-col font-sans p-4 w-full gap-6 text-content-h">
         <h3 className="text-content-h text-xl font-medium px-2">
           Send feedback,
           <br />
@@ -100,7 +100,7 @@ export const DialogFeedback: FC = () => {
               }}
               key={i}
               className={`size-full rounded-full flex items-center justify-center ${
-                rating === i ? "bg-content-l-a" : "bg-content-xl-a"
+                rating === i ? "bg-content-h-a" : "bg-content-xl-a"
               }`}
               style={{ width: "100%", height: "100%", aspectRatio: "1 / 1" }}>
               <img
