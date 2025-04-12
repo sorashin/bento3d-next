@@ -1,4 +1,7 @@
 import Canvas from "@/components/bento3d/3d/Canvas"
+import DialogAd from "@/components/common/ui/DialogAd"
+import DialogFeedback from "@/components/common/ui/DialogFeedback"
+import DrawerUpdates from "@/components/common/ui/DrawerUpdates"
 import GeometryExporter from "@/components/common/ui/GeometryExporter"
 import { GridEditor } from "@/components/common/ui/GridEditor"
 import { Header } from "@/components/common/ui/Header"
@@ -58,6 +61,9 @@ export function Page() {
       )}
       <LeftMenu />
       <RightMenu step={2} />
+      <DialogAd />
+      <DialogFeedback />
+      <DrawerUpdates />
     </>
   )
 }

@@ -15,7 +15,7 @@ interface RightMenuProps {
 }
 
 export const RightMenu: React.FC<RightMenuProps> = ({ children, step }) => {
-  const { openDialog } = useSettingsStore((state) => state)
+  const { openDialog, openDrawer } = useSettingsStore((state) => state)
   const { totalWidth, totalHeight, totalDepth } = useTrayStore((state) => state)
   const latestUpdate = updates.sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -51,7 +51,7 @@ export const RightMenu: React.FC<RightMenuProps> = ({ children, step }) => {
             </button>
             <button
               className="b-button bg-transparent relative"
-              onClick={() => openDialog("update")}
+              onClick={() => openDrawer("update")}
               data-tooltip-content={"Updates"}
               data-tooltip-id={"hint-tooltip"}>
               📣

@@ -2,9 +2,19 @@ import { create } from 'zustand';
 
 interface DialogState {
   isOpen: boolean;
-  type: '' | 'setting' | 'feedback' | 'ad'|'update';
+  type: '' | 'setting' | 'feedback' | 'ad';
+}
+interface DrawerState {
+  isOpen: boolean;
+  type: '' | 'update';
 }
 
+export interface Toast  {
+  isOpen: boolean;
+  content: string;
+  type: "default" | "error" | "warn";
+  persistent?: boolean;
+};
 
 
 interface SettingsState {
@@ -23,6 +33,11 @@ interface SettingsState {
   closeDialog: () => void;
   isGAInitialized: boolean;
   setIsGAInitialized: (isGAInitialized: boolean) => void;
+  toast: Toast[];
+  setToast: (toast: Toast[]) => void;
+  drawer: DrawerState;
+  openDrawer: (type: DrawerState['type']) => void;
+  closeDrawer: () => void;
 }
 
 export const useSettingsStore = create<SettingsState>()((set) => ({
@@ -41,5 +56,22 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   closeDialog: () => set({ dialog: { isOpen: false, type: '' } }),
   isGAInitialized: false,
   setIsGAInitialized: (isGAInitialized: boolean) => set({ isGAInitialized }),
+  toast: [],
+  setToast: (toast: Toast[]) => {
+    set((state) => {
+      const newToast = [...state.toast, ...toast];
+      if (!toast[toast.length - 1].persistent) {
+        setTimeout(() => {
+          set((state) => ({
+            toast: state.toast.filter((_, i) => i !== state.toast.length - 1),
+          }));
+        }, 5000);
+      }
+      return { toast: newToast };
+    });
+  },
+  drawer:{isOpen:false, type:''},
+  openDrawer: (type: DrawerState['type']) => set({ drawer: { isOpen: true, type } }),
+  closeDrawer: () => set({ drawer: { isOpen: false, type: '' } }),
 }));
 

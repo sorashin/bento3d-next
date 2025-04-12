@@ -33,7 +33,7 @@ export const LeftMenu = () => {
       <button className="b-button bg-transparent flex flex-row items-center gap-2 min-w-[180px] hover:bg-[rgba(255,255,255,.56)] px-4 b-dropdown group border-[1px] border-content-l-a">
         <Icon
           name={modes[currentMode].img}
-          className="w-8 h-8 stroke-[4px] stroke-content-m"
+          className="w-8 h-8 stroke-3 stroke-content-m"
         />
         <p className="flex-grow text-left font-semibold text-content-h-a">
           {modes[currentMode].label}

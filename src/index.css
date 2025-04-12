@@ -166,10 +166,10 @@ html, body, #root {
     background: transparent; /* トラックの背景色 */
   }
   .b-button {
-    @apply bg-content-xxl-a text-content-h rounded-[8px] p-2 text-sm cursor-pointer transition hover:bg-surface-sheet-l
+    @apply text-content-h rounded-[8px] p-2 text-sm cursor-pointer transition hover:bg-surface-sheet-l flex flex-row;
   }
   .b-dropdown {
-    @apply inline-block;
+    
   }
   .b-dropdown-contents {
     @apply absolute min-w-32 origin-top-left scale-0 transition-all duration-150 ease-in-out gap-1 p-1 rounded-sm opacity-0;
