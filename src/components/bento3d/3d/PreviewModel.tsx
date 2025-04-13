@@ -1,3 +1,4 @@
+import { useSettingsStore } from "@/stores/settings"
 import { useFakeTrayStore, useTrayStore } from "@/stores/tray"
 import { useMemo } from "react"
 import * as THREE from "three"
@@ -117,6 +118,7 @@ function RoundedRectangleLine({
 
 export default function TrayModel() {
   const { fillet, grid, thickness } = useTrayStore((state) => state)
+  const { isDragging } = useSettingsStore((state) => state)
   const { fakeTotalWidth, fakeTotalHeight, fakeTotalDepth } = useFakeTrayStore(
     (state) => state
   )
@@ -218,16 +220,17 @@ export default function TrayModel() {
       </mesh>
 
       {/* グリッドセルの描画（角丸長方形の線） */}
-      {gridCells.map((cell, index) => (
-        <RoundedRectangleLine
-          key={`grid-cell-${index}`}
-          position={cell.position}
-          width={cell.width}
-          depth={cell.depth}
-          fillet={fillet}
-          color="#999"
-        />
-      ))}
+      {!isDragging &&
+        gridCells.map((cell, index) => (
+          <RoundedRectangleLine
+            key={`grid-cell-${index}`}
+            position={cell.position}
+            width={cell.width}
+            depth={cell.depth}
+            fillet={fillet}
+            color="#999"
+          />
+        ))}
     </group>
   )
 }

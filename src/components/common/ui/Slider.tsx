@@ -30,12 +30,11 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
     }
   }
 
-  const [isDragging, setIsDragging] = useState(false)
   const [value, setValue] = useState(getInitialValue()) // 現在の設定値
   const [yPos, setYPos] = useState(0) // 現在のボーダー幅
   const [startY, setStartY] = useState(0) // ドラッグ開始時のY座標
   const [startX, setStartX] = useState(0) // ドラッグ開始時のX座標
-  const { setCameraMode } = useSettingsStore()
+  const { setCameraMode, setIsDragging, isDragging } = useSettingsStore()
   const rulerRange = 400
 
   // 位置に応じたクラス名を生成

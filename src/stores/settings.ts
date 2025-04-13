@@ -38,6 +38,8 @@ interface SettingsState {
   drawer: DrawerState;
   openDrawer: (type: DrawerState['type']) => void;
   closeDrawer: () => void;
+  isDragging: boolean;
+  setIsDragging: (isDragging: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()((set) => ({
@@ -73,5 +75,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   drawer:{isOpen:false, type:''},
   openDrawer: (type: DrawerState['type']) => set({ drawer: { isOpen: true, type } }),
   closeDrawer: () => set({ drawer: { isOpen: false, type: '' } }),
+  isDragging: false,
+  setIsDragging: (isDragging: boolean) => set({ isDragging }),
 }));
 
