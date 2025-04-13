@@ -4,20 +4,17 @@ import ReactGA from "react-ga4"
 import Icon from "@/components/common/ui/Icon"
 import updates from "@/assets/updates.json"
 import { Tooltip } from "react-tooltip"
-import { AnimatePresence, motion } from "framer-motion"
+import { motion } from "framer-motion"
 import { Ad } from "@/components/common/ui/Ad"
 import { useSettingsStore } from "@/stores/settings"
 import { useTrayStore } from "@/stores/tray"
 import GeometryExporter from "./GeometryExporter"
+import { useNavigationStore } from "@/stores/navigation"
 
-interface RightMenuProps {
-  children?: ReactNode
-  step: number
-}
-
-export const RightMenu: React.FC<RightMenuProps> = ({ children, step }) => {
+export const RightMenu: React.FC = () => {
   const { openDialog, openDrawer } = useSettingsStore((state) => state)
   const { totalWidth, totalHeight, totalDepth } = useTrayStore((state) => state)
+  const { currentNav } = useNavigationStore((state) => state)
   const latestUpdate = updates.sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )[0]
@@ -71,7 +68,7 @@ export const RightMenu: React.FC<RightMenuProps> = ({ children, step }) => {
             </a>
           </div>
         </motion.div>
-        {step === 2 && (
+        {currentNav === 2 && (
           <motion.div
             className="pt-2 border-t-[0.5px] border-content-xl-a"
             layout>
@@ -117,8 +114,6 @@ export const RightMenu: React.FC<RightMenuProps> = ({ children, step }) => {
           noArrow
         />
       </motion.div>
-
-      {step === 2 && children}
     </>
   )
 }
