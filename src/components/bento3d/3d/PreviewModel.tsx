@@ -1,3 +1,4 @@
+import Dim3d from "@/components/common/3d/Dim3d"
 import { useSettingsStore } from "@/stores/settings"
 import { useFakeTrayStore, useTrayStore } from "@/stores/tray"
 import { useMemo } from "react"
@@ -118,7 +119,7 @@ function RoundedRectangleLine({
 
 export default function TrayModel() {
   const { fillet, grid, thickness } = useTrayStore((state) => state)
-  const { isDragging } = useSettingsStore((state) => state)
+  const { isDragging, activeAxis } = useSettingsStore((state) => state)
   const { fakeTotalWidth, fakeTotalHeight, fakeTotalDepth } = useFakeTrayStore(
     (state) => state
   )
@@ -218,6 +219,24 @@ export default function TrayModel() {
         <extrudeGeometry args={[shape, extrudeSettings]} />
         <meshStandardMaterial color="#fff" side={THREE.DoubleSide} />
       </mesh>
+      <Dim3d
+        pointA={[-fakeTotalWidth / 2, -fakeTotalDepth / 2, 0]}
+        pointB={[fakeTotalWidth / 2, -fakeTotalDepth / 2, 0]}
+        label={"width"}
+        active={activeAxis === "width"}
+      />
+      <Dim3d
+        pointA={[fakeTotalWidth / 2, -fakeTotalDepth / 2, 0]}
+        pointB={[fakeTotalWidth / 2, fakeTotalDepth / 2, 0]}
+        label={"depth"}
+        active={activeAxis === "depth"}
+      />
+      <Dim3d
+        pointA={[fakeTotalWidth / 2, fakeTotalDepth / 2, 0]}
+        pointB={[fakeTotalWidth / 2, fakeTotalDepth / 2, fakeTotalHeight]}
+        label={"height"}
+        active={activeAxis === "height"}
+      />
 
       {/* グリッドセルの描画（角丸長方形の線） */}
       {!isDragging &&

@@ -40,6 +40,8 @@ interface SettingsState {
   closeDrawer: () => void;
   isDragging: boolean;
   setIsDragging: (isDragging: boolean) => void;
+  activeAxis: 'width' | 'depth' | 'height'|'';
+  setActiveAxis: (activeAxis: 'width' | 'depth' | 'height'|'') => void;
 }
 
 export const useSettingsStore = create<SettingsState>()((set) => ({
@@ -77,5 +79,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   closeDrawer: () => set({ drawer: { isOpen: false, type: '' } }),
   isDragging: false,
   setIsDragging: (isDragging: boolean) => set({ isDragging }),
+  activeAxis: '',
+  setActiveAxis: (activeAxis: 'width' | 'depth' | 'height'|'') => set({ activeAxis }),
 }));
 

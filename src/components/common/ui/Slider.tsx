@@ -6,7 +6,7 @@ import Icon from "./Icon"
 interface RangeSliderProps {
   min: number
   max: number
-  label: string
+  label: "" | "width" | "height" | "depth"
   position: "top" | "left" | "right" | "bottom"
 }
 
@@ -14,6 +14,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
   const { max, min, label, position } = props
   const { updateSize, totalWidth, totalDepth, totalHeight } = useTrayStore()
   const { updateFakeSize } = useFakeTrayStore()
+  const { setActiveAxis } = useSettingsStore()
   const inputRef = useRef<HTMLInputElement>(null)
 
   // labelに基づいて適切な初期値を取得
@@ -111,7 +112,9 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
   return (
     <>
       <div
-        className={`group ${getPositionClasses()} transition font-display text-content-dark-h-a pointer-events-auto flex justify-center`}>
+        className={`group ${getPositionClasses()} transition font-display text-content-dark-h-a pointer-events-auto flex justify-center`}
+        onMouseEnter={() => setActiveAxis(label)}
+        onMouseLeave={() => setActiveAxis("")}>
         <Icon
           name={
             ["top", "bottom"].includes(position) ? "chevron-left" : "chevron-up"
@@ -137,8 +140,8 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
         <input
           type="range"
           className={`range-slider ${getSliderOrientation()}`}
-          onMouseEnter={() => {}}
-          onMouseLeave={() => {}}
+          onMouseEnter={() => setActiveAxis(label)}
+          onMouseLeave={() => setActiveAxis(null)}
           onMouseDown={(e) => {
             setIsDragging(true)
             setStartY(e.clientY)
@@ -230,6 +233,8 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
               ref={inputRef}
               onFocus={(e) => e.target.select()}
               onChange={handleInputChange}
+              onMouseEnter={() => setActiveAxis(label)}
+              onMouseLeave={() => setActiveAxis(null)}
             />
             <span className="absolute -right-5 text-overline text-content-dark-m-a">
               mm
