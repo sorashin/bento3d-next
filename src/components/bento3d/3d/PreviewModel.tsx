@@ -224,18 +224,21 @@ export default function TrayModel() {
         pointB={[fakeTotalWidth / 2, -fakeTotalDepth / 2, 0]}
         label={"width"}
         active={activeAxis === "width"}
+        value={fakeTotalWidth}
       />
       <Dim3d
         pointA={[fakeTotalWidth / 2, -fakeTotalDepth / 2, 0]}
         pointB={[fakeTotalWidth / 2, fakeTotalDepth / 2, 0]}
         label={"depth"}
         active={activeAxis === "depth"}
+        value={fakeTotalDepth}
       />
       <Dim3d
         pointA={[fakeTotalWidth / 2, fakeTotalDepth / 2, 0]}
         pointB={[fakeTotalWidth / 2, fakeTotalDepth / 2, fakeTotalHeight]}
         label={"height"}
         active={activeAxis === "height"}
+        value={fakeTotalHeight}
       />
 
       {/* グリッドセルの描画（角丸長方形の線） */}
