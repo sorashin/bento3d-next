@@ -141,7 +141,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
           type="range"
           className={`range-slider ${getSliderOrientation()}`}
           onMouseEnter={() => setActiveAxis(label)}
-          onMouseLeave={() => setActiveAxis(null)}
+          onMouseLeave={() => setActiveAxis("")}
           onMouseDown={(e) => {
             setIsDragging(true)
             setStartY(e.clientY)
@@ -234,7 +234,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
               onFocus={(e) => e.target.select()}
               onChange={handleInputChange}
               onMouseEnter={() => setActiveAxis(label)}
-              onMouseLeave={() => setActiveAxis(null)}
+              onMouseLeave={() => setActiveAxis("")}
             />
             <span className="absolute -right-5 text-overline text-content-dark-m-a">
               mm

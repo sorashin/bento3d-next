@@ -36,6 +36,7 @@ const ModularInitializer = memo(({ slug }: { slug?: string }) => {
   const modular = useModularStore((state) => state.modular)
 
   useEffect(() => {
+    console.log("ModularInitializer mounted")
     initializeModular()
   }, [])
 

@@ -57,7 +57,7 @@ export function Page() {
         </div>
       )}
       <LeftMenu />
-      <RightMenu step={2} />
+      <RightMenu />
       <DialogAd />
       <DialogFeedback />
       <DrawerUpdates />
