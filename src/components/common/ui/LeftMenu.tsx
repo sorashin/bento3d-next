@@ -1,16 +1,19 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Icon from "@/components/common/ui/Icon"
 import { Tooltip } from "react-tooltip"
 import { useSettingsStore } from "@/stores/settings"
+import { useNavigate, useLocation } from "react-router-dom"
 
 const modes = [
   {
     label: "Partition",
+    slug: "tray",
     img: "bento-partition",
     sampleImg: ["/images/partitions/000.png", "/images/partitions/004.jpg"],
   },
   {
     label: "Partition & Box",
+    slug: "bento3d",
     img: "bento-box",
     sampleImg: [
       "/images/cases/000.jpg",
@@ -21,8 +24,27 @@ const modes = [
 ]
 
 export const LeftMenu = () => {
-  const [currentMode, setCurrentMode] = useState(1)
+  const [currentMode, setCurrentMode] = useState(0)
   const { openDialog } = useSettingsStore((state) => state)
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  // URLのパスからslugを取得して、対応するモードインデックスを設定
+  useEffect(() => {
+    const currentPath = location.pathname
+    const slug = currentPath.split("/")[1] // パスからslugを抽出
+
+    // slugに合わせてcurrentModeを設定
+    const modeIndex = modes.findIndex((mode) => mode.slug === slug)
+    if (modeIndex !== -1) {
+      setCurrentMode(modeIndex)
+    }
+  }, [location.pathname])
+
+  const handleModeChange = (slug: string) => {
+    navigate(`/${slug}`)
+  }
+
   return (
     <div className="absolute top-8 left-8 z-20 w-64 flex gap-2 items-center font-display">
       {/* <h1 className="flex gap-1 items-center">
@@ -49,7 +71,7 @@ export const LeftMenu = () => {
               <li
                 key={index}
                 className="flex flex-col items-center gap-2 w-[240px] hover:bg-[rgba(255,255,255,.72)] group child-group p-2 rounded-[6px]"
-                onClick={() => setCurrentMode(index)}>
+                onClick={() => handleModeChange(mode.slug)}>
                 <p className="w-full text-left text-lg mb-4 ml-2 mt-2 font-semibold text-content-h-a">
                   {mode.label}
                 </p>

@@ -32,6 +32,19 @@ export const nevigations: Record<string, Navigation[]> = {
         label:"Download",
         icon:"download",
     }],
+    "bento3d":[{
+        index:0,
+        label:"Size",
+        icon:"size",
+    },{
+        index:1,
+        label:"Grid",
+        icon:"grid",
+    },{
+        index:2,
+        label:"Download",
+        icon:"download",
+    }]
 }
 interface NavigationState {
     currentNavArray: Navigation[];

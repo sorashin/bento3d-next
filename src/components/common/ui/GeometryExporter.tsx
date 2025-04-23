@@ -97,7 +97,7 @@ const GeometryExporter: FC = () => {
                 className="flex justify-between items-center p-2 flex-col gap-1 cursor-pointer rounded-md hover:bg-surface-sheet-m transition"
                 onClick={() => handleExportSingle(index)}>
                 <Icon
-                  name={geometry.label || ""}
+                  name={geometry.label || "bento-box"} // 空の場合はデフォルトのアイコン名 "box" を使用
                   className="stroke-[2px] stroke-content-m size-2/3"
                 />
                 <button className="b-button bg-surface-ev1 !text-white items-center !py-1 w-full justify-center hover:!bg-content-h-a">

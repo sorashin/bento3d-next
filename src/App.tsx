@@ -43,13 +43,13 @@ const ModularInitializer = memo(({ slug }: { slug?: string }) => {
     if (modular && slug) {
       loadGraph(slug)
     }
-  }, [modular, slug])
+  }, [modular, slug, loadGraph])
 
   return null
 })
 
-// メモ化されたPageLoaderコンポーネント - slugに基づいてページを読み込む
-const PageLoader = memo(({ slug }: { slug: string }) => {
+// PageLoaderコンポーネント - memoを削除してslugの変更に確実に反応するように
+const PageLoader = ({ slug }: { slug: string }) => {
   const PageComponent = lazy(() => {
     const loader = pageComponents[slug]
     return loader ? loader() : Promise.resolve({ default: NotFound })
@@ -65,7 +65,7 @@ const PageLoader = memo(({ slug }: { slug: string }) => {
       <PageComponent />
     </Suspense>
   )
-})
+}
 
 // GraphRendererコンポーネント - URLパラメータを取得しPageLoaderに渡す
 const GraphRenderer = () => {
@@ -74,7 +74,8 @@ const GraphRenderer = () => {
   return (
     <>
       <ModularInitializer slug={slug} />
-      <PageLoader slug={slug || ""} />
+      {/* keyプロパティを追加して、slugが変わるたびにPageLoaderが再マウントされるようにする */}
+      <PageLoader key={slug} slug={slug || ""} />
     </>
   )
 }
@@ -84,7 +85,7 @@ function App() {
     <div className="flex flex-col h-screen w-screen">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/gridfinity" replace />} />
+          <Route path="/" element={<Navigate to="/tray" replace />} />
           <Route path="/:slug" element={<GraphRenderer />} />
         </Routes>
       </BrowserRouter>
