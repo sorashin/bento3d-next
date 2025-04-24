@@ -22,11 +22,13 @@ export function Page() {
   useEffect(() => {
     console.log("trayStore state:", trayState)
     if (!inputNodeId) return
-    updateNodeProperty(
-      inputNodeId!,
-      `{"trayStore":${JSON.stringify(trayState)}}`
-    )
-  }, [trayState, inputNodeId])
+    if (currentNav == 2) {
+      updateNodeProperty(
+        inputNodeId!,
+        `{"trayStore":${JSON.stringify(trayState)}}`
+      )
+    }
+  }, [currentNav])
 
   return (
     <>
