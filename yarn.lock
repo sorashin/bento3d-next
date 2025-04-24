@@ -6639,10 +6639,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodi-modular@npm:^0.0.11":
-  version: 0.0.11
-  resolution: "nodi-modular@npm:0.0.11"
-  checksum: 10c0/ed07833e12f2243561420c8f2e0b5da47ce1dbf139b6e89ec803d10dc4dcdf05b26c01dfd87b7ba78891c52156c567e3c5cd80941bb4a5a7ef055b2cfa574e3c
+"nodi-modular@npm:^0.0.13":
+  version: 0.0.13
+  resolution: "nodi-modular@npm:0.0.13"
+  checksum: 10c0/11cf1503370f23d42034a2d5d7aa2fbe7c10e3ee752bd97bbbf76cd803e21e30f1d1223f1a4c8da9f575e0b6cdf356c447f669d74132183a2151ace093076dd8
   languageName: node
   linkType: hard
 
@@ -7976,7 +7976,7 @@ __metadata:
     globals: "npm:^15.15.0"
     immer: "npm:^10.1.1"
     leva: "npm:^0.10.0"
-    nodi-modular: "npm:^0.0.11"
+    nodi-modular: "npm:^0.0.13"
     postcss: "npm:^8.5.3"
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
