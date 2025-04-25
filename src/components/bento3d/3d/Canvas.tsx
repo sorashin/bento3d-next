@@ -8,7 +8,7 @@ import {
 
 import { useModularStore } from "@/stores/modular"
 import TrayModel from "./TrayModel"
-import { useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Object3D } from "three"
 import PreviewModel from "./PreviewModel"
 import { useNavigationStore } from "@/stores/navigation"
@@ -21,17 +21,38 @@ const Canvas = () => {
   const { currentNav } = useNavigationStore((state) => state)
   const { gridSize } = useSettingsStore((state) => state)
   const { deunit } = useConversion()
-  const renderGeometries = () => {
-    return geometries.map((geometry) => {
-      return geometry.geometry
-    })
-  }
+  const canvasRef = useRef<HTMLDivElement>(null)
+  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
 
   useEffect(() => {
     Object3D.DEFAULT_UP.set(0, 0, 1) //Z軸を上にする
   }, [])
+
+  useEffect(() => {
+    // リサイズハンドラー関数
+    const handleResize = () => {
+      if (canvasRef.current) {
+        setCanvasSize({
+          width: canvasRef.current.clientWidth,
+          height: canvasRef.current.clientHeight,
+        })
+      }
+    }
+
+    // 初期サイズを設定
+    handleResize()
+
+    // リサイズイベントリスナーを追加
+    window.addEventListener("resize", handleResize)
+
+    // クリーンアップ関数
+    return () => {
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [])
+
   return (
-    <div className="flex-1">
+    <div className="flex-1" ref={canvasRef}>
       <ThreeCanvas
         orthographic
         camera={{
@@ -41,7 +62,8 @@ const Canvas = () => {
           near: 0.1,
           far: 10000,
         }}
-        frameloop="demand">
+        frameloop="demand"
+        resize={{ scroll: false, debounce: { scroll: 50, resize: 50 } }}>
         <Grid
           cellSize={deunit(gridSize)}
           sectionSize={deunit(gridSize) * 10}
@@ -56,6 +78,9 @@ const Canvas = () => {
         />
         <color attach="background" args={["#cccccc"]} />
         <ambientLight intensity={2.8} />
+        {/* axis helper */}
+
+        <axesHelper args={[100]} />
         <directionalLight
           position={[5, 5, 5]}
           intensity={1}
@@ -79,7 +104,7 @@ const Canvas = () => {
         />
 
         {currentNav == 0 && <PreviewModel />}
-        {currentNav == 2 && <TrayModel geometries={renderGeometries()} />}
+        {currentNav == 2 && <TrayModel geometries={geometries} />}
       </ThreeCanvas>
     </div>
   )

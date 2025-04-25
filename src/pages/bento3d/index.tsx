@@ -2,14 +2,16 @@ import Canvas from "@/components/bento3d/3d/Canvas"
 import DialogAd from "@/components/common/ui/DialogAd"
 import DialogFeedback from "@/components/common/ui/DialogFeedback"
 import DrawerUpdates from "@/components/common/ui/DrawerUpdates"
-import GeometryExporter from "@/components/common/ui/GeometryExporter"
+
 import { GridEditor } from "@/components/common/ui/GridEditor"
 import { Header } from "@/components/common/ui/Header"
+import Icon from "@/components/common/ui/Icon"
 import { LeftMenu } from "@/components/common/ui/LeftMenu"
 import { RightMenu } from "@/components/common/ui/RightMenu"
 import { RangeSlider } from "@/components/common/ui/Slider"
 import { useModularStore } from "@/stores/modular"
 import { useNavigationStore } from "@/stores/navigation"
+import { useSettingsStore } from "@/stores/settings"
 import { useTrayStore } from "@/stores/tray"
 import { useEffect } from "react"
 
@@ -18,15 +20,28 @@ export function Page() {
   const trayState = useTrayStore()
   const { thickness } = useTrayStore((state) => state)
   const { inputNodeId, updateNodeProperty } = useModularStore((state) => state)
+  const { setBom, setIsPreviewLoad } = useSettingsStore((state) => state)
 
   useEffect(() => {
     console.log("trayStore state:", trayState)
     if (!inputNodeId) return
     if (currentNav == 2) {
-      updateNodeProperty(
-        inputNodeId!,
-        `{"trayStore":${JSON.stringify(trayState)}}`
-      )
+      // ローディング状態を開始
+      setIsPreviewLoad(true)
+      console.log("now loading...")
+      // updateNodeProperty が完了したらローディング状態を終了
+      try {
+        updateNodeProperty(
+          inputNodeId!,
+          `{"trayStore":${JSON.stringify(trayState)}}`
+        )
+      } finally {
+        // 少し遅延を入れてUIの更新が完了するのを待つ
+        setTimeout(() => {
+          console.log("done")
+          setIsPreviewLoad(false)
+        }, 300)
+      }
     }
   }, [currentNav])
 
@@ -54,6 +69,29 @@ export function Page() {
           <div className="flex items-center justify-center w-1/2 h-1/2">
             <GridEditor />
           </div>
+        </div>
+      )}
+      {currentNav == 2 && (
+        // <input
+        //   className="absolute bottom-16 right-16 w-1/2 h-1/2 z-10"
+        //   type="range"
+        //   step={0.01}
+        //   min={0}
+        //   max={1}
+        //   onChange={(e) => setBom(Number(e.target.value))}
+        // />
+        <div className="b-input absolute z-10 bottom-32 inset-x-0 flex justify-center items-center gap-2 pointer-events-none text-content-m-a">
+          <Icon name="bom-shrink" className="size-8" />
+
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            onChange={(e) => setBom(Number(e.target.value))}
+          />
+
+          <Icon name="bom-explode" className="size-8" />
         </div>
       )}
       <LeftMenu />

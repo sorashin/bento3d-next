@@ -70,7 +70,7 @@ export const RightMenu: React.FC = () => {
         </motion.div>
         {currentNav === 2 && (
           <motion.div
-            className="pt-2 border-t-[0.5px] border-content-xl-a"
+            className="pt-2 px-2 border-t-[0.5px] border-content-xl-a w-full"
             layout>
             <p className="w-full my-2 text-center text-xs text-content-m-a font-display">
               Download STLs

@@ -4,11 +4,24 @@ import { FC, useCallback, useEffect, useMemo, useState } from "react"
 import { DoubleSide, Mesh, MeshStandardMaterial, Object3D } from "three"
 import { STLExporter } from "three-stdlib"
 import Icon from "./Icon"
+import { useTrayStore } from "@/stores/tray"
+import { useParams } from "react-router-dom"
 
 const GeometryExporter: FC = () => {
   const [format] = useState<string | null>("stl")
   const geometries = useModularStore((state) => state.geometries)
   const nodes = useModularStore((state) => state.nodes)
+  const { totalWidth, totalDepth, totalHeight } = useTrayStore((state) => state)
+
+  const { slug } = useParams<{ slug: string }>()
+  const gridCSS = (slug: string) => {
+    switch (slug) {
+      case "bento3d":
+        return `grid-cols-1 md:grid-cols-3 [&>li:first-child]:col-span-full [&>li:not(:first-child)]:col-span-1`
+      default:
+        return ``
+    }
+  }
 
   const geometriesWithInfo = useMemo(() => {
     return geometries.map((geometry) => {
@@ -42,7 +55,7 @@ const GeometryExporter: FC = () => {
       if (format === "json") {
         await showSaveFilePicker({
           generator: () => Promise.resolve(JSON.stringify(geometry)),
-          suggestedName: `${label}.${format}`,
+          suggestedName: `${label}-W${totalWidth}-D${totalDepth}-H${totalHeight}.${format}`,
           types: [
             {
               description: `${format?.toUpperCase()} file`,
@@ -68,7 +81,7 @@ const GeometryExporter: FC = () => {
             const data = await parseMesh(root)
             return data
           },
-          suggestedName: `${label}.${format}`,
+          suggestedName: `${label}-W${totalWidth}-D${totalDepth}-H${totalHeight}.${format}`,
           types: [
             {
               description: `${format?.toUpperCase()} file`,
@@ -87,27 +100,25 @@ const GeometryExporter: FC = () => {
   }, [geometries])
 
   return (
-    <div className="p-3">
+    <div className="p-0">
       {geometriesWithInfo.length > 0 ? (
-        <div className="mt-3">
-          <ul className="divide-y divide-gray-200">
-            {geometriesWithInfo.map((geometry, index) => (
-              <li
-                key={index}
-                className="flex justify-between items-center p-2 flex-col gap-1 cursor-pointer rounded-md hover:bg-surface-sheet-m transition"
-                onClick={() => handleExportSingle(index)}>
-                <Icon
-                  name={geometry.label || "bento-box"} // 空の場合はデフォルトのアイコン名 "box" を使用
-                  className="stroke-[2px] stroke-content-m size-2/3"
-                />
-                <button className="b-button bg-surface-ev1 !text-white items-center !py-1 w-full justify-center hover:!bg-content-h-a">
-                  <Icon name="download" className="size-4" />
-                  {geometry.label || `geometry ${index + 1}`}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ul className={`grid grid-cols-1 w-full ${gridCSS(slug!)} gap-2`}>
+          {geometriesWithInfo.map((geometry, index) => (
+            <li
+              key={index}
+              className="flex justify-between items-center p-2 flex-col gap-1 cursor-pointer rounded-md hover:bg-surface-sheet-m transition"
+              onClick={() => handleExportSingle(index)}>
+              <Icon
+                name={geometry.label || "bento-box"} // 空の場合はデフォルトのアイコン名 "box" を使用
+                className="stroke-[2px] stroke-content-m size-2/3"
+              />
+              <button className="b-button bg-surface-ev1 !text-white items-center !py-1 w-full justify-center hover:!bg-content-h-a">
+                <Icon name="download" className="size-4" />
+                {geometry.label || `geometry ${index + 1}`}
+              </button>
+            </li>
+          ))}
+        </ul>
       ) : (
         <div className="text-gray-500">No Geometry Found</div>
       )}

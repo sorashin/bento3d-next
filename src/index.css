@@ -177,3 +177,34 @@ html, body, #root {
   .b-dropdown:hover > .b-dropdown-contents {
     @apply scale-100 opacity-100;
   }
+
+  
+
+  
+
+  /* カスタムスライダースタイル */
+  .b-input input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    @apply flex-1 bg-content-xxl rounded-full outline-none pointer-events-auto max-w-[320px];
+  }
+
+  /* スライダーのつまみ */
+  .b-input input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    @apply bg-content-h rounded-full cursor-pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .b-input input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    @apply bg-content-h rounded-full cursor-pointer;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }

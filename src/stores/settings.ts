@@ -42,6 +42,10 @@ interface SettingsState {
   setIsDragging: (isDragging: boolean) => void;
   activeAxis: 'width' | 'depth' | 'height'|'';
   setActiveAxis: (activeAxis: 'width' | 'depth' | 'height'|'') => void;
+  bom:number
+  setBom: (bom: number) => void;
+  isPreviewLoad: boolean;
+  setIsPreviewLoad: (isPreviewLoad: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()((set) => ({
@@ -81,5 +85,9 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   setIsDragging: (isDragging: boolean) => set({ isDragging }),
   activeAxis: '',
   setActiveAxis: (activeAxis: 'width' | 'depth' | 'height'|'') => set({ activeAxis }),
+  bom: 1,
+  setBom: (bom: number) => set({ bom }),
+  isPreviewLoad: false,
+  setIsPreviewLoad: (isPreviewLoad: boolean) => set({ isPreviewLoad }),
 }));
 

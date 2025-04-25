@@ -1,13 +1,15 @@
 import Icon from "@/components/common/ui/Icon"
 import { useNavigationStore } from "@/stores/navigation"
+import { useSettingsStore } from "@/stores/settings"
 import React from "react"
 
 const NavButton: React.FC<{
   label: string
   icon: string
   isActive: boolean
+  isLoading?: boolean
   onClick: () => void
-}> = ({ label, icon, isActive, onClick }) => {
+}> = ({ label, icon, isActive, isLoading = false, onClick }) => {
   return (
     <button
       className={`w-fit p-2 flex justify-center items-center gap-2 rounded-sm cursor-pointer ${
@@ -18,7 +20,11 @@ const NavButton: React.FC<{
       onClick={() => {
         onClick()
       }}>
-      <Icon name={icon} className="w-6 h-6" />
+      {isLoading ? (
+        <div className="w-6 h-6 animate-spin rounded-full border-2 border-solid border-current border-r-transparent" />
+      ) : (
+        <Icon name={icon} className="w-6 h-6" />
+      )}
       {label}
     </button>
   )
@@ -26,6 +32,8 @@ const NavButton: React.FC<{
 
 export const Header = () => {
   const { currentNav, currentNavArray, setCurrentNav } = useNavigationStore()
+  const { isPreviewLoad } = useSettingsStore()
+
   return (
     <header className="absolute inset-x-0 top-0 pt-8 px-4 flex flex-col justify-between z-20">
       <div className="flex justify-between md:justify-center items-center gap-2 w-full font-display">
@@ -36,6 +44,7 @@ export const Header = () => {
               label={item.label}
               icon={item.icon}
               isActive={currentNav === index}
+              isLoading={index == 2 && isPreviewLoad}
               onClick={() => {
                 setCurrentNav(index)
               }}
