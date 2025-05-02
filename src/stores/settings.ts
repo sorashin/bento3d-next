@@ -38,6 +38,8 @@ interface SettingsState {
   drawer: DrawerState;
   openDrawer: (type: DrawerState['type']) => void;
   closeDrawer: () => void;
+  isSettingsOpen: boolean;
+  setIsSettingsOpen: (isSettingsOpen: boolean) => void;
   isDragging: boolean;
   setIsDragging: (isDragging: boolean) => void;
   activeAxis: 'width' | 'depth' | 'height'|'';
@@ -62,6 +64,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   dialog: { isOpen: false, type: '' },
   openDialog: (type: DialogState['type']) => set({ dialog: { isOpen: true, type } }),
   closeDialog: () => set({ dialog: { isOpen: false, type: '' } }),
+  
   isGAInitialized: false,
   setIsGAInitialized: (isGAInitialized: boolean) => set({ isGAInitialized }),
   toast: [],
@@ -81,11 +84,13 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   drawer:{isOpen:false, type:''},
   openDrawer: (type: DrawerState['type']) => set({ drawer: { isOpen: true, type } }),
   closeDrawer: () => set({ drawer: { isOpen: false, type: '' } }),
+  isSettingsOpen: false,
+  setIsSettingsOpen: (isSettingsOpen: boolean) => set({ isSettingsOpen }),
   isDragging: false,
   setIsDragging: (isDragging: boolean) => set({ isDragging }),
   activeAxis: '',
   setActiveAxis: (activeAxis: 'width' | 'depth' | 'height'|'') => set({ activeAxis }),
-  bom: 1,
+  bom: 0,
   setBom: (bom: number) => set({ bom }),
   isPreviewLoad: false,
   setIsPreviewLoad: (isPreviewLoad: boolean) => set({ isPreviewLoad }),

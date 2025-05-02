@@ -7,9 +7,9 @@ const NavButton: React.FC<{
   label: string
   icon: string
   isActive: boolean
-  isLoading?: boolean
+  isLoading: boolean
   onClick: () => void
-}> = ({ label, icon, isActive, isLoading = false, onClick }) => {
+}> = ({ label, icon, isActive, isLoading, onClick }) => {
   return (
     <button
       className={`w-fit p-2 flex justify-center items-center gap-2 rounded-sm cursor-pointer ${
@@ -30,9 +30,9 @@ const NavButton: React.FC<{
   )
 }
 
-export const Header = () => {
+export const Header: React.FC = () => {
   const { currentNav, currentNavArray, setCurrentNav } = useNavigationStore()
-  const { isPreviewLoad } = useSettingsStore()
+  const { isPreviewLoad, setIsPreviewLoad } = useSettingsStore()
 
   return (
     <header className="absolute inset-x-0 top-0 pt-8 px-4 flex flex-col justify-between z-20">
@@ -46,7 +46,13 @@ export const Header = () => {
               isActive={currentNav === index}
               isLoading={index == 2 && isPreviewLoad}
               onClick={() => {
-                setCurrentNav(index)
+                if (index == 2) {
+                  setIsPreviewLoad(true)
+                  // currentNavが変更されるとnodeのevaluationが走ってその後のレンダリング処理がブロックされるため、タイムアウトを設ける
+                  setTimeout(() => setCurrentNav(index), 500)
+                } else {
+                  setCurrentNav(index)
+                }
               }}
             />
             {index < currentNavArray.length - 1 && (

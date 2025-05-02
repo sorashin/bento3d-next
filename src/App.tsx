@@ -59,8 +59,28 @@ const PageLoader = ({ slug }: { slug: string }) => {
   return (
     <Suspense
       fallback={
-        <div className="flex-1 flex items-center justify-center">
-          loading...
+        <div className="flex-1 flex items-center justify-center gap-1 flex-col">
+          <img
+            src="/public/images/loading.gif"
+            alt="loading"
+            className="size-24"
+          />
+          <span
+            className="text-xs animate-pulse"
+            style={{
+              animation: "blink 1.5s infinite",
+              animationTimingFunction: "steps(3, start)",
+            }}>
+            loading...
+          </span>
+          <style>{`
+            @keyframes blink {
+              0%, 100% { opacity: 1; }
+              25% { opacity: 0.3; }
+              50% { opacity: 0.7; }
+              75% { opacity: 0.2; }
+            }
+          `}</style>
         </div>
       }>
       <PageComponent />

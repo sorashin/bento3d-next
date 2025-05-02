@@ -80,9 +80,7 @@ html, body, #root {
   overflow: hidden;
 }
 
-.b-round-button{
-  @apply bg-primary text-content-dark-h-a rounded-full size-8 flex items-center justify-center cursor-pointer hover:scale-95 transition;
-}
+
 .grid-bottom-layer{
   background: radial-gradient(
       398.85% 398.85% at 54.68% -169.05%,
@@ -168,6 +166,9 @@ html, body, #root {
   .b-button {
     @apply text-content-h rounded-[8px] p-2 text-sm cursor-pointer transition hover:bg-surface-sheet-l flex flex-row;
   }
+  .b-round-button{
+  @apply bg-primary text-content-dark-h-a rounded-full size-8 flex items-center justify-center cursor-pointer hover:scale-95 transition;
+}
   .b-dropdown {
     
   }
@@ -207,4 +208,37 @@ html, body, #root {
     @apply bg-content-h rounded-full cursor-pointer;
     border: 2px solid rgba(255, 255, 255, 0.5);
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .b-input-range:hover::-webkit-slider-thumb {
+    filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07))
+      drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
+  }
+  .b-input-range::-webkit-slider-thumb {
+    position: relative;
+    /* z-index: 10; */
+    width: calc(32px - 4px);
+    -webkit-appearance: none;
+    appearance: none;
+    height: calc(32px - 4px);
+    cursor: ew-resize;
+    background: #fff;
+
+    /* offset-x | offset-y | blur-radius | spread-radius | color */
+    box-shadow: calc(-100vw - 22px) 0 0 100vw theme("colors.content-dark-h-a");
+    border: 2px solid theme("colors.content-dark-h-a");
+    border-radius: theme("borderRadius.lg");
+    box-sizing: content-box;
+    background: var(--slider-thumb-bg-url), #ffffff center 24px no-repeat;
+
+    transition: 0.2s ease;
+  }
+
+  .b-input-range::after::-webkit-slider-thumb {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    border-radius: theme("borderRadius.lg");
   }

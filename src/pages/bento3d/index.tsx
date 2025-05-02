@@ -20,16 +20,16 @@ export function Page() {
   const trayState = useTrayStore()
   const { thickness } = useTrayStore((state) => state)
   const { inputNodeId, updateNodeProperty } = useModularStore((state) => state)
-  const { setBom, setIsPreviewLoad } = useSettingsStore((state) => state)
+  const { setBom, setIsPreviewLoad, isPreviewLoad } = useSettingsStore(
+    (state) => state
+  )
 
   useEffect(() => {
     console.log("trayStore state:", trayState)
     if (!inputNodeId) return
     if (currentNav == 2) {
-      // ローディング状態を開始
-      setIsPreviewLoad(true)
-      console.log("now loading...")
-      // updateNodeProperty が完了したらローディング状態を終了
+      // setIsPreviewLoad(true)
+      // console.log("isPreviewLoad", isPreviewLoad)
       try {
         updateNodeProperty(
           inputNodeId!,
@@ -80,7 +80,7 @@ export function Page() {
         //   max={1}
         //   onChange={(e) => setBom(Number(e.target.value))}
         // />
-        <div className="b-input absolute z-10 bottom-32 inset-x-0 flex justify-center items-center gap-2 pointer-events-none text-content-m-a">
+        <div className="b-input absolute z-10 bottom-32 inset-x-0 flex justify-center items-center gap-2 pointer-events-none text-white">
           <Icon name="bom-shrink" className="size-8" />
 
           <input
@@ -88,6 +88,7 @@ export function Page() {
             min={0}
             max={1}
             step={0.01}
+            defaultValue={0}
             onChange={(e) => setBom(Number(e.target.value))}
           />
 

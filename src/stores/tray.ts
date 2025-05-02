@@ -36,6 +36,9 @@ interface TrayStore {
   updateRow: (id: string, updates: Partial<Row>) => void;
   updateSize: (params: { width?: number, depth?: number, height?: number }) => void;
   setSelectedColumnId: (id: string | null) => void;
+  setIsStack: (isStack: boolean) => void;
+  setThickness: (thickness: number) => void;
+  setFillet: (fillet: number) => void;
 }
 
 interface FakeTrayStore{
@@ -48,8 +51,8 @@ interface FakeTrayStore{
 
 
 
-// 幅を再計算する共通ヘルパー関数
-const recalculateWidths = (rows: Row[], totalWidth: number, thickness:number): Row[] => {
+// 幅と深さを再計算する共通ヘルパー関数
+const recalculateRowDimensions = (rows: Row[], totalWidth: number, totalDepth: number, thickness: number): Row[] => {
   // 固定幅の合計を計算
   const fixedWidthSum = rows
     .filter(row => row.type === 'fixed')
@@ -67,29 +70,36 @@ const recalculateWidths = (rows: Row[], totalWidth: number, thickness:number): R
   const totalUnits = fillCount + (halfCount / 2) + (thirdCount / 3);
   const unitWidth = totalUnits > 0 ? availableWidth / totalUnits : 0;
   
-  // 行の幅を更新
+  // 各行の深さを計算（厚みを考慮）
+  const rowDepth = totalDepth - 2 * thickness;
+  
+  // 行の幅と深さを更新
   return rows.map(row => {
-    if (row.type === 'fixed') {
-      return row; // 固定幅行は変更しない
+    let newWidth = row.width;
+    // 固定幅でない場合のみ幅を再計算
+    if (row.type !== 'fixed') {
+      switch (row.type) {
+        case 'fill':
+          newWidth = unitWidth;
+          break;
+        case '1/2':
+          newWidth = unitWidth / 2;
+          break;
+        case '1/3':
+          newWidth = unitWidth / 3;
+          break;
+      }
+      
+      // 小数第2位で四捨五入
+      newWidth = Math.round(newWidth * 100) / 100;
     }
     
-    let newWidth = 0;
-    switch (row.type) {
-      case 'fill':
-        newWidth = unitWidth;
-        break;
-      case '1/2':
-        newWidth = unitWidth / 2;
-        break;
-      case '1/3':
-        newWidth = unitWidth / 3;
-        break;
-    }
-    
-    // 小数第2位で四捨五入
-    newWidth = Math.round(newWidth * 100) / 100;
-    
-    return { ...row, width: newWidth };
+    // 幅と深さの両方を更新して返す
+    return { 
+      ...row, 
+      width: newWidth,
+      depth: rowDepth
+    };
   });
 };
 
@@ -142,7 +152,7 @@ export const useTrayStore = create<TrayStore>((set) => ({
       rows.push(rowWithWidth);
       
       // 幅を再計算
-      const updatedRows = recalculateWidths(rows, state.totalWidth, state.thickness);
+      const updatedRows = recalculateRowDimensions(rows, state.totalWidth, state.totalDepth, state.thickness);
       
       // 負の幅をチェック
       if (updatedRows.some(row => row.width < 0)) {
@@ -189,7 +199,7 @@ export const useTrayStore = create<TrayStore>((set) => ({
       
       // 必要に応じて幅を再計算
       const recalculatedGrid = updates.width !== undefined || updates.type !== undefined || updates.division !== undefined
-        ? recalculateWidths(updatedGrid, state.totalWidth,state.thickness)
+        ? recalculateRowDimensions(updatedGrid, state.totalWidth, state.totalDepth, state.thickness)
         : updatedGrid;
         
       // 負の幅をチェック
@@ -221,16 +231,8 @@ export const useTrayStore = create<TrayStore>((set) => ({
         mm2pixel: calculateMm2Pixel(width, depth) // mm2pixelを再計算
       };
       
-      // 行の幅を再計算
-      let recalculatedGrid = recalculateWidths(state.grid, width, state.thickness);
-      
-      // depthが変更された場合、各行のdepthを更新
-      if (params.depth !== undefined) {
-        recalculatedGrid = recalculatedGrid.map(row => ({
-          ...row,
-          depth: depth - 2 * state.thickness
-        }));
-      }
+      // 行の幅と深さを再計算
+      const recalculatedGrid = recalculateRowDimensions(state.grid, width, depth, state.thickness);
       
       // 負の幅をチェック
       if (recalculatedGrid.some(row => row.width < 0)) {
@@ -256,7 +258,7 @@ export const useTrayStore = create<TrayStore>((set) => ({
         const filteredGrid = state.grid.filter(row => row.id !== rowId);
         
         // 幅を再計算
-        const recalculatedGrid = recalculateWidths(filteredGrid, state.totalWidth, state.thickness);
+        const recalculatedGrid = recalculateRowDimensions(filteredGrid, state.totalWidth, state.totalDepth, state.thickness);
         
         return {
           ...state,
@@ -283,7 +285,34 @@ export const useTrayStore = create<TrayStore>((set) => ({
   setSelectedColumnId: (id) => set(state => ({
     ...state,
     selectedColumnId: id
-  }))
+  })),
+  setIsStack: (isStack) => set(state => ({
+    ...state,
+    isStack: isStack
+  })),
+  setThickness: (thickness) => set(state => {
+    const newThickness = Math.round(thickness * 10) / 10;
+    // 厚みが変更されたら行の幅と深さを再計算
+    const recalculatedGrid = recalculateRowDimensions(state.grid, state.totalWidth, state.totalDepth, newThickness);
+  
+    return {
+      ...state,
+      thickness: newThickness,
+      grid: recalculatedGrid
+    };
+  }),
+  setFillet: (fillet) => set(state => {
+    const newFillet = Math.round(fillet * 10) / 10;
+    // フィレットが変更されたら行の寸法を再計算
+    const recalculatedGrid = recalculateRowDimensions(state.grid, state.totalWidth, state.totalDepth, state.thickness);
+    
+    return {
+      ...state,
+      fillet: newFillet,
+      grid: recalculatedGrid
+    };
+  }),
+  
 }));
 
 export const useFakeTrayStore = create<FakeTrayStore>((set) => ({
