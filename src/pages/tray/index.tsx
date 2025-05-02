@@ -10,27 +10,37 @@ import { RightMenu } from "@/components/common/ui/RightMenu"
 import { RangeSlider } from "@/components/common/ui/Slider"
 import { useModularStore } from "@/stores/modular"
 import { useNavigationStore } from "@/stores/navigation"
+import { useSettingsStore } from "@/stores/settings"
 import { useTrayStore } from "@/stores/tray"
-import { useEffect } from "react"
+import { useCallback } from "react"
 
 export function Page() {
   const { currentNav } = useNavigationStore()
   const trayState = useTrayStore()
   const { thickness } = useTrayStore((state) => state)
   const { inputNodeId, updateNodeProperty } = useModularStore((state) => state)
+  const { setIsPreviewLoad } = useSettingsStore((state) => state)
 
-  useEffect(() => {
+  const handleDLView = useCallback(() => {
     console.log("trayStore state:", trayState)
     if (!inputNodeId) return
-    updateNodeProperty(
-      inputNodeId!,
-      `{"trayStore":${JSON.stringify(trayState)}}`
-    )
-  }, [trayState, inputNodeId])
+    try {
+      updateNodeProperty(
+        inputNodeId!,
+        `{"trayStore":${JSON.stringify(trayState)}}`
+      )
+    } finally {
+      // 少し遅延を入れてUIの更新が完了するのを待つ
+      setTimeout(() => {
+        console.log("done")
+        setIsPreviewLoad(false)
+      }, 300)
+    }
+  }, [inputNodeId, trayState])
 
   return (
     <>
-      <Header />
+      <Header onClickDL={handleDLView} />
 
       {/* Canvas は常に表示し続ける */}
       <Canvas />

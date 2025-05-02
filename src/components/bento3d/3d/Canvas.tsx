@@ -1,4 +1,4 @@
-import { Canvas as ThreeCanvas } from "@react-three/fiber"
+import { Canvas as ThreeCanvas, useFrame, useThree } from "@react-three/fiber"
 import {
   OrbitControls,
   GizmoViewport,
@@ -8,21 +8,65 @@ import {
 
 import { useModularStore } from "@/stores/modular"
 import TrayModel from "./TrayModel"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Object3D } from "three"
 import PreviewModel from "./PreviewModel"
 import { useNavigationStore } from "@/stores/navigation"
 import { useSettingsStore } from "@/stores/settings"
 import useConversion from "@/hooks/useConversion"
 import * as THREE from "three"
+import { animate, MotionValue, useMotionValue } from "framer-motion"
 
 const Canvas = () => {
   const { geometries } = useModularStore()
   const { currentNav } = useNavigationStore((state) => state)
-  const { gridSize } = useSettingsStore((state) => state)
+  const { gridSize, cameraMode } = useSettingsStore((state) => state)
   const { deunit } = useConversion()
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
+  const cameraX = useMotionValue(300)
+  const cameraY = useMotionValue(300)
+  const cameraZ = useMotionValue(300)
+  useLayoutEffect(() => {
+    if (cameraMode === "perspective") {
+      animate(cameraX, 300, { duration: 0.2 })
+      animate(cameraY, -300, { duration: 0.2 })
+      animate(cameraZ, 300, { duration: 0.2 })
+    } else if (cameraMode === "front") {
+      //Front View
+      animate(cameraX, 0, { duration: 0.2 })
+      animate(cameraY, -300, { duration: 0.2 })
+      animate(cameraZ, 0, { duration: 0.2 })
+    } else if (cameraMode === "side") {
+      //SideView
+      animate(cameraX, 300, { duration: 0.2 })
+      animate(cameraY, 0, { duration: 0.2 })
+      animate(cameraZ, 0, { duration: 0.2 })
+    }
+  }, [cameraMode])
+  const CameraPositionUpdater = ({
+    x,
+    y,
+    z,
+  }: {
+    x: MotionValue
+    y: MotionValue
+    z: MotionValue
+  }) => {
+    const { camera } = useThree()
+
+    useFrame(() => {
+      if (currentNav == 0) {
+        camera.position.x = x.get()
+        camera.position.y = y.get()
+        camera.position.z = z.get()
+
+        camera.updateProjectionMatrix()
+      }
+    })
+
+    return null
+  }
 
   useEffect(() => {
     Object3D.DEFAULT_UP.set(0, 0, 1) //Z軸を上にする
@@ -56,7 +100,8 @@ const Canvas = () => {
       <ThreeCanvas
         orthographic
         camera={{
-          position: [100, -100, 100], // clipping 問題解決するため zを１００にする
+          // position: [100, -100, 100], // clipping 問題解決するため zを１００にする
+          position: [cameraX.get(), cameraY.get(), cameraZ.get()],
           fov: 40,
           zoom: 5,
           near: 0.1,
@@ -64,6 +109,7 @@ const Canvas = () => {
         }}
         frameloop="demand"
         resize={{ scroll: false, debounce: { scroll: 50, resize: 50 } }}>
+        <CameraPositionUpdater x={cameraX} y={cameraY} z={cameraZ} />
         <Grid
           cellSize={deunit(gridSize)}
           sectionSize={deunit(gridSize) * 10}
@@ -96,7 +142,7 @@ const Canvas = () => {
         </GizmoHelper>
 
         <OrbitControls
-          enablePan={true}
+          enablePan={false}
           enableZoom={true}
           enableRotate={currentNav === 2 ? true : false}
           makeDefault

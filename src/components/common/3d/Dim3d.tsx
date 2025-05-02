@@ -1,6 +1,6 @@
-import React, { act } from "react"
+import React from "react"
 import { Vector3 } from "three"
-import { Line, Html, Sphere, Text } from "@react-three/drei"
+import { Line, Text } from "@react-three/drei"
 
 interface Dim3dProps {
   pointA: [number, number, number] | Vector3
@@ -12,6 +12,12 @@ interface Dim3dProps {
   active: boolean
   offset?: number // オフセット値を設定するプロパティ
 }
+
+// ラベルタイプの判定ヘルパー
+const isWidthType = (label: string) => label === "width"
+const isDepthType = (label: string) => label === "depth"
+const isHeightType = (label: string) => label === "height"
+const isXYPlane = (label: string) => isWidthType(label) || isDepthType(label)
 
 const Dim3d: React.FC<Dim3dProps> = ({
   pointA,
@@ -27,40 +33,22 @@ const Dim3d: React.FC<Dim3dProps> = ({
   const vecA = pointA instanceof Vector3 ? pointA : new Vector3(...pointA)
   const vecB = pointB instanceof Vector3 ? pointB : new Vector3(...pointB)
 
-  // 基準平面を決定（XY平面またはYZ平面）
-  const isXYPlane = label === "width" || label === "depth"
-
-  // 箱から遠ざかる方向へのオフセットベクトルを作成
-  const offsetVector = new Vector3()
-  if (label === "width") {
-    // 幅の場合はY方向に遠ざける（上方向）
-    offsetVector.set(0, -1, 0).multiplyScalar(offset)
-  } else if (label === "depth") {
-    // 奥行きの場合はX方向に遠ざける（右方向）
-    offsetVector.set(1, 0, 0).multiplyScalar(offset)
-  } else if (label === "height") {
-    // 高さの場合はZ方向に遠ざける（手前方向）
-    offsetVector.set(0, 1, 0).multiplyScalar(offset)
-  }
-
-  // 点AとBにオフセットを適用
-  const offsetVecA = vecA.clone().add(offsetVector)
-  const offsetVecB = vecB.clone().add(offsetVector)
-
-  // A→Bベクトル（オフセット後）
-  const vecAB = new Vector3().subVectors(offsetVecB, offsetVecA)
+  // A→Bベクトル
+  const vecAB = new Vector3().subVectors(vecB, vecA)
 
   // 回転軸を決定
-  const rotationAxis = isXYPlane ? new Vector3(0, 0, 1) : new Vector3(1, 0, 0)
+  const rotationAxis = isXYPlane(label)
+    ? new Vector3(0, 0, 1)
+    : new Vector3(1, 0, 0)
 
-  // A→Bを時計回りに90度回転させたベクトル（正規化して長さoffsetに設定）
+  // A→Bを90度回転させたベクトル（正規化して長さoffsetに設定）
   const vecRotatedFromA = vecAB
     .clone()
     .applyAxisAngle(rotationAxis, -Math.PI / 2)
     .normalize()
     .multiplyScalar(offset)
 
-  // B→Aを反時計回りに90度回転させたベクトル（正規化してoffset長さに設定）
+  // B→Aを90度回転させたベクトル（正規化してoffset長さに設定）
   const vecRotatedFromB = vecAB
     .clone()
     .negate()
@@ -69,52 +57,57 @@ const Dim3d: React.FC<Dim3dProps> = ({
     .multiplyScalar(offset)
 
   // 点C: オフセット後のAから回転ベクトルを加えた点
-  const vecC = new Vector3().addVectors(offsetVecA, vecRotatedFromA)
+  const vecC = new Vector3().addVectors(vecA, vecRotatedFromA)
 
   // 点D: オフセット後のBから回転ベクトルを加えた点
-  const vecD = new Vector3().addVectors(offsetVecB, vecRotatedFromB)
+  const vecD = new Vector3().addVectors(vecB, vecRotatedFromB)
 
-  // 基準平面に合わせて座標を調整（同一平面上に配置）
-  if (isXYPlane) {
+  // 基準平面に合わせて座標を調整
+  if (isXYPlane(label)) {
     // XY平面の場合、Z座標を揃える
-    vecC.setZ(offsetVecA.z)
-    vecD.setZ(offsetVecB.z)
+    vecC
+      .setX(vecA.x)
+      .setY(vecA.y)
+      .setZ(vecA.z - offset)
+    vecD
+      .setX(vecB.x)
+      .setY(vecB.y)
+      .setZ(vecB.z - offset)
   } else {
     // YZ平面の場合、X座標を揃える
-    vecC.setX(offsetVecA.x)
-    vecD.setX(offsetVecB.x)
+    vecC.setX(vecA.x)
+    vecD.setX(vecB.x)
   }
 
-  // A-Cの8割の位置にmidACを設定 (offsetVecAから見てvecCの方向に80%の位置)
-  const midAC = new Vector3().copy(offsetVecA).lerp(vecC, 0.7)
+  // 両端点からの補助線中間点を計算
+  const midAC = new Vector3().copy(vecA).lerp(vecC, 0.7)
+  const midBD = new Vector3().copy(vecB).lerp(vecD, 0.7)
 
-  // B-Dの8割の位置(midBD)
-  const midBD = new Vector3().copy(offsetVecB).lerp(vecD, 0.7)
-
-  // midAC-midBDの中点（ラベル位置）
+  // 寸法線上の中点（ラベル位置）
   const labelPosition = new Vector3()
     .addVectors(midAC, midBD)
     .multiplyScalar(0.5)
 
-  // テキスト位置をオフセットと同様の方向に少し移動
-  const textOffsetFactor = 0.4 // テキストオフセットの倍率
-  if (label === "width") {
-    // 幅の場合はY方向（上方向）に少し移動
+  // テキスト位置の調整
+  const textOffsetFactor = 0.4
+  if (isWidthType(label)) {
     labelPosition.y -= offset * textOffsetFactor
-  } else if (label === "depth") {
-    // 奥行きの場合はX方向（右方向）に少し移動
+  } else if (isDepthType(label)) {
     labelPosition.x += offset * textOffsetFactor
-  } else if (label === "height") {
-    // 高さの場合はZ方向（手前方向）に少し移動
+  } else if (isHeightType(label)) {
     labelPosition.y += offset * textOffsetFactor
   }
 
-  const labelRotation: [number, number, number] =
-    label === "width"
-      ? [0, 0, 0]
-      : label === "depth"
-      ? [0, 0, Math.PI / 2]
-      : [Math.PI / 2, Math.PI / 2, 0]
+  // ラベルの回転角度を設定
+  const labelRotation: [number, number, number] = isWidthType(label)
+    ? [Math.PI / 2, 0, 0]
+    : isDepthType(label)
+    ? [0, Math.PI / 2, Math.PI / 2]
+    : [Math.PI / 2, Math.PI / 2, 0]
+
+  // テキストのアンカー位置を設定
+  const anchorX = isXYPlane(label) ? "center" : "left"
+  const anchorY = isXYPlane(label) ? "top" : "middle"
 
   // 寸法線のポイント配列
   const points = [midAC, midBD]
@@ -124,17 +117,17 @@ const Dim3d: React.FC<Dim3dProps> = ({
       {/* 寸法線 */}
       <Line points={points} color={color} lineWidth={lineWidth} />
 
-      {/* 補助線1: オフセット後のA to C */}
+      {/* 補助線1: A to C */}
       <Line
-        points={[offsetVecA, vecC]}
+        points={[vecA, vecC]}
         color={color}
         lineWidth={lineWidth}
         dashed={false}
       />
 
-      {/* 補助線2: オフセット後のB to D */}
+      {/* 補助線2: B to D */}
       <Line
-        points={[offsetVecB, vecD]}
+        points={[vecB, vecD]}
         color={color}
         lineWidth={lineWidth}
         dashed={false}
@@ -143,8 +136,8 @@ const Dim3d: React.FC<Dim3dProps> = ({
       {/* ラベルテキスト */}
       <Text
         color={active ? "#4597F7" : "#999"}
-        anchorX={label === "width" || label === "depth" ? "center" : "left"}
-        anchorY={label === "width" || label === "depth" ? "top" : "middle"}
+        anchorX={anchorX}
+        anchorY={anchorY}
         position={labelPosition}
         fontSize={4}
         rotation={labelRotation}>

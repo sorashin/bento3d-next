@@ -30,7 +30,10 @@ const NavButton: React.FC<{
   )
 }
 
-export const Header: React.FC = () => {
+export interface HeaderProps {
+  onClickDL: () => void
+}
+export const Header: React.FC<HeaderProps> = ({ onClickDL }) => {
   const { currentNav, currentNavArray, setCurrentNav } = useNavigationStore()
   const { isPreviewLoad, setIsPreviewLoad } = useSettingsStore()
 
@@ -49,7 +52,10 @@ export const Header: React.FC = () => {
                 if (index == 2) {
                   setIsPreviewLoad(true)
                   // currentNavが変更されるとnodeのevaluationが走ってその後のレンダリング処理がブロックされるため、タイムアウトを設ける
-                  setTimeout(() => setCurrentNav(index), 500)
+                  setTimeout(() => {
+                    setCurrentNav(index)
+                    onClickDL()
+                  }, 500)
                 } else {
                   setCurrentNav(index)
                 }

@@ -146,7 +146,9 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
             setIsDragging(true)
             setStartY(e.clientY)
             setStartX(e.clientX)
-            setCameraMode("front")
+            setCameraMode(
+              label === "height" || label === "depth" ? "side" : "front"
+            )
           }}
           onMouseMove={(e) => {
             if (isDragging) {

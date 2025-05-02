@@ -13,7 +13,7 @@ import { useModularStore } from "@/stores/modular"
 import { useNavigationStore } from "@/stores/navigation"
 import { useSettingsStore } from "@/stores/settings"
 import { useTrayStore } from "@/stores/tray"
-import { useEffect } from "react"
+import { useCallback, useEffect } from "react"
 
 export function Page() {
   const { currentNav } = useNavigationStore()
@@ -24,32 +24,48 @@ export function Page() {
     (state) => state
   )
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   console.log("trayStore state:", trayState)
+  //   if (!inputNodeId) return
+  //   if (currentNav == 2) {
+  //     // setIsPreviewLoad(true)
+  //     // console.log("isPreviewLoad", isPreviewLoad)
+  //     try {
+  //       updateNodeProperty(
+  //         inputNodeId!,
+  //         `{"trayStore":${JSON.stringify(trayState)}}`
+  //       )
+  //     } finally {
+  //       // 少し遅延を入れてUIの更新が完了するのを待つ
+  //       setTimeout(() => {
+  //         console.log("done")
+  //         setIsPreviewLoad(false)
+  //       }, 300)
+  //     }
+  //   }
+  // }, [currentNav])
+  const handleDLView = useCallback(() => {
     console.log("trayStore state:", trayState)
     if (!inputNodeId) return
-    if (currentNav == 2) {
-      // setIsPreviewLoad(true)
-      // console.log("isPreviewLoad", isPreviewLoad)
-      try {
-        updateNodeProperty(
-          inputNodeId!,
-          `{"trayStore":${JSON.stringify(trayState)}}`
-        )
-      } finally {
-        // 少し遅延を入れてUIの更新が完了するのを待つ
-        setTimeout(() => {
-          console.log("done")
-          setIsPreviewLoad(false)
-        }, 300)
-      }
+    try {
+      updateNodeProperty(
+        inputNodeId!,
+        `{"trayStore":${JSON.stringify(trayState)}}`
+      )
+    } finally {
+      // 少し遅延を入れてUIの更新が完了するのを待つ
+      setTimeout(() => {
+        console.log("done")
+        setIsPreviewLoad(false)
+      }, 300)
     }
-  }, [currentNav])
+  }, [inputNodeId, trayState])
 
   return (
     <>
       <Canvas />
       {/* UI実装など */}
-      <Header />
+      <Header onClickDL={handleDLView} />
       {/* UIコンポーネントだけを条件付きで表示 */}
       {currentNav == 0 && (
         <div className="absolute inset-0 z-10 pointer-events-none">
