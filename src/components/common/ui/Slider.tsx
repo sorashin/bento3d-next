@@ -14,7 +14,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
   const { max, min, label, position } = props
   const { updateSize, totalWidth, totalDepth, totalHeight } = useTrayStore()
   const { updateFakeSize } = useFakeTrayStore()
-  const { setActiveAxis } = useSettingsStore()
+  const { setActiveAxis, activeAxis } = useSettingsStore()
   const inputRef = useRef<HTMLInputElement>(null)
 
   // labelに基づいて適切な初期値を取得
@@ -37,6 +37,11 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
   const [startX, setStartX] = useState(0) // ドラッグ開始時のX座標
   const { setCameraMode, setIsDragging, isDragging } = useSettingsStore()
   const rulerRange = 400
+
+  // 扇状の目盛りのために
+  const tickCount = 41 // より細かい目盛り
+  const arcAngle = 120 // 扇の角度範囲（度）
+  const arcRadius = 200 // 扇の半径
 
   // 位置に応じたクラス名を生成
   const getPositionClasses = () => {
@@ -102,12 +107,144 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
     }
   }
 
+  // 扇状の目盛りを描画するコンポーネント
+  const RulerTicks = () => {
+    const isVertical = ["left", "right"].includes(position)
+    const centerIndex = Math.floor(tickCount / 2)
+    const baseAngleOffset = (position: string) => {
+      switch (position) {
+        case "left":
+          return 90
+        case "right":
+          return -90
+        case "bottom":
+          return 0
+        default:
+          return 0
+      }
+    }
+
+    // 目盛りを回転させるために現在の値から角度オフセットを計算
+    const valueRatio = (value - min) / (max - min) // 0～1の範囲
+    const centerAngleOffset = valueRatio * arcAngle - arcAngle / 2
+
+    // 扇状に配置するための目盛りの配列を生成
+    const ticks = Array.from({ length: tickCount }, (_, i) => {
+      const tickValue = min + (i / (tickCount - 1)) * (max - min)
+      const isMiddle = i === centerIndex
+      const isCurrent =
+        Math.abs(tickValue - value) < (max - min) / (tickCount - 1) / 2
+
+      // 扇状の配置を計算（現在の値が中央に来るように回転）
+      const baseAngle = -arcAngle / 2 + (arcAngle / (tickCount - 1)) * i
+      const angleInDegrees = baseAngle - centerAngleOffset
+      const angleInRadians = (angleInDegrees * Math.PI) / 180
+
+      // 扇状の位置を計算（CSSの変形に使用）
+      const tickStyle = {
+        transform: isVertical
+          ? `rotate(${angleInDegrees}deg) translateY(-${arcRadius}px)`
+          : `rotate(${angleInDegrees}deg) translateX(-${arcRadius}px)`,
+        transformOrigin: isVertical ? "center bottom" : "center left",
+        height: isVertical ? `${arcRadius}px` : "auto",
+        width: isVertical ? "auto" : `${arcRadius}px`,
+        position: "absolute" as const,
+        display: "flex",
+        justifyContent: isVertical ? "center" : "flex-end",
+        alignItems: isVertical ? "flex-end" : "center",
+      }
+
+      // 目盛りの長さを調整
+      const tickLength = i % 5 === 0 ? 12 : i % 2 === 0 ? 8 : 4
+
+      return (
+        <div key={i} style={tickStyle}>
+          <div /* 目盛りとなる棒 */
+            className={`
+              ${isVertical ? "w-[1px]" : "h-[1px]"} 
+              ${i % 5 === 0 ? "bg-content-dark-h-a" : "bg-content-dark-l-a"}
+              ${isCurrent ? "!bg-content-dark-h-a !w-[2px] !h-[2px]" : ""}
+              ${
+                i === centerIndex
+                  ? "!bg-content-dark-h-a !w-[3px] !h-[3px]"
+                  : ""
+              }
+            `}
+            style={{
+              height: isVertical ? `${tickLength}px` : "1px",
+              width: isVertical ? "1px" : `${tickLength}px`,
+            }}
+          />
+
+          {(i % 10 === 0 || isMiddle) && (
+            <span
+              className={`
+                text-xs text-content-dark-m-a px-1
+                ${isCurrent ? "!text-content-dark-h-a font-bold" : ""}
+                ${i === centerIndex ? "!text-content-dark-h-a font-bold" : ""}
+              `}
+              style={{
+                transform: isVertical
+                  ? `rotate(${-angleInDegrees}deg)` // ラベルを水平に戻す
+                  : `rotate(${-angleInDegrees}deg)`, // ラベルを水平に戻す
+                marginLeft: isVertical ? 0 : "5px",
+                marginBottom: isVertical ? "5px" : 0,
+                position: "absolute",
+                right: isVertical ? null : "10px",
+                bottom: isVertical ? "10px" : null,
+              }}>
+              {Math.round(tickValue)}
+            </span>
+          )}
+        </div>
+      )
+    })
+
+    // 現在値を示す中央線（垂直、常に中央）
+    const centerLineStyle = {
+      position: "absolute" as const,
+      height: isVertical ? `${arcRadius + 10}px` : "2px",
+      width: isVertical ? "2px" : `${arcRadius + 10}px`,
+      backgroundColor: "rgba(255, 255, 255, 0.9)",
+      bottom: isVertical ? 0 : "50%",
+      left: isVertical ? "50%" : 0,
+      transform: isVertical ? "translateX(-50%)" : "translateY(-50%)",
+      zIndex: 10,
+    }
+
+    return (
+      <div
+        className={`
+          absolute pointer-events-none
+          ${isVertical ? "h-[300px] w-[300px]" : "w-[300px] h-[300px]"}
+          flex items-center justify-center
+          bg-content-dark-xl-a bg-opacity-40 backdrop-blur-sm
+          rounded-full overflow-hidden
+          ${position === "left" ? "left-24" : ""}
+          ${position === "right" ? "right-24" : ""}
+          ${position === "top" ? "top-24" : ""}
+          ${position === "bottom" ? "bottom-24" : ""}
+        `}
+        style={{
+          transform: `translate(-50%, -50%)`,
+          left: isVertical ? undefined : "50%",
+          top: isVertical ? "50%" : undefined,
+        }}>
+        <div style={centerLineStyle} />
+        {ticks}
+      </div>
+    )
+  }
+
   // set input value to phantomSize.depth
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.value = String(value)
     }
   }, [value])
+
+  // 現在のスライダーがドラッグ中かどうかを判定
+  const isCurrentlyDragging = isDragging && activeAxis === label
 
   return (
     <>
@@ -144,6 +281,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
           onMouseLeave={() => setActiveAxis("")}
           onMouseDown={(e) => {
             setIsDragging(true)
+            setActiveAxis(label)
             setStartY(e.clientY)
             setStartX(e.clientX)
             setCameraMode(
@@ -151,7 +289,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
             )
           }}
           onMouseMove={(e) => {
-            if (isDragging) {
+            if (isDragging && activeAxis === label) {
               calculateNewValue(
                 ["left", "right"].includes(position) ? e.clientY : e.clientX
               )
@@ -165,6 +303,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
           }}
           onMouseUp={() => {
             setIsDragging(false)
+            setActiveAxis("")
 
             // labelに基づいて適切なプロパティを更新
             const sizeUpdate: {
@@ -185,11 +324,12 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
           }}
           onTouchStart={(e) => {
             setIsDragging(true)
+            setActiveAxis(label)
             setStartY(e.touches[0].clientY)
             setStartX(e.touches[0].clientX)
           }}
           onTouchMove={(e) => {
-            if (isDragging) {
+            if (isDragging && activeAxis === label) {
               calculateNewValue(
                 ["left", "right"].includes(position)
                   ? e.touches[0].clientY
@@ -204,6 +344,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
           }}
           onTouchEnd={() => {
             setIsDragging(false)
+            setActiveAxis("")
 
             // labelに基づいて適切なプロパティを更新 (タッチイベント用)
             const sizeUpdate: {
@@ -243,6 +384,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
             </span>
           </p>
         </div>
+        {isCurrentlyDragging && <RulerTicks />}
       </div>
     </>
   )

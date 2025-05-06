@@ -173,21 +173,23 @@ export const LeftMenu = () => {
         </motion.div>
       )}
 
-      <Tooltip
-        id="setting-tooltip"
-        place="bottom"
-        className="text-xs"
-        style={{
-          backgroundColor: "#1C1C1C",
-          color: "#ffffff",
-          fontSize: "12px",
-          padding: "2px 4px 2px 4px",
-          borderRadius: "4px",
-          userSelect: "none",
-          fontFamily: "sans-serif",
-        }}
-        noArrow
-      />
+      {isSettingsOpen && (
+        <Tooltip
+          id="setting-tooltip"
+          place="bottom"
+          className="text-xs"
+          style={{
+            backgroundColor: "#1C1C1C",
+            color: "#ffffff",
+            fontSize: "12px",
+            padding: "2px 4px 2px 4px",
+            borderRadius: "4px",
+            userSelect: "none",
+            fontFamily: "sans-serif",
+          }}
+          noArrow
+        />
+      )}
     </motion.div>
   )
 }
