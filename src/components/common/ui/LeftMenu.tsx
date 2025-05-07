@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Icon from "@/components/common/ui/Icon"
 import { Tooltip } from "react-tooltip"
 import { useSettingsStore } from "@/stores/settings"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useTrayStore } from "@/stores/tray"
 import { motion } from "framer-motion"
+import { useNavigationStore } from "@/stores/navigation"
 
 const modes = [
   {
@@ -27,6 +28,7 @@ const modes = [
 
 export const LeftMenu = () => {
   const [currentMode, setCurrentMode] = useState(0)
+  const { currentNav } = useNavigationStore((state) => state)
   const { isSettingsOpen, setIsSettingsOpen } = useSettingsStore(
     (state) => state
   )
@@ -50,10 +52,18 @@ export const LeftMenu = () => {
   const handleModeChange = (slug: string) => {
     navigate(`/${slug}`)
   }
+  const handleMenuReset = useCallback(() => {
+    setIsStack(false)
+    setThickness(2)
+    setFillet(2)
+  }, [])
+  useEffect(() => {
+    handleMenuReset()
+  }, [currentMode])
 
   return (
     <motion.div
-      className="absolute top-8 left-8 z-20 w-[240px] h-fit flex flex-col gap-2 items-start font-display bg-surface-sheet-l backdrop-blur-lg rounded-md p-2"
+      className="absolute top-8 left-8 z-20 w-[240px] h-fit flex flex-col gap-2 items-start font-display bg-surface-sheet-l backdrop-blur-lg rounded-md p-1"
       layout>
       <motion.div className="flex flex-row items-center gap-2 w-full" layout>
         <button className="b-button bg-surface-sheet-h flex flex-row items-center gap-2 min-w-[180px] hover:bg-[rgba(255,255,255,.56)] px-4 b-dropdown group relative">
@@ -98,14 +108,22 @@ export const LeftMenu = () => {
           </div>
         </button>
         <motion.button
-          className="b-button"
-          onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+          className={`b-button ${
+            currentNav !== 2
+              ? "!text-content-m-a !cursor-pointer !hover:bg-surface-sheet-l"
+              : "!text-content-xl-a !cursor-default !hover:bg-transparent"
+          }`}
+          onClick={() => {
+            if (currentNav !== 2) {
+              setIsSettingsOpen(!isSettingsOpen)
+            }
+          }}
           layout
           data-tooltip-content={"settings"}
           data-tooltip-id="setting-tooltip">
           <Icon
             name={`${!isSettingsOpen ? "config" : "shrink"}`}
-            className="size-6 text-content-m-a"
+            className={`size-6  `}
           />
         </motion.button>
       </motion.div>
@@ -127,33 +145,36 @@ export const LeftMenu = () => {
               {thickness}
             </span>
           </div>
-          <label htmlFor="isStack" className="text-content-m-a text-xs">
-            Stack
-          </label>
-          <ul className="grid grid-cols-2 w-full rounded-md bg-content-xxl-a">
-            <li
-              onClick={() => setIsStack(false)}
-              className={`cursor-pointer flex flex-col items-center rounded-sm p-1 ${
-                !isStack ? "bg-white" : "hover:bg-content-xxl-a"
-              }`}>
-              <Icon
-                name="unstackable"
-                className="size-8 text-content-m-a"></Icon>
-              <span className="text-xs text-content-m-a text-center font-sans">
-                unstackable
-              </span>
-            </li>
-            <li
-              onClick={() => setIsStack(true)}
-              className={`cursor-pointer flex flex-col items-center rounded-sm p-1 ${
-                isStack ? "bg-white" : "hover:bg-content-xxl-a"
-              }`}>
-              <Icon name="stack" className="size-8 text-content-m-a"></Icon>
-              <span className="text-xs text-content-m-a text-center font-sans">
-                stackable
-              </span>
-            </li>
-          </ul>
+          {currentMode !== 1 && (
+            <>
+              <label htmlFor="isStack" className="text-content-m-a text-xs">
+                Stack
+              </label>
+              <ul className="grid grid-cols-2 w-full rounded-md bg-content-xxl-a">
+                <li
+                  onClick={() => setIsStack(false)}
+                  className={`cursor-pointer flex flex-col items-center rounded-sm p-1 text-content-m-a ${
+                    !isStack ? "bg-white" : "hover:bg-content-xxl-a"
+                  }`}>
+                  <Icon name="unstackable" className="size-8 "></Icon>
+                  <span className="text-xs text-center font-sans">
+                    unstackable
+                  </span>
+                </li>
+                <li
+                  onClick={() => setIsStack(true)}
+                  className={`cursor-pointer flex flex-col items-center rounded-sm p-1 text-content-m-a ${
+                    isStack ? "bg-white" : "hover:bg-content-xxl-a"
+                  }`}>
+                  <Icon name="stack" className="size-8 "></Icon>
+                  <span className="text-xs text-center font-sans">
+                    stackable
+                  </span>
+                </li>
+              </ul>
+            </>
+          )}
+
           <label htmlFor="thickness" className="text-content-m-a text-xs">
             Fillet
           </label>

@@ -110,10 +110,11 @@ const Canvas = () => {
         frameloop="demand"
         resize={{ scroll: false, debounce: { scroll: 50, resize: 50 } }}>
         <CameraPositionUpdater x={cameraX} y={cameraY} z={cameraZ} />
+        <color attach="background" args={["#cccccc"]} />
         <Grid
           cellSize={deunit(gridSize)}
           sectionSize={deunit(gridSize) * 10}
-          sectionColor={"#9faca8"}
+          sectionColor={"#bbd7cf"}
           cellColor={"#b0bdbb"}
           cellThickness={0.8}
           sectionThickness={0.8}
@@ -122,7 +123,6 @@ const Canvas = () => {
           infiniteGrid={true}
           side={THREE.DoubleSide}
         />
-        <color attach="background" args={["#cccccc"]} />
         <ambientLight intensity={2.8} />
         {/* axis helper */}
 

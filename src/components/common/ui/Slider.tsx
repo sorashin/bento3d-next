@@ -111,15 +111,18 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
   const RulerTicks = () => {
     const isVertical = ["left", "right"].includes(position)
 
-    // 位置に応じた基本角度オフセットを取得
-    const baseAngleOffset =
-      position === "left"
-        ? 90
-        : position === "right"
-        ? -90
-        : position === "bottom"
-        ? 90
-        : 0
+    const baseAngleOffset = (position: string) => {
+      switch (position) {
+        case "left":
+          return 90
+        case "right":
+          return -90
+        case "bottom":
+          return 90
+        default:
+          return 0
+      }
+    }
 
     // 目盛りを回転させるために現在の値から角度オフセットを計算
     const valueRatio = (value - min) / (max - min) // 0～1の範囲
@@ -131,18 +134,12 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
       const isCurrent =
         Math.abs(tickValue - value) < (max - min) / (tickCount - 1) / 2
 
-      // 角度の計算
-      const tickAngle = -arcAngle / 2 + (arcAngle / (tickCount - 1)) * i
-      const angleInDegrees = tickAngle + baseAngleOffset - centerAngleOffset
-
-      // 目盛りの長さを調整
-      const tickLength = isCurrent
-        ? 64
-        : Math.round(tickValue) % 10 === 0
-        ? 16
-        : Math.round(tickValue) % 5 === 0
-        ? 8
-        : 4
+      // 扇状の配置を計算（現在の値が中央に来るように回転）
+      const baseAngle =
+        -arcAngle / 2 +
+        (arcAngle / (tickCount - 1)) * i +
+        baseAngleOffset(position)
+      const angleInDegrees = baseAngle - centerAngleOffset
 
       // 扇状の位置を計算（CSSの変形に使用）
       const tickStyle = {
@@ -165,12 +162,18 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
         alignItems: isVertical ? "flex-end" : "center",
       }
 
-      // 目盛りが10の倍数かどうか
-      const isMajorTick = Math.round(tickValue) % 10 === 0
+      // 目盛りの長さを調整
+      const tickLength = isCurrent
+        ? 64
+        : Math.round(tickValue) % 10 === 0
+        ? 16
+        : Math.round(tickValue) % 5 === 0
+        ? 8
+        : 4
 
       return (
         <div key={i} style={tickStyle}>
-          <div
+          <div /* 目盛りとなる棒 */
             className={`
               ${isVertical ? "w-[1px]" : "h-[1px]"} 
               ${
@@ -178,6 +181,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
                   ? "bg-content-h-a"
                   : "bg-content-l-a"
               }
+              
             `}
             style={{
               height: isVertical ? `${tickLength}px` : "1px",
@@ -186,16 +190,22 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
           />
 
           {/* 数字は10の倍数の場合のみ表示 */}
-          {isMajorTick && !isCurrent && (
+          {Math.round(tickValue) % 10 === 0 && !isCurrent && (
             <span
-              className="text-xs text-content-m-a px-1"
+              className={`
+                text-xs text-content-m-a px-1
+                ${isCurrent ? "!text-content-h-a font-bold" : ""}
+                
+              `}
               style={{
-                transform: `rotate(${-angleInDegrees}deg)`, // ラベルを水平に戻す
+                transform: isVertical
+                  ? `rotate(${-angleInDegrees}deg)` // ラベルを水平に戻す
+                  : `rotate(${-angleInDegrees}deg)`, // ラベルを水平に戻す
+                marginLeft: isVertical ? 0 : "5px",
+                marginBottom: isVertical ? "5px" : 0,
                 position: "absolute",
                 right: isVertical ? undefined : "10px",
                 bottom: isVertical ? "10px" : undefined,
-                marginLeft: isVertical ? 0 : "5px",
-                marginBottom: isVertical ? "5px" : 0,
               }}>
               {Math.round(tickValue)}
             </span>
@@ -204,7 +214,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
       )
     })
 
-    // 現在値を示す中央線
+    // 現在値を示す中央線（垂直、常に中央）
     const centerLineStyle = {
       position: "absolute" as const,
       height: isVertical ? `${arcRadius + 10}px` : "2px",
@@ -216,33 +226,34 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
       zIndex: 10,
     }
 
-    // 扇形の位置計算を簡略化
-    const rulerPosition = {
-      transform: isVertical ? "translate(0, -50%)" : "translate(-50%, 0)",
-      left:
-        isVertical && position === "left"
-          ? `-${arcRadius / 2 + 200}px`
-          : position === "left"
-          ? ""
-          : "50%",
-      right:
-        isVertical && position === "right"
-          ? `-${arcRadius / 2 + 200}px`
-          : undefined,
-      top: isVertical ? "50%" : undefined,
-      bottom: !isVertical ? `-${arcRadius / 2 + 200}px` : undefined,
-    }
-
     return (
       <div
         className={`
           absolute pointer-events-none
           ${isVertical ? "h-[300px] w-[300px]" : "w-[300px] h-[300px]"}
           flex items-center justify-center rounded-full bg-content-xxl-a
+          
+          
           ${position === "top" ? "top-24" : ""}
           ${position === "bottom" ? "bottom-0)" : ""}
         `}
-        style={rulerPosition}>
+        style={{
+          transform: `${
+            isVertical ? "translate(0, -50%)" : "translate(-50%, 0)"
+          }`,
+          left: isVertical
+            ? position === "left"
+              ? `-${arcRadius / 2 + 200}px`
+              : ``
+            : "50%",
+          right: isVertical
+            ? position === "right"
+              ? `-${arcRadius / 2 + 200}px`
+              : ``
+            : undefined,
+          top: isVertical ? "50%" : undefined,
+          bottom: isVertical ? undefined : `-${arcRadius / 2 + 200}px`,
+        }}>
         <div style={centerLineStyle} />
         {ticks}
       </div>
