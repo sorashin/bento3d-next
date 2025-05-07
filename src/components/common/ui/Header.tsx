@@ -1,7 +1,7 @@
 import Icon from "@/components/common/ui/Icon"
 import { useNavigationStore } from "@/stores/navigation"
-import { useSettingsStore } from "@/stores/settings"
 import React from "react"
+import { Toast as ToastType, useSettingsStore } from "@/stores/settings"
 
 const NavButton: React.FC<{
   label: string
@@ -35,7 +35,17 @@ export interface HeaderProps {
 }
 export const Header: React.FC<HeaderProps> = ({ onClickDL }) => {
   const { currentNav, currentNavArray, setCurrentNav } = useNavigationStore()
-  const { isPreviewLoad, setIsPreviewLoad } = useSettingsStore()
+  const { isPreviewLoad, setIsPreviewLoad, setToast, toast } =
+    useSettingsStore()
+  const handleToast = () => {
+    const i: ToastType = {
+      content:
+        "Generating STL data — this may take up to several dozen seconds.",
+      type: "default",
+      isOpen: true,
+    }
+    setToast([...toast, i])
+  }
 
   return (
     <header className="absolute inset-x-0 top-0 pt-8 px-4 flex flex-col justify-between z-20">
@@ -51,6 +61,7 @@ export const Header: React.FC<HeaderProps> = ({ onClickDL }) => {
               onClick={() => {
                 if (index == 2) {
                   setIsPreviewLoad(true)
+                  handleToast()
                   // currentNavが変更されるとnodeのevaluationが走ってその後のレンダリング処理がブロックされるため、タイムアウトを設ける
                   setTimeout(() => {
                     setCurrentNav(index)

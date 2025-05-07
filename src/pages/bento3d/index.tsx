@@ -12,41 +12,21 @@ import { RangeSlider } from "@/components/common/ui/Slider"
 import { useModularStore } from "@/stores/modular"
 import { useNavigationStore } from "@/stores/navigation"
 import { useSettingsStore } from "@/stores/settings"
+import { Toast } from "@/components/common/ui/Toast"
 import { useTrayStore } from "@/stores/tray"
-import { useCallback, useEffect } from "react"
+import { useCallback } from "react"
 
 export function Page() {
   const { currentNav } = useNavigationStore()
   const trayState = useTrayStore()
   const { thickness } = useTrayStore((state) => state)
   const { inputNodeId, updateNodeProperty } = useModularStore((state) => state)
-  const { setBom, setIsPreviewLoad, isPreviewLoad } = useSettingsStore(
-    (state) => state
-  )
+  const { setBom, setIsPreviewLoad } = useSettingsStore((state) => state)
 
-  // useEffect(() => {
-  //   console.log("trayStore state:", trayState)
-  //   if (!inputNodeId) return
-  //   if (currentNav == 2) {
-  //     // setIsPreviewLoad(true)
-  //     // console.log("isPreviewLoad", isPreviewLoad)
-  //     try {
-  //       updateNodeProperty(
-  //         inputNodeId!,
-  //         `{"trayStore":${JSON.stringify(trayState)}}`
-  //       )
-  //     } finally {
-  //       // 少し遅延を入れてUIの更新が完了するのを待つ
-  //       setTimeout(() => {
-  //         console.log("done")
-  //         setIsPreviewLoad(false)
-  //       }, 300)
-  //     }
-  //   }
-  // }, [currentNav])
   const handleDLView = useCallback(() => {
     console.log("trayStore state:", trayState)
     if (!inputNodeId) return
+
     try {
       updateNodeProperty(
         inputNodeId!,
@@ -116,6 +96,7 @@ export function Page() {
       <DialogAd />
       <DialogFeedback />
       <DrawerUpdates />
+      <Toast />
       {/* <div className="absolute bottom-16 right-16">
         <GeometryExporter />
       </div> */}
