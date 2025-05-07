@@ -60,11 +60,7 @@ const PageLoader = ({ slug }: { slug: string }) => {
     <Suspense
       fallback={
         <div className="flex-1 flex items-center justify-center gap-1 flex-col">
-          <img
-            src="/public/images/loading.gif"
-            alt="loading"
-            className="size-24"
-          />
+          <img src="/images/loading.gif" alt="loading" className="size-24" />
           <span
             className="text-xs animate-pulse"
             style={{
