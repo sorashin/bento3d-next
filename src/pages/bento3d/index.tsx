@@ -69,7 +69,7 @@ export function Page() {
       {/* UIコンポーネントだけを条件付きで表示 */}
       {currentNav == 0 && (
         <div className="absolute inset-0 z-10 pointer-events-none">
-          <RangeSlider min={30} max={400} label={"width"} position={"bottom"} />
+          <RangeSlider min={50} max={400} label={"width"} position={"bottom"} />
           <RangeSlider
             min={thickness}
             max={200}

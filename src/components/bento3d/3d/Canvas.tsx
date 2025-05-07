@@ -126,7 +126,7 @@ const Canvas = () => {
         <ambientLight intensity={2.8} />
         {/* axis helper */}
 
-        <axesHelper args={[100]} />
+        {/* <axesHelper args={[100]} /> */}
         <directionalLight
           position={[5, 5, 5]}
           intensity={1}

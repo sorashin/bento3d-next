@@ -39,9 +39,9 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
   const rulerRange = 400
 
   // 扇状の目盛りのために
-  const tickCount = 41 // より細かい目盛り
-  const arcAngle = 120 // 扇の角度範囲（度）
-  const arcRadius = 200 // 扇の半径
+  const tickCount = max - min // より細かい目盛り
+  const arcAngle = 240 // 扇の角度範囲（度）
+  const arcRadius = 1200 // 扇の半径
 
   // 位置に応じたクラス名を生成
   const getPositionClasses = () => {
@@ -110,7 +110,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
   // 扇状の目盛りを描画するコンポーネント
   const RulerTicks = () => {
     const isVertical = ["left", "right"].includes(position)
-    const centerIndex = Math.floor(tickCount / 2)
+
     const baseAngleOffset = (position: string) => {
       switch (position) {
         case "left":
@@ -118,7 +118,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
         case "right":
           return -90
         case "bottom":
-          return 0
+          return 90
         default:
           return 0
       }
@@ -131,21 +131,29 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
     // 扇状に配置するための目盛りの配列を生成
     const ticks = Array.from({ length: tickCount }, (_, i) => {
       const tickValue = min + (i / (tickCount - 1)) * (max - min)
-      const isMiddle = i === centerIndex
       const isCurrent =
         Math.abs(tickValue - value) < (max - min) / (tickCount - 1) / 2
 
       // 扇状の配置を計算（現在の値が中央に来るように回転）
-      const baseAngle = -arcAngle / 2 + (arcAngle / (tickCount - 1)) * i
+      const baseAngle =
+        -arcAngle / 2 +
+        (arcAngle / (tickCount - 1)) * i +
+        baseAngleOffset(position)
       const angleInDegrees = baseAngle - centerAngleOffset
-      const angleInRadians = (angleInDegrees * Math.PI) / 180
 
       // 扇状の位置を計算（CSSの変形に使用）
       const tickStyle = {
         transform: isVertical
           ? `rotate(${angleInDegrees}deg) translateY(-${arcRadius}px)`
           : `rotate(${angleInDegrees}deg) translateX(-${arcRadius}px)`,
-        transformOrigin: isVertical ? "center bottom" : "center left",
+        transformOrigin:
+          position === "left"
+            ? "center left"
+            : position === "right"
+            ? "center right"
+            : position === "bottom"
+            ? "bottom center"
+            : "top center",
         height: isVertical ? `${arcRadius}px` : "auto",
         width: isVertical ? "auto" : `${arcRadius}px`,
         position: "absolute" as const,
@@ -155,20 +163,25 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
       }
 
       // 目盛りの長さを調整
-      const tickLength = i % 5 === 0 ? 12 : i % 2 === 0 ? 8 : 4
+      const tickLength = isCurrent
+        ? 64
+        : Math.round(tickValue) % 10 === 0
+        ? 16
+        : Math.round(tickValue) % 5 === 0
+        ? 8
+        : 4
 
       return (
         <div key={i} style={tickStyle}>
           <div /* 目盛りとなる棒 */
             className={`
               ${isVertical ? "w-[1px]" : "h-[1px]"} 
-              ${i % 5 === 0 ? "bg-content-dark-h-a" : "bg-content-dark-l-a"}
-              ${isCurrent ? "!bg-content-dark-h-a !w-[2px] !h-[2px]" : ""}
               ${
-                i === centerIndex
-                  ? "!bg-content-dark-h-a !w-[3px] !h-[3px]"
-                  : ""
+                Math.round(tickValue) % 5 === 0
+                  ? "bg-content-h-a"
+                  : "bg-content-l-a"
               }
+              
             `}
             style={{
               height: isVertical ? `${tickLength}px` : "1px",
@@ -176,12 +189,13 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
             }}
           />
 
-          {(i % 10 === 0 || isMiddle) && (
+          {/* 数字は10の倍数の場合のみ表示 */}
+          {Math.round(tickValue) % 10 === 0 && !isCurrent && (
             <span
               className={`
-                text-xs text-content-dark-m-a px-1
-                ${isCurrent ? "!text-content-dark-h-a font-bold" : ""}
-                ${i === centerIndex ? "!text-content-dark-h-a font-bold" : ""}
+                text-xs text-content-m-a px-1
+                ${isCurrent ? "!text-content-h-a font-bold" : ""}
+                
               `}
               style={{
                 transform: isVertical
@@ -217,18 +231,28 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
         className={`
           absolute pointer-events-none
           ${isVertical ? "h-[300px] w-[300px]" : "w-[300px] h-[300px]"}
-          flex items-center justify-center
-          bg-content-dark-xl-a bg-opacity-40 backdrop-blur-sm
-          rounded-full overflow-hidden
-          ${position === "left" ? "left-24" : ""}
-          ${position === "right" ? "right-24" : ""}
+          flex items-center justify-center rounded-full bg-content-xxl-a
+          
+          
           ${position === "top" ? "top-24" : ""}
-          ${position === "bottom" ? "bottom-24" : ""}
+          ${position === "bottom" ? "bottom-0)" : ""}
         `}
         style={{
-          transform: `translate(-50%, -50%)`,
-          left: isVertical ? undefined : "50%",
+          transform: `${
+            isVertical ? "translate(0, -50%)" : "translate(-50%, 0)"
+          }`,
+          left: isVertical
+            ? position === "left"
+              ? `-${arcRadius / 2 + 200}px`
+              : ``
+            : "50%",
+          right: isVertical
+            ? position === "right"
+              ? `-${arcRadius / 2 + 200}px`
+              : ``
+            : undefined,
           top: isVertical ? "50%" : undefined,
+          bottom: isVertical ? undefined : `-${arcRadius / 2 + 200}px`,
         }}>
         <div style={centerLineStyle} />
         {ticks}
@@ -244,7 +268,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
   }, [value])
 
   // 現在のスライダーがドラッグ中かどうかを判定
-  const isCurrentlyDragging = isDragging && activeAxis === label
+  const isCurrentlyDragging = activeAxis === label
 
   return (
     <>
@@ -383,8 +407,9 @@ export const RangeSlider: React.FC<RangeSliderProps> = (props) => {
               mm
             </span>
           </p>
+          {isCurrentlyDragging && <RulerTicks />}
+          {/* <RulerTicks /> */}
         </div>
-        {isCurrentlyDragging && <RulerTicks />}
       </div>
     </>
   )

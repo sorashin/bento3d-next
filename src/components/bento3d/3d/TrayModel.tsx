@@ -42,14 +42,12 @@ export default function TrayModel({ geometries }: TrayModelProps) {
   }, [geometries, nodes])
 
   return (
-    <group
-      rotation={[Math.PI, 0, 0]}
-      position={[-totalWidth / 2, totalDepth / 2, 0]}>
+    <group rotation={[Math.PI, 0, 0]}>
       {geometriesWithInfo.map((geometry, index) => {
         // trayの場合は追加の移動を適用するNodiの不具合修正までの間の対応
         const extraOffset =
           geometry.label === "latch"
-            ? new Vector3(totalWidth / 2, totalDepth + 7, -totalHeight - 3)
+            ? new Vector3(0, totalDepth / 2 + 7, -totalHeight - 3)
             : new Vector3(0, 0, 0)
 
         return (
