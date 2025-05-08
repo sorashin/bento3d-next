@@ -24,7 +24,6 @@ jobs:
         if: success()
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          # firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           firebaseServiceAccount: ${{ github.ref == 'refs/heads/develop' && secrets.FIREBASE_SERVICE_ACCOUNT_BENTO3D_DEV || secrets.FIREBASE_SERVICE_ACCOUNT_BENTO3D_PROD }}
           channelId: live
           projectId: ${{ github.ref == 'refs/heads/develop' && 'bento3d-dev' || 'shintaro-s-private' }}
