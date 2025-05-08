@@ -63,14 +63,14 @@ const GAInitializer = memo(({ slug }: { slug?: string }) => {
     ReactGA.send({
       hitType: "pageview",
       // アクセスしたパス (pathname) とクエリ文字列 (search) を送付する (必要に応じて編集する)
-      page: `/${slug}/00${currentNav}`,
+      page: `/${slug}/00${currentNav!}`,
     })
   }, [])
   useEffect(() => {
     ReactGA.send({
       hitType: "pageview",
       // アクセスしたパス (pathname) とクエリ文字列 (search) を送付する (必要に応じて編集する)
-      page: `/${slug}/00${currentNav}`,
+      page: `/${slug}/00${currentNav!}`,
     })
   }, [slug, currentNav])
 
