@@ -194,7 +194,7 @@ export const LeftMenu = () => {
         </motion.div>
       )}
 
-      {isSettingsOpen && (
+      {!isSettingsOpen && (
         <Tooltip
           id="setting-tooltip"
           place="bottom"

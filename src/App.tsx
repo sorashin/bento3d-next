@@ -7,6 +7,9 @@ import {
   Navigate,
   useParams,
 } from "react-router-dom"
+import ReactGA from "react-ga4"
+import { useSettingsStore } from "./stores/settings"
+import { useNavigationStore } from "./stores/navigation"
 
 // NotFoundコンポーネント作成
 const NotFound = () => (
@@ -45,6 +48,31 @@ const ModularInitializer = memo(({ slug }: { slug?: string }) => {
       loadGraph(slug)
     }
   }, [modular, slug, loadGraph])
+
+  return null
+})
+// GAの初期化を担当するコンポーネント
+const GAInitializer = memo(({ slug }: { slug?: string }) => {
+  const { setIsGAInitialized } = useSettingsStore((state) => state)
+  const { currentNav } = useNavigationStore((state) => state)
+
+  useEffect(() => {
+    // Google Analytics 測定 ID を入力して設定
+    ReactGA.initialize("G-J10ZQ1VRW8")
+    setIsGAInitialized(true)
+    ReactGA.send({
+      hitType: "pageview",
+      // アクセスしたパス (pathname) とクエリ文字列 (search) を送付する (必要に応じて編集する)
+      page: `/${slug}/00${currentNav}`,
+    })
+  }, [])
+  useEffect(() => {
+    ReactGA.send({
+      hitType: "pageview",
+      // アクセスしたパス (pathname) とクエリ文字列 (search) を送付する (必要に応じて編集する)
+      page: `/${slug}/00${currentNav}`,
+    })
+  }, [slug, currentNav])
 
   return null
 })
@@ -91,6 +119,7 @@ const GraphRenderer = () => {
   return (
     <>
       <ModularInitializer slug={slug} />
+      <GAInitializer slug={slug} />
       {/* keyプロパティを追加して、slugが変わるたびにPageLoaderが再マウントされるようにする */}
       <PageLoader key={slug} slug={slug || ""} />
     </>
