@@ -23,8 +23,8 @@ jobs:
         if: success()
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BENTO3D_DEV_FA0E5 }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BENTO3D_DEV}}
           channelId: live
-          projectId: bento3d-dev-fa0e5
+          projectId: bento3d-dev
         env:
           FIREBASE_CLI_EXPERIMENTS: webframeworks
