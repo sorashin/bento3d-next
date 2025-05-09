@@ -48,38 +48,40 @@ export const GridEditor = () => {
                 borderRadius: fillet * mm2pixel,
                 gap: thickness * mm2pixel,
               }}>
-              {Array.from(Array(row.division).keys()).map((i) => (
+              {row.column.map((col, i) => (
                 <motion.div
                   data-row-id={row.id}
                   data-column-id={row.id + i}
-                  data-size={`w:${row.width} d:${
-                    (totalDepth - (2 + row.division - 1) * thickness) /
-                    row.division
-                  }`}
+                  data-size={`w:${row.width} d:${col.depth}`}
                   key={i}
                   initial={false}
                   animate={{
-                    height:
-                      ((totalDepth - (2 + row.division - 1) * thickness) /
-                        row.division) *
-                      mm2pixel,
+                    height: col.depth * mm2pixel,
 
                     borderRadius: fillet * mm2pixel,
                   }}
                   className="group w-full flex flex-col justify-center items-center grid-bottom-layer border-content-l border-[0.5px] grid-shadow-inner"
                   onClick={() => setSelectedColumnId(row.id + i)}>
                   <div className="invisible group-hover:visible transition size-full flex justify-center items-center">
+                    {/* row用 */}
                     <Dim
-                      colId={JSON.stringify(i)}
+                      // colId={JSON.stringify(i)}
                       rowId={row.id}
                       position={"top"}
+                      offset={2}
+                    />
+                    {/* col用 */}
+                    <Dim
+                      colId={col.id}
+                      rowId={row.id}
+                      position={"left"}
                       offset={2}
                     />
                     <Icon
                       name="trash"
                       className="cursor-pointer"
                       onClick={() => {
-                        removeColumn(row.id)
+                        removeColumn(row.id, col.id)
                       }}
                     />
                   </div>
@@ -94,7 +96,13 @@ export const GridEditor = () => {
                     id: crypto.randomUUID(),
                     depth: totalDepth - 2 * thickness,
                     type: "fill",
-                    division: 1,
+                    column: [
+                      {
+                        id: crypto.randomUUID(),
+                        depth: totalDepth - 2 * thickness,
+                        type: "fill",
+                      },
+                    ],
                   })
                 }}>
                 <Icon name="plus" />
