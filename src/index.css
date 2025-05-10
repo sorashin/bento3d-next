@@ -36,7 +36,9 @@
   --color-surface-sheet-h: rgba(255,255,255,.64);
   --color-surface-sheet-m: rgba(255,255,255,.56);
   --color-surface-sheet-l: rgba(255,255,255,.32);
-  --color-system-error: #F3785D;
+  --color-system-error-h: #F3785D;
+  --color-system-error-m: rgba(243,120,93,.56);
+  --color-system-error-l: rgba(243,120,93,.26);
   --color-system-warning: rgba(254, 161, 41, 1.0);
   --color-system-success: #00FF00;
   --color-system-info: #4597F7;

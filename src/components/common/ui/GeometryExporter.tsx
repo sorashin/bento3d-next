@@ -120,7 +120,15 @@ const GeometryExporter: FC = () => {
           ))}
         </ul>
       ) : (
-        <div className="text-gray-500">No Geometry Found</div>
+        <div className="bg-system-error-l flex flex-col items-center justify-center p-2 rounded-md w-full text-system-error-h">
+          <div className="flex items-start gap-1 justify-start">
+            <Icon name="alert" className="size-6" />
+            <h3 className="text-base leading-tight mb-2 font-bold ">
+              Failed to generate geometry
+            </h3>
+          </div>
+          <p className="text-xs ml-6">Try changing W/D/H size or partition</p>
+        </div>
       )}
     </div>
   )
