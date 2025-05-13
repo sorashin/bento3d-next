@@ -75,7 +75,7 @@ export const DrawerUpdates: FC = () => {
                       key={idx}
                       className={`mb-4 bg-content-h rounded-sm shadow-md relative ${
                         update.image ? "p-0" : "p-4"
-                      } overflow-hidden`}>
+                      } overflow-hidden flex flex-col items-center`}>
                       <h5
                         className={`font-bold ${
                           update.image ? "absolute" : "relative"
