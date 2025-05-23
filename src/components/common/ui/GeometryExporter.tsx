@@ -393,7 +393,7 @@ const GeometryExporter: FC = () => {
                 {geometry.label}
               </button>
             </li>
-          ))}
+            ))}
         </ul>
       ) : (
         <div className="bg-system-error-l flex flex-col items-center justify-center p-2 rounded-md w-full text-system-error-h">
