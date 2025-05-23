@@ -7,6 +7,9 @@ lerna-debug.log*
 firebase-debug.log*
 ui-debug.log*
 
+
+.yarn/install-state.gz
+
 # dependencies
 node_modules
 /.pnp
