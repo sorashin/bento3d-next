@@ -95,31 +95,36 @@ const GeometryExporter: FC = () => {
         return new Manifold(mesh)
       })
 
-      // tray001を取得
-      const tray001 = trayGeometries.find((g) => g.label === "tray001")
+      // // tray001を取得
+      const tray001 = trayGeometries.find((g) => g.label == "tray001")
 
-      // tray002をすべて取得
+      // // tray002をすべて取得
       const tray002s = trayGeometries.filter((g) => g.label === "tray002")
+      console.log("tray002s", tray002s, "tray001", tray001)
 
       // Manifoldに変換
-      const tray001Manifold = new Manifold(
-        new Mesh(geometry2mesh(tray001!.geometry))
-      )
-      const tray002Manifolds = tray002s.map(
-        (g) => new Manifold(new Mesh(geometry2mesh(g.geometry)))
-      )
 
+      const tray002Manifolds = tray002s.map((g) => {
+        const { vertProperties, triVerts } = geometry2mesh(g.geometry)
+        const mesh = new Mesh({ numProp: 3, vertProperties, triVerts })
+        mesh.merge()
+
+        return new Manifold(mesh)
+      })
+      console.log("tray002Manifolds", tray002Manifolds)
       // differenceを順番に適用
-      let result = tray001Manifold
+      let result = manifolds[0]
       for (const tray002 of tray002Manifolds) {
+        //何番目の処理かを表示
+        console.log("tray002", tray002, "result", result)
         result = Manifold.difference(result, tray002)
       }
 
       // 1. tray001 と tray002 の difference
-      // const result = Manifold.difference(manifolds[0], manifolds[1])
+      // let result = Manifold.difference(manifolds[0], manifolds[2])
 
       // // 2. 1の結果と tray003 の difference
-      // result = Manifold.difference(result, manifolds[2])
+      // result = Manifold.difference(result, manifolds[3])
 
       // // 3. 2の結果と tray004 の union
       // result = Manifold.union(result, manifolds[3])
