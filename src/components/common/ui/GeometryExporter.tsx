@@ -16,6 +16,7 @@ import { useParams } from "react-router-dom"
 import { GeometryIdentifier } from "nodi-modular"
 import Module from "manifold-3d"
 import { convertGeometryInteropToJson } from "@/utils/geometryUtils"
+import { useSettingsStore } from "@/stores/settings"
 
 // Convert Manifold Mesh to Three.js BufferGeometry
 function mesh2geometry(mesh: any) {
@@ -30,8 +31,12 @@ function geometry2mesh(geometry: BufferGeometry) {
   const positions = geometry.getAttribute("position")
   const indices = geometry.getIndex()
 
-  const vertProperties = new Float32Array(positions.array)
-  const triVerts = new Uint32Array(indices ? indices.array : [])
+  const vertProperties = new Float32Array(
+    (positions.array as Float32Array).slice()
+  )
+  const triVerts = new Uint32Array(
+    indices ? (indices.array as Uint32Array).slice() : []
+  )
 
   return { vertProperties, triVerts }
 }
@@ -40,6 +45,9 @@ const GeometryExporter: FC = () => {
   const [format] = useState<string | null>("stl")
   const geometries = useModularStore((state) => state.geometries)
   const nodes = useModularStore((state) => state.nodes)
+  const { manifoldGeometries, setManifoldGeometries } = useSettingsStore(
+    (state) => state
+  )
   const { totalWidth, totalDepth, totalHeight } = useTrayStore((state) => state)
   const [manifoldModule, setManifoldModule] = useState<any>(null)
 
@@ -95,41 +103,43 @@ const GeometryExporter: FC = () => {
         return new Manifold(mesh)
       })
 
-      // // tray001を取得
-      const tray001 = trayGeometries.find((g) => g.label == "tray001")
-
-      // // tray002をすべて取得
+      // tray002をすべて取得
       const tray002s = trayGeometries.filter((g) => g.label === "tray002")
-      console.log("tray002s", tray002s, "tray001", tray001)
 
       // Manifoldに変換
-
       const tray002Manifolds = tray002s.map((g) => {
         const { vertProperties, triVerts } = geometry2mesh(g.geometry)
         const mesh = new Mesh({ numProp: 3, vertProperties, triVerts })
         mesh.merge()
-
         return new Manifold(mesh)
       })
-      console.log("tray002Manifolds", tray002Manifolds)
+
+      // tray003のindexを取得
+      const tray003Index = trayGeometries.findIndex(
+        (g) => g.label === "tray003"
+      )
+      // tray003のindexを取得
+      const tray004Index = trayGeometries.findIndex(
+        (g) => g.label === "tray004"
+      )
+
       // differenceを順番に適用
       let result = manifolds[0]
+      // 1. tray001 と tray002 の difference
       for (const tray002 of tray002Manifolds) {
-        //何番目の処理かを表示
-        console.log("tray002", tray002, "result", result)
         result = Manifold.difference(result, tray002)
       }
-
-      // 1. tray001 と tray002 の difference
-      // let result = Manifold.difference(manifolds[0], manifolds[2])
-
-      // // 2. 1の結果と tray003 の difference
-      // result = Manifold.difference(result, manifolds[3])
-
-      // // 3. 2の結果と tray004 の union
-      // result = Manifold.union(result, manifolds[3])
+      // 2. 上の結果 と tray003 の difference（indexで取得）
+      if (tray003Index !== -1) {
+        result = Manifold.difference(result, manifolds[tray003Index])
+      }
+      // 3. 上の結果 と tray004 の union
+      if (tray004Index !== -1) {
+        result = Manifold.union(result, manifolds[tray004Index])
+      }
 
       // Convert back to Three.js geometry
+      setManifoldGeometries([mesh2geometry(result.getMesh())])
       return mesh2geometry(result.getMesh())
     } catch (error) {
       console.error("Error processing geometry:", error)
