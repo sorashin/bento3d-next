@@ -45,9 +45,7 @@ const GeometryExporter: FC = () => {
   const [format] = useState<string | null>("stl")
   const geometries = useModularStore((state) => state.geometries)
   const nodes = useModularStore((state) => state.nodes)
-  const { manifoldGeometries, setManifoldGeometries } = useSettingsStore(
-    (state) => state
-  )
+
   const { totalWidth, totalDepth, totalHeight } = useTrayStore((state) => state)
   const [manifoldModule, setManifoldModule] = useState<any>(null)
 
@@ -139,7 +137,6 @@ const GeometryExporter: FC = () => {
       }
 
       // Convert back to Three.js geometry
-      setManifoldGeometries([mesh2geometry(result.getMesh())])
       return mesh2geometry(result.getMesh())
     } catch (error) {
       console.error("Error processing geometry:", error)
