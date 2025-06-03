@@ -1,4 +1,5 @@
 import Canvas from "@/components/bento3d/3d/Canvas"
+import { ColorSwitcher } from "@/components/common/ui/ColorSwicher"
 import DialogAd from "@/components/common/ui/DialogAd"
 import DialogFeedback from "@/components/common/ui/DialogFeedback"
 import DrawerUpdates from "@/components/common/ui/DrawerUpdates"
@@ -63,6 +64,11 @@ export function Page() {
           <div className="flex items-center justify-center w-1/2 h-1/2">
             <GridEditor />
           </div>
+        </div>
+      )}
+      {currentNav == 2 && (
+        <div className="absolute bottom-16 inset-x-0 flex justify-center items-center gap-2 pointer-events-none text-white">
+          <ColorSwitcher />
         </div>
       )}
       <LeftMenu />
