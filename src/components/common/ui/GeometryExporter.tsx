@@ -140,7 +140,9 @@ const GeometryExporter: FC = () => {
 
     const { Manifold, Mesh } = manifoldModule
     const bentoGeometries = geometriesWithInfo
-      .filter((geometry) => geometry.label?.includes("bento3d"))
+      .filter((geometry) =>
+        ["lid"].some((key) => geometry.label?.includes(key))
+      )
       .sort((a, b) => {
         const numA = parseInt(a.label?.match(/\d+/)?.[0] || "0")
         const numB = parseInt(b.label?.match(/\d+/)?.[0] || "0")
@@ -151,27 +153,54 @@ const GeometryExporter: FC = () => {
 
     try {
       const manifolds = bentoGeometries.map((geometry) => {
-        const { vertProperties, triVerts } = geometry2mesh(geometry.geometry)
-        const mesh = new Mesh({ numProp: 3, vertProperties, triVerts })
-        mesh.merge()
-        return new Manifold(mesh)
-      })
-
-      const lidManifolds = bentoGeometries
-        .filter((g) => g.label?.includes("_lid"))
-        .map((geometry) => {
+        try {
           const { vertProperties, triVerts } = geometry2mesh(geometry.geometry)
           const mesh = new Mesh({ numProp: 3, vertProperties, triVerts })
           mesh.merge()
+          return new Manifold(mesh)
+        } catch (e) {
+          console.error(
+            `このジオメトリでManifold化に失敗: label=${
+              geometry.label
+            }, id=${JSON.stringify(geometry.id)}`,
+            geometry,
+            e
+          )
+          return null // もしくはthrow e;
+        }
+      })
+      console.log("manifolds", manifolds)
 
+      const lidManifolds = bentoGeometries
+        .filter((g) => g.label?.includes("lid002"))
+        .map((geometry) => {
+          const { vertProperties, triVerts } = geometry2mesh(geometry.geometry)
+          const mesh = new Mesh({ numProp: 3, vertProperties, triVerts })
+          // 一時的デバッグ
+          if (!mesh.isManifold?.()) {
+            console.error(
+              `このメッシュはマニホールドではありません: label=${
+                geometry.label
+              }, id=${JSON.stringify(geometry.id)}`,
+              {
+                label: geometry.label,
+                id: geometry.id,
+                positionCount:
+                  geometry.geometry.getAttribute("position")?.count,
+                indexCount: geometry.geometry.getIndex()?.count,
+                geometry,
+              }
+            )
+          }
+          mesh.merge()
           return new Manifold(mesh)
         })
-      let lidResult = lidManifolds[0]
-      lidResult = Manifold.union(manifolds[0], manifolds[6])
-      // for (const item of lidManifolds.slice(1)) {
-      //   lidResult = Manifold.union(lidResult, item)
-      // }
-      // Convert back to Three.js geometry
+      console.log("lidManifolds", lidManifolds)
+
+      const lid001Index = bentoGeometries.findIndex((g) => g.label === "lid001")
+      let lidResult = manifolds[lid001Index]
+      lidResult = Manifold.union(lidResult, lidManifolds[1])
+
       return mesh2geometry(lidResult.getMesh())
     } catch (error) {
       console.error("Error processing geometry:", error)
@@ -254,6 +283,7 @@ const GeometryExporter: FC = () => {
   }, [geometries])
   //processedGeometry内でmanifoldGeometriesを更新してはいけないのでuseEffectで実行
   useEffect(() => {
+    console.log("processBentoGeometry", processBentoGeometry)
     if (slug === "tray") {
       if (processedGeometry) {
         //同じtrayのlabelを持ったmanifoldGeometriesは削除
