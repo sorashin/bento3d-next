@@ -13,10 +13,7 @@ import { STLExporter } from "three-stdlib"
 import Icon from "./Icon"
 import { useTrayStore } from "@/stores/tray"
 import { useParams } from "react-router-dom"
-import { GeometryIdentifier } from "nodi-modular"
 import Module from "manifold-3d"
-import { convertGeometryInteropToJson } from "@/utils/geometryUtils"
-import { useSettingsStore } from "@/stores/settings"
 
 // Convert Manifold Mesh to Three.js BufferGeometry
 function mesh2geometry(mesh: any) {
@@ -49,14 +46,9 @@ const GeometryExporter: FC = () => {
   const { totalWidth, totalDepth, totalHeight } = useTrayStore((state) => state)
   const [manifoldModule, setManifoldModule] = useState<any>(null)
 
-  useEffect(() => {
-    const initManifold = async () => {
-      const wasm = await Module()
-      wasm.setup()
-      setManifoldModule(wasm)
-    }
-    initManifold()
-  }, [])
+  const { manifoldGeometries, setManifoldGeometries } = useModularStore(
+    (state) => state
+  )
 
   const { slug } = useParams<{ slug: string }>()
   const gridCSS = (slug: string) => {
@@ -143,6 +135,49 @@ const GeometryExporter: FC = () => {
       return null
     }
   }, [geometriesWithInfo, manifoldModule, slug])
+  const processBentoGeometry = useMemo(() => {
+    if (!manifoldModule || slug !== "bento3d") return null
+
+    const { Manifold, Mesh } = manifoldModule
+    const bentoGeometries = geometriesWithInfo
+      .filter((geometry) => geometry.label?.includes("bento3d"))
+      .sort((a, b) => {
+        const numA = parseInt(a.label?.match(/\d+/)?.[0] || "0")
+        const numB = parseInt(b.label?.match(/\d+/)?.[0] || "0")
+        return numA - numB
+      })
+    console.log("bentoGeometries", bentoGeometries)
+    if (bentoGeometries.length < 2) return null
+
+    try {
+      const manifolds = bentoGeometries.map((geometry) => {
+        const { vertProperties, triVerts } = geometry2mesh(geometry.geometry)
+        const mesh = new Mesh({ numProp: 3, vertProperties, triVerts })
+        mesh.merge()
+        return new Manifold(mesh)
+      })
+
+      const lidManifolds = bentoGeometries
+        .filter((g) => g.label?.includes("_lid"))
+        .map((geometry) => {
+          const { vertProperties, triVerts } = geometry2mesh(geometry.geometry)
+          const mesh = new Mesh({ numProp: 3, vertProperties, triVerts })
+          mesh.merge()
+
+          return new Manifold(mesh)
+        })
+      let lidResult = lidManifolds[0]
+      lidResult = Manifold.union(manifolds[0], manifolds[6])
+      // for (const item of lidManifolds.slice(1)) {
+      //   lidResult = Manifold.union(lidResult, item)
+      // }
+      // Convert back to Three.js geometry
+      return mesh2geometry(lidResult.getMesh())
+    } catch (error) {
+      console.error("Error processing geometry:", error)
+      return null
+    }
+  }, [geometriesWithInfo, manifoldModule, slug])
 
   const parseMesh = useCallback(
     async (object: Object3D) => {
@@ -207,8 +242,35 @@ const GeometryExporter: FC = () => {
     [format, geometries, parseMesh]
   )
   useEffect(() => {
+    const initManifold = async () => {
+      const wasm = await Module()
+      wasm.setup()
+      setManifoldModule(wasm)
+    }
+    initManifold()
+  }, [])
+  useEffect(() => {
     console.log("geometries", geometries)
   }, [geometries])
+  //processedGeometry内でmanifoldGeometriesを更新してはいけないのでuseEffectで実行
+  useEffect(() => {
+    if (slug === "tray") {
+      if (processedGeometry) {
+        //同じtrayのlabelを持ったmanifoldGeometriesは削除
+        const newManifoldGeometries = manifoldGeometries.filter(
+          (geometry) => geometry.label !== "tray"
+        )
+        setManifoldGeometries([
+          ...newManifoldGeometries,
+          {
+            label: "tray",
+            id: "tray",
+            geometry: processedGeometry,
+          },
+        ])
+      }
+    }
+  }, [slug, processedGeometry])
 
   return (
     <div className="p-0">

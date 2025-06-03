@@ -10,6 +10,11 @@ export interface GeometryWithId {
   id: GeometryIdentifier;  // stringではなくGeometryIdentifier型に修正
   geometry: BufferGeometry;
 }
+export interface ManifoldGeometriesWithInfo {
+  label: string
+  id: string
+  geometry: BufferGeometry
+}
 
 // Zustandストアの型定義
 interface ModularState {
@@ -17,6 +22,7 @@ interface ModularState {
   nodes: NodeInterop[];
   geometries: GeometryWithId[];
   inputNodeId:string
+  manifoldGeometries:ManifoldGeometriesWithInfo[]
   
 
   // アクション
@@ -25,6 +31,7 @@ interface ModularState {
   setGeometries: (geometries: GeometryWithId[]) => void;
 
   setInputNodeId: (inputNodeId:string) => void
+  setManifoldGeometries: (manifoldGeometries:ManifoldGeometriesWithInfo[]) => void
   
   // 複雑な操作
   initializeModular: () => Promise<void>;
@@ -52,7 +59,8 @@ export const useModularStore = create<ModularState>((set, get) => ({
   nodes: [],
   geometries: [],
   inputNodeId: "",
-  
+  manifoldGeometries:[],
+  setManifoldGeometries: (manifoldGeometries) => set({ manifoldGeometries }),
 
   setModular: (modular) => set({ modular }),
   setNodes: (nodes) => set({ nodes }),
