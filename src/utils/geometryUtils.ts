@@ -2,12 +2,12 @@
 import {
     BufferAttribute,
     BufferGeometry,
-    
+    Matrix4,
     
   } from "three";
   
   // Modularの幾何学インターフェイスをThree.jsのBufferGeometryに変換
-  const convertGeometryInterop = (interop: any): BufferGeometry | null => {
+  const convertGeometryInterop = (interop: any, transform: number[]): BufferGeometry | null => {
     switch (interop?.variant) {
       case "Mesh": {
         const { data } = interop;
@@ -27,6 +27,7 @@ import {
             new BufferAttribute(new Uint32Array(faces.flat(1)), 1)
           );
         }
+        geometry.applyMatrix4(new Matrix4().fromArray(transform));
   
         return geometry;
       }
