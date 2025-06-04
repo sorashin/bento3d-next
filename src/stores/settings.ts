@@ -15,16 +15,20 @@ export interface Toast  {
   type: "default" | "error" | "warn";
   persistent?: boolean;
 };
-
-export interface Fillament {
+export interface FillamentState {
   series:string;
+  color:Color;
+}
+export interface Color {
   name:string;
+  sampleImage:string;
   hex:string;
   threeHEX:string;
   metalness:number;
   roughness:number;
   url:string;
 }
+
 
 
 interface SettingsState {
@@ -58,8 +62,8 @@ interface SettingsState {
   setBom: (bom: number) => void;
   isPreviewLoad: boolean;
   setIsPreviewLoad: (isPreviewLoad: boolean) => void;
-  fillament:Fillament;
-  setFillament: (fillament:Fillament) => void;
+  currentFillament:FillamentState;
+  setFillament: (fillament:FillamentState) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()((set) => ({
@@ -106,15 +110,18 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   setBom: (bom: number) => set({ bom }),
   isPreviewLoad: false,
   setIsPreviewLoad: (isPreviewLoad: boolean) => set({ isPreviewLoad }),
-  fillament:{
+  currentFillament:{
     series:'Polymaker Panchroma',
-    name:'ArmyBlue',
-    hex:'#000000',
-    threeHEX:'#333333',
-    metalness:0,
-    roughness:0.5,
-    url:'https://www.matterhackers.com/store/l/polymaker-panchroma-matte-pla-filament-175mm-1kg/sk/MMTZMUFV'
+    color:{
+      name:'ArmyBlue',
+      sampleImage:'https://www.matterhackers.com/store/l/polymaker-panchroma-matte-pla-filament-175mm-1kg/sk/MMTZMUFV',
+      hex:'#000000',
+      threeHEX:'#333333',
+      metalness:0,
+      roughness:0.5,
+      url:'https://www.matterhackers.com/store/l/polymaker-panchroma-matte-pla-filament-175mm-1kg/sk/MMTZMUFV'
+    }
   },
-  setFillament: (fillament:Fillament) => set({ fillament }),
+  setFillament: (fillament:FillamentState) => set({ currentFillament:fillament }),
 }));
 
