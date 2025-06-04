@@ -70,7 +70,7 @@ const GeometryExporter: FC = () => {
     })
   }, [geometries, nodes])
 
-  const processedGeometry = useMemo(() => {
+  const processTrayGeometry = useMemo(() => {
     if (!manifoldModule || slug !== "tray") return null
 
     const { Manifold, Mesh } = manifoldModule
@@ -114,22 +114,22 @@ const GeometryExporter: FC = () => {
       )
 
       // differenceを順番に適用
-      let result = manifolds[0]
+      let trayResult = manifolds[0]
       // 1. tray001 と tray002 の difference
       for (const tray002 of tray002Manifolds) {
-        result = Manifold.difference(result, tray002)
+        trayResult = Manifold.difference(trayResult, tray002)
       }
       // 2. 上の結果 と tray003 の difference（indexで取得）
       if (tray003Index !== -1) {
-        result = Manifold.difference(result, manifolds[tray003Index])
+        trayResult = Manifold.difference(trayResult, manifolds[tray003Index])
       }
       // 3. 上の結果 と tray004 の union
       if (tray004Index !== -1) {
-        result = Manifold.union(result, manifolds[tray004Index])
+        trayResult = Manifold.union(trayResult, manifolds[tray004Index])
       }
 
       // Convert back to Three.js geometry
-      return mesh2geometry(result.getMesh())
+      return mesh2geometry(trayResult.getMesh())
     } catch (error) {
       console.error("Error processing geometry:", error)
       return null
@@ -141,7 +141,7 @@ const GeometryExporter: FC = () => {
     const { Manifold, Mesh } = manifoldModule
     const bentoGeometries = geometriesWithInfo
       .filter((geometry) =>
-        ["lid"].some((key) => geometry.label?.includes(key))
+        ["lid","box"].some((key) => geometry.label?.includes(key))
       )
       .sort((a, b) => {
         const numA = parseInt(a.label?.match(/\d+/)?.[0] || "0")
@@ -171,37 +171,68 @@ const GeometryExporter: FC = () => {
       })
       console.log("manifolds", manifolds)
 
-      const lidManifolds = bentoGeometries
-        .filter((g) => g.label?.includes("lid002"))
-        .map((geometry) => {
-          const { vertProperties, triVerts } = geometry2mesh(geometry.geometry)
+      // const lidManifolds = bentoGeometries
+      //   .filter((g) => g.label?.includes("lid002"))
+      //   .map((geometry) => {
+      //     const { vertProperties, triVerts } = geometry2mesh(geometry.geometry)
+      //     const mesh = new Mesh({ numProp: 3, vertProperties, triVerts })
+      //     // 一時的デバッグ
+      //     if (!mesh.isManifold?.()) {
+      //       console.error(
+      //         `このメッシュはマニホールドではありません: label=${
+      //           geometry.label
+      //         }, id=${JSON.stringify(geometry.id)}`,
+      //         {
+      //           label: geometry.label,
+      //           id: geometry.id,
+      //           positionCount:
+      //             geometry.geometry.getAttribute("position")?.count,
+      //           indexCount: geometry.geometry.getIndex()?.count,
+      //           geometry,
+      //         }
+      //       )
+      //     }
+      //     mesh.merge()
+      //     return new Manifold(mesh)
+      //   })
+      // console.log("lidManifolds", lidManifolds)
+
+      const lid001Index = bentoGeometries.findIndex((g) => g.label === "lid001")
+      // lid002をすべて取得
+      const lid002s = bentoGeometries.filter((g) => g.label === "lid002")
+      // Manifoldに変換
+      const lid002Manifolds = lid002s.map((g) => {
+        const { vertProperties, triVerts } = geometry2mesh(g.geometry)
+        const mesh = new Mesh({ numProp: 3, vertProperties, triVerts })
+        mesh.merge()
+        return new Manifold(mesh)
+      })
+      const box001Index = bentoGeometries.findIndex((g) => g.label === "box001")
+
+      const box002Index = bentoGeometries.findIndex((g) => g.label === "box002")
+      const box003Manifolds = bentoGeometries
+        .filter((g) => g.label === "box003")
+        .map((g) => {
+          const { vertProperties, triVerts } = geometry2mesh(g.geometry)
           const mesh = new Mesh({ numProp: 3, vertProperties, triVerts })
-          // 一時的デバッグ
-          if (!mesh.isManifold?.()) {
-            console.error(
-              `このメッシュはマニホールドではありません: label=${
-                geometry.label
-              }, id=${JSON.stringify(geometry.id)}`,
-              {
-                label: geometry.label,
-                id: geometry.id,
-                positionCount:
-                  geometry.geometry.getAttribute("position")?.count,
-                indexCount: geometry.geometry.getIndex()?.count,
-                geometry,
-              }
-            )
-          }
           mesh.merge()
           return new Manifold(mesh)
         })
-      console.log("lidManifolds", lidManifolds)
 
-      const lid001Index = bentoGeometries.findIndex((g) => g.label === "lid001")
       let lidResult = manifolds[lid001Index]
-      lidResult = Manifold.union(lidResult, lidManifolds[1])
+      for (const lid002 of lid002Manifolds) {
+        lidResult = Manifold.union(lidResult, lid002)
+      }
 
-      return mesh2geometry(lidResult.getMesh())
+      let boxResult = manifolds[box001Index]
+      
+      boxResult = Manifold.difference(boxResult, manifolds[box002Index])
+      
+      for (const box003 of box003Manifolds) {
+        boxResult = Manifold.union(boxResult, box003)
+      }
+
+      return mesh2geometry(boxResult.getMesh())
     } catch (error) {
       console.error("Error processing geometry:", error)
       return null
@@ -281,11 +312,11 @@ const GeometryExporter: FC = () => {
   useEffect(() => {
     console.log("geometries", geometries)
   }, [geometries])
-  //processedGeometry内でmanifoldGeometriesを更新してはいけないのでuseEffectで実行
+  //processTrayGeometry内でmanifoldGeometriesを更新してはいけないのでuseEffectで実行
   useEffect(() => {
     console.log("processBentoGeometry", processBentoGeometry)
     if (slug === "tray") {
-      if (processedGeometry) {
+      if (processTrayGeometry) {
         //同じtrayのlabelを持ったmanifoldGeometriesは削除
         const newManifoldGeometries = manifoldGeometries.filter(
           (geometry) => geometry.label !== "tray"
@@ -295,21 +326,37 @@ const GeometryExporter: FC = () => {
           {
             label: "tray",
             id: "tray",
-            geometry: processedGeometry,
+            geometry: processTrayGeometry,
           },
         ])
       }
     }
-  }, [slug, processedGeometry])
+    if (slug === "bento3d") {
+      if (processBentoGeometry) {
+        //同じbentoのlabelを持ったmanifoldGeometriesは削除
+        const newManifoldGeometries = manifoldGeometries.filter(
+          (geometry) => geometry.label !== "bento"
+        )
+        setManifoldGeometries([
+          ...newManifoldGeometries,
+          {
+            label: "bento",
+            id: "bento",
+            geometry: processBentoGeometry,
+          },
+        ])
+      }
+    }
+  }, [slug, processTrayGeometry, processBentoGeometry])
 
   return (
     <div className="p-0">
-      {processedGeometry && (
+      {processTrayGeometry && (
         <button
           className="b-button bg-surface-ev1 !text-white items-center !py-1 w-full justify-center hover:!bg-content-h-a mb-4"
           onClick={async () => {
             const mesh = new ThreeMesh(
-              processedGeometry,
+              processTrayGeometry,
               new MeshStandardMaterial({ side: DoubleSide })
             )
             const root = new Object3D()
@@ -326,6 +373,30 @@ const GeometryExporter: FC = () => {
           }}>
           <Icon name="download" className="size-4" />
           合成済みトレイをSTLでダウンロード
+        </button>
+      )}
+      {processBentoGeometry && (
+        <button
+          className="b-button bg-surface-ev1 !text-white items-center !py-1 w-full justify-center hover:!bg-content-h-a mb-4"
+          onClick={async () => {
+            const mesh = new ThreeMesh(
+              processBentoGeometry,
+              new MeshStandardMaterial({ side: DoubleSide })
+            )
+            const root = new Object3D()
+            root.add(mesh)
+            const exporter = new STLExporter()
+            const data = exporter.parse(root)
+            const blob = new Blob([data], { type: "application/octet-stream" })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement("a")
+            a.href = url
+            a.download = `processed-bento.stl`
+            a.click()
+            URL.revokeObjectURL(url)
+          }}>
+          <Icon name="download" className="size-4" />
+          合成済みベントーをSTLでダウンロード
         </button>
       )}
       {geometriesWithInfo.length > 0 ? (
