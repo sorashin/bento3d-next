@@ -41,11 +41,7 @@ export default function TrayModel() {
       {manifoldGeometries.map((geometry, index) => {
         // 法線を再計算
         geometry.geometry.computeVertexNormals()
-        // trayの場合は追加の移動を適用するNodiの不具合修正までの間の対応
-        const extraOffset =
-          geometry.label === "latch"
-            ? new Vector3(0, totalDepth / 2 + 7, -totalHeight - 3)
-            : new Vector3(0, 0, 0)
+        
 
         return (
           <mesh
@@ -55,7 +51,7 @@ export default function TrayModel() {
               slug === "bento3d"
                 ? directions(geometry.label || "")
                     .multiplyScalar(-100 * bom)
-                    .add(extraOffset)
+                    
                 : [0, 0, 0]
             }
             rotation={[Math.PI, 0, 0]}>
