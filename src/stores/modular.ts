@@ -110,7 +110,8 @@ export const useModularStore = create<ModularState>((set, get) => ({
       const gs = geometryIdentifiers!
         .map((id) => {
           const interop = modular.findGeometryInteropById(id);
-          const geometry = interop ? convertGeometryInterop(interop) : null;
+          const {transform} = id
+          const geometry = interop ? convertGeometryInterop(interop, transform) : null;
           
           return geometry ? { 
             id, // ジオメトリ識別子をIDとして保存
