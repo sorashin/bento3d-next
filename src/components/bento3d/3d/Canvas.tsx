@@ -8,7 +8,7 @@ import {
 
 import { useModularStore } from "@/stores/modular"
 import TrayModel from "./TrayModel"
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState, useMemo } from "react"
 import { Object3D } from "three"
 import PreviewModel from "./PreviewModel"
 import { useNavigationStore } from "@/stores/navigation"
@@ -114,21 +114,21 @@ const Canvas = () => {
         <Grid
           cellSize={deunit(gridSize)}
           sectionSize={deunit(gridSize) * 10}
-          sectionColor={"#bbd7cf"}
-          cellColor={"#b0bdbb"}
+          sectionColor={"#9fc0b7"}
+          cellColor={"#919c9b"}
           cellThickness={0.8}
           sectionThickness={0.8}
-          fadeDistance={250}
+          fadeDistance={800}
           rotation={[Math.PI / 2, 0, 0]}
           infiniteGrid={true}
           side={THREE.DoubleSide}
         />
-        <ambientLight intensity={2.8} />
+        <ambientLight intensity={2.5} />
         {/* axis helper */}
 
         {/* <axesHelper args={[100]} /> */}
         <directionalLight
-          position={[5, 5, 5]}
+          position={[50, 50, 50]}
           intensity={1}
           castShadow
           shadow-mapSize-width={2048}
@@ -150,7 +150,7 @@ const Canvas = () => {
         />
 
         {currentNav == 0 && <PreviewModel />}
-        {currentNav == 2 && <TrayModel geometries={geometries} />}
+        {currentNav == 2 && <TrayModel />}
       </ThreeCanvas>
     </div>
   )

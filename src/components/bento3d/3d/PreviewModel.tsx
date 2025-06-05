@@ -189,17 +189,19 @@ export default function TrayModel() {
         xOffset += grid[index - 1].width + thickness
       }
 
-      // セルの深さを計算
-      const cellDepth =
-        (row.depth - (row.division - 1) * thickness) / row.division
-
       // トレイの中心を原点として、縦方向に行を配置
       const yOffset = -fakeTotalDepth / 2 + thickness
 
       // 各セルを処理
-      for (let i = 0; i < row.division; i++) {
+      for (let i = 0; i < row.column.length; i++) {
+        // iまでのcolumnのdepthの累計を計算
+        const totalDepth = row.column
+          .slice(0, i)
+          .reduce((acc, c) => acc + (c.depth || 0), 0)
         // 位置を直接計算
-        const currentYOffset = yOffset + i * (cellDepth + thickness)
+        const currentYOffset = yOffset + totalDepth + thickness * i
+        // セルの深さを計算
+        const cellDepth = row.column[i].depth
 
         // セルの情報を追加
         cells.push({

@@ -2,18 +2,17 @@ import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import wasm from 'vite-plugin-wasm'
 import svgr from "vite-plugin-svgr";
-// import topLevelAwait from 'vite-plugin-top-level-await'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     tailwindcss(),
     wasm(),
+    // topLevelAwait(),
     svgr({ include: "**/*.svg" })
-    // topLevelAwait()
   ],
   optimizeDeps: {
-    exclude: ['nodi-modular']
+    exclude: ['nodi-modular', 'manifold-3d']
   },
   resolve: {
 		alias: {

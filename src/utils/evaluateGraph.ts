@@ -22,7 +22,8 @@ export const evaluateGraph = async (
       ? result.geometryIdentifiers
           .map((id) => {
             const interop = modular.findGeometryInteropById(id);
-            const geometry = interop ? convertGeometryInterop(interop) : null;
+            const {transform} = id
+            const geometry = interop ? convertGeometryInterop(interop, transform) : null;
             
             return geometry ? {
               id,
