@@ -6,8 +6,8 @@ export type Row = {
   width: number;
   depth: number;
   type: FlexSize;
-  division: number;
-//   column: Column[];
+  // division: number;
+  column: Column[];
 };
 export type Column ={
     id: string;
@@ -32,7 +32,7 @@ interface TrayStore {
   // アクション
   addRow: (newRow: Omit<Row, 'width'>) => void;
   addColumn: (rowId: string) => void;
-  removeColumn: (rowId: string) => void; // 新しく追加するアクション
+  removeColumn: (rowId: string, colId: string) => void; // 新しく追加するアクション
   updateRow: (id: string, updates: Partial<Row>) => void;
   updateSize: (params: { width?: number, depth?: number, height?: number }) => void;
   setSelectedColumnId: (id: string | null) => void;
@@ -103,6 +103,63 @@ const recalculateRowDimensions = (rows: Row[], totalWidth: number, totalDepth: n
   });
 };
 
+// 列の深さを再計算する共通ヘルパー関数
+const recalculateColDimensions = (rows: Row[], thickness: number): Row[] => {
+  // 各行について処理
+  return rows.map(row => {
+    // 固定幅の列の合計を計算
+    const fixedDepthSum = row.column
+      .filter(col => col.type === 'fixed')
+      .reduce((sum, col) => sum + col.depth, 0);
+    
+    // フレキシブル列に使える深さを計算
+    const availableDepth = row.depth - fixedDepthSum  - (row.column.length-1)*thickness;
+
+    // フレキシブル列の種類をカウント
+    const fillCount = row.column.filter(col => col.type === 'fill').length;
+    const halfCount = row.column.filter(col => col.type === '1/2').length;
+    const thirdCount = row.column.filter(col => col.type === '1/3').length;
+    
+    // 深さの単位を計算
+    const totalUnits = fillCount + (halfCount / 2) + (thirdCount / 3);
+    const unitDepth = totalUnits > 0 ? availableDepth / totalUnits : 0;
+    
+    // 列の深さを更新
+    const updatedColumns = row.column.map(col => {
+      let newDepth = col.depth;
+      // 固定深さでない場合のみ深さを再計算
+      if (col.type !== 'fixed') {
+        switch (col.type) {
+          case 'fill':
+            newDepth = unitDepth;
+            break;
+          case '1/2':
+            newDepth = unitDepth / 2;
+            break;
+          case '1/3':
+            newDepth = unitDepth / 3;
+            break;
+        }
+        
+        // 小数第2位で四捨五入
+        newDepth = Math.round(newDepth * 100) / 100;
+      }
+      
+      // 深さを更新して返す
+      return { 
+        ...col, 
+        depth: newDepth
+      };
+    });
+    
+    // 更新された列で行を更新
+    return {
+      ...row,
+      column: updatedColumns
+    };
+  });
+};
+
 // ウィンドウサイズを取得するヘルパー関数
 const getWindowSize = () => {
   if (typeof window === 'undefined') return { width: 1000, height: 800 };
@@ -128,7 +185,12 @@ export const useTrayStore = create<TrayStore>((set) => ({
     width: 96,
     depth: 96,
     type: 'fill',
-    division: 1
+    // division: 1,
+    column: [{
+      id: 'col1',
+      depth: 96,
+      type: 'fill'
+    }]
   }],
   totalWidth: 100,
   totalDepth: 100,
@@ -154,15 +216,18 @@ export const useTrayStore = create<TrayStore>((set) => ({
       // 幅を再計算
       const updatedRows = recalculateRowDimensions(rows, state.totalWidth, state.totalDepth, state.thickness);
       
+      // 列の深さを再計算
+      const updatedRowsCols = recalculateColDimensions(updatedRows, state.thickness);
+      
       // 負の幅をチェック
-      if (updatedRows.some(row => row.width < 0)) {
+      if (updatedRowsCols.some(row => row.width < 0)) {
         alert('Cannot add row: negative width would occur');
         return state;
       }
       
       return {
         ...state,
-        grid: updatedRows
+        grid: updatedRowsCols
       };
     });
   },
@@ -171,18 +236,31 @@ export const useTrayStore = create<TrayStore>((set) => ({
         // 行を検索
         const rowIndex = state.grid.findIndex(row => row.id === rowId);
         if (rowIndex === -1) return state;
+        
         // 新しい列を追加
         const updatedRow = {
             ...state.grid[rowIndex],
-            division: state.grid[rowIndex].division + 1,
+            // division: state.grid[rowIndex].division + 1,
+            column: [
+                ...(state.grid[rowIndex].column || []),
+                {
+                    id: crypto.randomUUID(),
+                    depth: state.grid[rowIndex].depth,
+                    
+                    type: 'fill' as FlexSize
+                }
+            ]
         };
         // 行を更新
         const updatedGrid = [...state.grid];
         updatedGrid[rowIndex] = updatedRow;
         
+        // 列の深さを再計算
+        const recalculatedGrid = recalculateColDimensions(updatedGrid, state.thickness);
+        
         return {
             ...state,
-            grid: updatedGrid
+            grid: recalculatedGrid
         };
     });
   },
@@ -198,19 +276,24 @@ export const useTrayStore = create<TrayStore>((set) => ({
       updatedGrid[rowIndex] = { ...updatedGrid[rowIndex], ...updates };
       
       // 必要に応じて幅を再計算
-      const recalculatedGrid = updates.width !== undefined || updates.type !== undefined || updates.division !== undefined
+      const recalculatedRows = updates.width !== undefined || updates.type !== undefined || updates.column !== undefined
         ? recalculateRowDimensions(updatedGrid, state.totalWidth, state.totalDepth, state.thickness)
         : updatedGrid;
         
+      // 必要に応じて列の深さを再計算
+      const recalculatedRowsCols = updates.column !== undefined
+        ? recalculateColDimensions(recalculatedRows, state.thickness)
+        : recalculatedRows;
+
       // 負の幅をチェック
-      if (recalculatedGrid.some(row => row.width < 0)) {
+      if (recalculatedRowsCols.some(row => row.width < 0|| row.column.some(col => col.depth < 0))) {
         alert('Cannot update size: negative width would occur');
         return state;
       }
       
       return {
         ...state,
-        grid: recalculatedGrid
+        grid: recalculatedRowsCols
       };
     });
   },
@@ -232,28 +315,32 @@ export const useTrayStore = create<TrayStore>((set) => ({
       };
       
       // 行の幅と深さを再計算
-      const recalculatedGrid = recalculateRowDimensions(state.grid, width, depth, state.thickness);
+      const recalculatedRows = recalculateRowDimensions(state.grid, width, depth, state.thickness);
       
+      // 列の深さを再計算
+      const recalculatedRowsCols = recalculateColDimensions(recalculatedRows, state.thickness);
+
       // 負の幅をチェック
-      if (recalculatedGrid.some(row => row.width < 0)) {
+      if (recalculatedRowsCols.some(row => row.width < 0)) {
         alert('Cannot update size: negative width would occur');
         return state;
       }
       
       return {
         ...newState,
-        grid: recalculatedGrid
+        grid: recalculatedRowsCols
       };
     });
   },
-  removeColumn: (rowId) => {
+  removeColumn: (rowId, colId) => {
     set(state => {
       // 行を検索
       const rowIndex = state.grid.findIndex(row => row.id === rowId);
-      if (rowIndex === -1) return state;
-      
+      const colIndex = state.grid[rowIndex].column.findIndex(col => col.id === colId);
+      if (rowIndex === -1 || colIndex === -1) return state;
+
       // 行のdivisionが1の場合、行自体を削除する
-      if (state.grid[rowIndex].division === 1) {
+      if (state.grid[rowIndex].column.length === 1) {
         // 直接行を削除するロジックを実装（removeRowを呼び出さない）
         const filteredGrid = state.grid.filter(row => row.id !== rowId);
         
@@ -264,22 +351,25 @@ export const useTrayStore = create<TrayStore>((set) => ({
           ...state,
           grid: recalculatedGrid
         };
+      }else{
+        // rowId,colIdが一致するcol要素を削除する
+        const updatedRow = {
+          ...state.grid[rowIndex],
+          column: state.grid[rowIndex].column.filter(col => col.id !== colId)
+        };
+        // 行を更新
+        const updatedGrid = [...state.grid];
+        updatedGrid[rowIndex] = updatedRow;
+        
+        // 列の深さを再計算
+        const recalculatedGrid = recalculateColDimensions(updatedGrid, state.thickness);
+        
+        return {
+          ...state,
+          grid: recalculatedGrid
+        };
       }
       
-      // divisionが1より大きい場合、divisionを1減らす
-      const updatedRow = {
-        ...state.grid[rowIndex],
-        division: state.grid[rowIndex].division - 1,
-      };
-      
-      // 行を更新
-      const updatedGrid = [...state.grid];
-      updatedGrid[rowIndex] = updatedRow;
-      
-      return {
-        ...state,
-        grid: updatedGrid
-      };
     });
   },
   setSelectedColumnId: (id) => set(state => ({
@@ -294,22 +384,26 @@ export const useTrayStore = create<TrayStore>((set) => ({
     const newThickness = Math.round(thickness * 10) / 10;
     // 厚みが変更されたら行の幅と深さを再計算
     const recalculatedGrid = recalculateRowDimensions(state.grid, state.totalWidth, state.totalDepth, newThickness);
+    // 列の深さも再計算
+    const fullyRecalculatedGrid = recalculateColDimensions(recalculatedGrid, newThickness);
   
     return {
       ...state,
       thickness: newThickness,
-      grid: recalculatedGrid
+      grid: fullyRecalculatedGrid
     };
   }),
   setFillet: (fillet) => set(state => {
     const newFillet = Math.round(fillet * 10) / 10;
     // フィレットが変更されたら行の寸法を再計算
     const recalculatedGrid = recalculateRowDimensions(state.grid, state.totalWidth, state.totalDepth, state.thickness);
+    // 列の深さも再計算
+    const fullyRecalculatedGrid = recalculateColDimensions(recalculatedGrid, state.thickness);
     
     return {
       ...state,
       fillet: newFillet,
-      grid: recalculatedGrid
+      grid: fullyRecalculatedGrid
     };
   }),
   
