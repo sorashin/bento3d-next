@@ -50,7 +50,7 @@ export const DrawerUpdates: FC = () => {
       onClose={() => closeDrawer()}
       className="max-w-sm bg-transparent overflow-y-auto">
       <div className="w-full h-full p-8">
-        <h3 className="text-center mb-6 font-display text-xl">UPDATEs</h3>
+        <h3 className="text-center mb-6 font-display text-content-h text-xl">UPDATEs</h3>
         <p className="mb-8 text-content-m-a text-center text-sm">
           Bento3D keeps evolving, <br />
           making your 3D printing life even better.

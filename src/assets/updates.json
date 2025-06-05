@@ -1,4 +1,15 @@
-[
+[{
+    "title": "Fixed broken STL issue & Wavy lines are back",
+    "image": "/images/updates/2025-06-05.png",
+    "date": "2025-06-05",
+    "style": "left-4 bottom-6 text-content-h"
+  },
+  {
+    "title": "Column Sizing",
+    "image": "/images/updates/2025-06-05.mp4",
+    "date": "2025-06-05",
+    "style": "left-4 bottom-6 text-content-h"
+  },
   {
     "title": "Fixed stl not downloaded issue on Safari",
     "image": "",
