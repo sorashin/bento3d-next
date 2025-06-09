@@ -25,7 +25,7 @@ const directions = (parts: string): Vector3 => {
 export default function TrayModel() {
   const { totalDepth, totalHeight } = useTrayStore((state) => state)
 
-  const { bom } = useSettingsStore((state) => state)
+  const { bom, currentFillament } = useSettingsStore((state) => state)
   const { slug } = useParams<{ slug: string }>()
   const { manifoldGeometries } = useModularStore((state) => state)
 
@@ -49,14 +49,12 @@ export default function TrayModel() {
             geometry={geometry.geometry}
             position={
               slug === "bento3d"
-                ? directions(geometry.label || "")
-                    .multiplyScalar(-100 * bom)
-                    
+                ? directions(geometry.label || "").multiplyScalar(-100 * bom)
                 : [0, 0, 0]
             }
             rotation={[Math.PI, 0, 0]}>
             <meshStandardMaterial
-              color={geometry.label === "tray" ? "#ffffff" : "#3581d8"}
+              color={slug==='tray' ? currentFillament.color.threeHEX : geometry.label === "tray" ? "#ffffff" : currentFillament.color.threeHEX}
               flatShading={true}
             />
 

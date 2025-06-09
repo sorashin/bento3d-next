@@ -66,10 +66,11 @@ export function Page() {
           </div>
         </div>
       )}
-
-      <div className="absolute bottom-32 inset-x-0 flex justify-center items-center gap-2 pointer-events-none text-white">
-        <ColorSwitcher />
-      </div>
+      {currentNav == 2 && (
+        <div className="absolute bottom-8 inset-x-0 flex justify-center items-center gap-2 pointer-events-none text-white">
+          <ColorSwitcher />
+        </div>
+      )}
 
       <LeftMenu />
       <RightMenu />

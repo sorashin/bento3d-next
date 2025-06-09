@@ -27,6 +27,7 @@ export interface Color {
   metalness:number;
   roughness:number;
   url:string;
+  ogImage:string;
 }
 
 
@@ -113,13 +114,14 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   currentFillament:{
     series:'Polymaker Panchroma',
     color:{
-      name:'ArmyBlue',
-      sampleImage:'https://www.matterhackers.com/store/l/polymaker-panchroma-matte-pla-filament-175mm-1kg/sk/MMTZMUFV',
-      hex:'#000000',
-      threeHEX:'#333333',
+      name:'CottonWhite',
+      sampleImage:'/images/samples/cotton-white.png',
+      hex:'#DDE0DC',
+      threeHEX:'#DDE0DC',
       metalness:0,
       roughness:0.5,
-      url:'https://www.matterhackers.com/store/l/polymaker-panchroma-matte-pla-filament-175mm-1kg/sk/MMTZMUFV'
+      url:'https://www.matterhackers.com/store/l/polymaker-panchroma-matte-pla-filament-175mm-1kg/sk/M1W5HVYP?aff=7670',
+      ogImage:'/images/ogps/cotton-white.png'
     }
   },
   setFillament: (fillament:FillamentState) => set({ currentFillament:fillament }),
