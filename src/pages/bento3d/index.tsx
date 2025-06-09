@@ -15,6 +15,7 @@ import { useSettingsStore } from "@/stores/settings"
 import { Toast } from "@/components/common/ui/Toast"
 import { useTrayStore } from "@/stores/tray"
 import { useCallback } from "react"
+import { ColorSwitcher } from "@/components/common/ui/ColorSwicher"
 
 export function Page() {
   const { currentNav } = useNavigationStore()
@@ -76,19 +77,22 @@ export function Page() {
         //   max={1}
         //   onChange={(e) => setBom(Number(e.target.value))}
         // />
-        <div className="b-input absolute z-10 bottom-32 inset-x-0 flex justify-center items-center gap-2 pointer-events-none text-white">
-          <Icon name="bom-shrink" className="size-8" />
+        // <div className="b-input absolute z-10 bottom-32 inset-x-0 flex justify-center items-center gap-2 pointer-events-none text-white">
+        //   <Icon name="bom-shrink" className="size-8" />
 
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.01}
-            defaultValue={0}
-            onChange={(e) => setBom(Number(e.target.value))}
-          />
+        //   <input
+        //     type="range"
+        //     min={0}
+        //     max={1}
+        //     step={0.01}
+        //     defaultValue={0}
+        //     onChange={(e) => setBom(Number(e.target.value))}
+        //   />
 
-          <Icon name="bom-explode" className="size-8" />
+        //   <Icon name="bom-explode" className="size-8" />
+        // </div>
+        <div className="absolute bottom-8 inset-x-0 flex justify-center items-center gap-2 pointer-events-none text-white">
+          <ColorSwitcher />
         </div>
       )}
       <LeftMenu />

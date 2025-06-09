@@ -15,6 +15,21 @@ export interface Toast  {
   type: "default" | "error" | "warn";
   persistent?: boolean;
 };
+export interface FillamentState {
+  series:string;
+  color:Color;
+}
+export interface Color {
+  name:string;
+  sampleImage:string;
+  hex:string;
+  threeHEX:string;
+  metalness:number;
+  roughness:number;
+  url:string;
+  ogImage:string;
+}
+
 
 
 interface SettingsState {
@@ -48,6 +63,8 @@ interface SettingsState {
   setBom: (bom: number) => void;
   isPreviewLoad: boolean;
   setIsPreviewLoad: (isPreviewLoad: boolean) => void;
+  currentFillament:FillamentState;
+  setFillament: (fillament:FillamentState) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()((set) => ({
@@ -94,5 +111,19 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   setBom: (bom: number) => set({ bom }),
   isPreviewLoad: false,
   setIsPreviewLoad: (isPreviewLoad: boolean) => set({ isPreviewLoad }),
+  currentFillament:{
+    series:'Polymaker Panchroma',
+    color:{
+      name:'CottonWhite',
+      sampleImage:'/images/samples/cotton-white.png',
+      hex:'#DDE0DC',
+      threeHEX:'#DDE0DC',
+      metalness:0,
+      roughness:0.5,
+      url:'https://www.matterhackers.com/store/l/polymaker-panchroma-matte-pla-filament-175mm-1kg/sk/M1W5HVYP?aff=7670',
+      ogImage:'/images/ogps/cotton-white.png'
+    }
+  },
+  setFillament: (fillament:FillamentState) => set({ currentFillament:fillament }),
 }));
 
