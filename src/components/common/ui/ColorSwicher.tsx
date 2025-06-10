@@ -77,7 +77,9 @@ export const ColorSwitcher: React.FC<ColorSwitcherProps> = () => {
                 )
                 return (
                   <>
-                    <p className="text-sm text-content-m-a">{item.series}</p>
+                    <p className="font-semibold text-content-m-a">
+                      {item.series}
+                    </p>
                     <div className="grid grid-cols-6 gap-4 w-fit ">
                       {sortedColors.map((color) => (
                         <div
@@ -179,42 +181,62 @@ export const ColorSwitcher: React.FC<ColorSwitcherProps> = () => {
           </>
         ) : (
           <motion.div className="flex items-center gap-2">
-            {slug==='bento3d' && (  
+            {slug === "bento3d" && (
               <>
-            <div className="b-input flex justify-center items-center gap-2 pointer-events-none text-content-m h-9">
-              <Icon name="bom-shrink" className="size-8" />
+                <div className="b-input flex justify-center items-center gap-2 pointer-events-none text-content-m h-9">
+                  <Icon name="bom-shrink" className="size-8" />
 
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.01}
-                defaultValue={0}
-                onChange={(e) => setBom(Number(e.target.value))}
-              />
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    defaultValue={0}
+                    onChange={(e) => setBom(Number(e.target.value))}
+                  />
 
-              <Icon name="bom-explode" className="size-8" />
-            </div>
-            <span className="w-[1px] h-8 bg-content-l-a block" />
+                  <Icon name="bom-explode" className="size-8" />
+                </div>
+                <span className="w-[1px] h-8 bg-content-l-a block" />
               </>
             )}
             <motion.div
-              className="flex items-center gap-2 cursor-pointer w-40 relative"
-              onClick={() => setIsExpanded(true)}
+              className="flex items-center gap-2 cursor-pointer relative"
               layout>
-              <span
-                className="w-6 h-6 rounded-full"
-                style={{ backgroundColor: currentFillament.color.hex }}></span>
-              <p className="text-sm text-content-m-a">
-                {currentFillament.color.name}
-              </p>
-              <div className="absolute top-[-48px] left-1/2 -translate-x-1/2 overflow-hidden">
-                <img
-                  src="/images/spool.png"
-                  alt=""
-                  className="absolute block top-0 left-1/2 -translate-x-1/2 size-[197px] min-w-"
-                />
+              <div
+                className="flex items-center gap-2 group"
+                onClick={() => setIsExpanded(true)}>
+                <div className="relative size-8">
+                  <span
+                    className="absolute inset-1 rounded-full"
+                    style={{
+                      backgroundColor: currentFillament.color.hex,
+                    }}></span>
+                  <img
+                    src="/images/spool.png"
+                    alt=""
+                    className="size-full relative group-hover:animate-[spin_2s_linear_infinite]"
+                  />
+                </div>
+                <p className="text-sm text-content-h-a">
+                  <span className="text-content-m-a text-xs -mb-1">
+                    {currentFillament.series}
+                  </span>
+                  <br />
+                  {currentFillament.color.name}
+                </p>
               </div>
+              <a
+                className="b-button rounded-full items-center"
+                href={currentFillament.color.url}
+                target="_blank"
+                onClick={(e) => e.stopPropagation()}>
+                $22.99
+                <Icon
+                  name="chevron-right"
+                  className="size-4 text-content-l-a"
+                />
+              </a>
             </motion.div>
           </motion.div>
         )}
