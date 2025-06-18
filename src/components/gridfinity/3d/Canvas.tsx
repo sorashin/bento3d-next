@@ -28,7 +28,7 @@ const Canvas = () => {
           far: 10000,
         }}
         frameloop="demand">
-        {/* <color attach="background" args={["#1e293b"]} /> */}
+        <color attach="background" args={["#cccccc"]} />
         <ambientLight intensity={0.8} />
         <directionalLight
           position={[5, 5, 5]}

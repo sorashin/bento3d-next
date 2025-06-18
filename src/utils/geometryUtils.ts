@@ -5,7 +5,27 @@ import {
     Matrix4,
     
   } from "three";
-  
+  const mesh2geometry = (mesh: any) => {
+  const geometry = new BufferGeometry()
+  geometry.setAttribute("position", new BufferAttribute(mesh.vertProperties, 3))
+  geometry.setIndex(new BufferAttribute(mesh.triVerts, 1))
+  return geometry
+}
+
+// Convert Three.js BufferGeometry to Manifold Mesh
+const geometry2mesh = (geometry: BufferGeometry) => {
+  const positions = geometry.getAttribute("position")
+  const indices = geometry.getIndex()
+
+  const vertProperties = new Float32Array(
+    (positions.array as Float32Array).slice()
+  )
+  const triVerts = new Uint32Array(
+    indices ? (indices.array as Uint32Array).slice() : []
+  )
+
+  return { vertProperties, triVerts }
+}
   // Modularの幾何学インターフェイスをThree.jsのBufferGeometryに変換
   const convertGeometryInterop = (interop: any, transform: number[]): BufferGeometry | null => {
     switch (interop?.variant) {
@@ -38,4 +58,4 @@ import {
   };
 
 
-  export {convertGeometryInterop}
+  export {convertGeometryInterop, mesh2geometry, geometry2mesh}
