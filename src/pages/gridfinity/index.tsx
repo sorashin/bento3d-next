@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useParams } from "react-router-dom"
 import { geometry2mesh, mesh2geometry } from "@/utils/geometryUtils"
 import { BufferGeometry } from "three"
+import { RightMenu } from "@/components/gridfinity/ui/RightMenu"
 export function Page() {
   const { slug } = useParams<{ slug: string }>()
   const [manifoldModule, setManifoldModule] = useState<Awaited<
@@ -66,7 +67,7 @@ export function Page() {
 
       let gridfinityResult = manifolds[gridfinity001Index]
       for (const gridfinity002 of gridfinity002Manifolds) {
-        gridfinityResult = Manifold.difference(gridfinityResult!, gridfinity002)
+        gridfinityResult = Manifold.union(gridfinityResult!, gridfinity002)
       }
       
 
@@ -107,7 +108,7 @@ export function Page() {
   return (
     <>
       <Canvas />
-      
+      <RightMenu />
     </>
   )
 }
