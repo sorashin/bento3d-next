@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
-    "axios": "^1.7.9"
+    "@google-cloud/storage": "^7.16.0",
+    "axios": "^1.7.9",
+    "express": "^5.1.0",
+    "multer": "^2.0.1"
   }
 }

@@ -8,6 +8,7 @@ import { Header } from "@/components/common/ui/Header"
 import { LeftMenu } from "@/components/common/ui/LeftMenu"
 import { RightMenu } from "@/components/common/ui/RightMenu"
 import { RangeSlider } from "@/components/common/ui/Slider"
+import { Toast } from "@/components/common/ui/Toast"
 import { useModularStore } from "@/stores/modular"
 import { useNavigationStore } from "@/stores/navigation"
 import { useSettingsStore } from "@/stores/settings"
@@ -77,6 +78,7 @@ export function Page() {
       <DialogAd />
       <DialogFeedback />
       <DrawerUpdates />
+      <Toast />
     </>
   )
 }

@@ -1,64 +1,97 @@
+const express = require('express');
+const multer = require('multer');
+const { Storage } = require('@google-cloud/storage');
 const axios = require('axios');
+const path = require('path');
+
+const app = express();
+const upload = multer({ storage: multer.memoryStorage() });
 
 const NOTION_API_URL = 'https://api.notion.com/v1/pages';
-const NOTION_TOKEN = process.env.NOTION_TOKEN; // 環境変数に保存
-const DATABASE_ID = process.env.DATABASE_ID; // 環境変数に保存
+const NOTION_TOKEN = process.env.NOTION_TOKEN;
+const DATABASE_ID = process.env.DATABASE_ID;
+const BUCKET_NAME = process.env.BUCKET_NAME;
 
-exports.addNotionItem = async (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*'); // すべてのオリジンを許可
+const storage = new Storage();
+const bucket = storage.bucket(BUCKET_NAME);
+
+app.post('/addNotionItem', upload.single('photo'), async (req, res) => {
+  const { feedback, rating } = req.body;
+  const file = req.file;
+
+  if (!feedback && typeof rating !== 'string') {
+    return res.status(400).send({ error: 'Missing fields' });
+  }
+
+  let imageUrl = null;
+
+  if (file) {
+    const fileName = `uploads/${Date.now()}-${file.originalname}`;
+    const blob = bucket.file(fileName);
+
+    const blobStream = blob.createWriteStream({
+    resumable: false,
+    contentType: file.mimetype,
+    });
+
+    blobStream.end(file.buffer);
+
+    await new Promise((resolve, reject) => {
+    blobStream.on('finish', resolve);
+    blobStream.on('error', reject);
+    });
+
+    imageUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${fileName}`;
+  }
+
+  const properties = {
+    ...(feedback && {
+      Feedback: { rich_text: [{ text: { content: feedback } }] }
+    }),
+    ...(rating && {
+      Rating: { number: Number(rating) }
+    }),
+    ...(imageUrl && {
+      Photo: { url: imageUrl }
+    }),
+  };
+
+  try {
+    const notionRes = await axios.post(
+      NOTION_API_URL,
+      {
+        parent: { database_id: DATABASE_ID },
+        properties,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${NOTION_TOKEN}`,
+          'Content-Type': 'application/json',
+          'Notion-Version': '2022-06-28',
+        },
+      }
+    );
+
+    res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.set('Access-Control-Allow-Headers', 'Content-Type');
+    res.status(200).send({ message: 'Success', data: notionRes.data });
+  } catch (error) {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    res.status(500).send({ error: 'Notion Error', detail: error.response?.data || error.message });
+  }
+});
 
-    if (req.method === 'OPTIONS') {
-        res.status(204).send('');
-        return;
-    }
+app.options('/addNotionItem', (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  res.status(204).send('');
+});
 
-    if (req.method !== 'POST') {
-        res.status(405).send({ error: 'Method Not Allowed' });
-        return;
-    }
-
-    const { feedback, rating } = req.body;
-
-    if (!feedback && typeof rating !== 'number') {
-        res.status(400).send({ error: 'Missing or invalid fields' });
-        return;
-    }
-
-    const properties = {};
-
-    if (feedback) {
-        properties.Feedback = { // rich_text プロパティ
-            rich_text: [{ text: { content: feedback } }],
-        };
-    }
-
-    if (typeof rating === 'number') {
-        properties.Rating = { // number プロパティ
-            number: rating,
-        };
-    }
-
-    try {
-        const response = await axios.post(
-            NOTION_API_URL,
-            {
-                parent: { database_id: DATABASE_ID },
-                properties,
-            },
-            {
-                headers: {
-                    Authorization: `Bearer ${NOTION_TOKEN}`,
-                    'Content-Type': 'application/json',
-                    'Notion-Version': '2022-06-28',
-                },
-            }
-        );
-
-        res.status(200).send({ message: 'Item added successfully', data: response.data });
-    } catch (error) {
-        console.error('Error adding item to Notion:', error.response?.data || error.message);
-        res.status(500).send({ error: 'Failed to add item to Notion', details: error.response?.data || error.message });
-    }
-};
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
