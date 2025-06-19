@@ -26,7 +26,14 @@ app.post('/addNotionItem', upload.single('photo'), async (req, res) => {
   let imageUrl = null;
 
   if (file) {
-    const fileName = `uploads/${Date.now()}-${file.originalname}`;
+    const sanitize = (name) =>
+      name.normalize("NFKD")
+          .replace(/[^\x00-\x7F]/g, '') // remove non-ASCII
+          .replace(/\s+/g, '-');        // spaces to hyphens
+
+    const safeName = sanitize(file.originalname);
+    const fileName = `uploads/${Date.now()}-${safeName}`;//force convert to ASCII file name
+    
     const blob = bucket.file(fileName);
 
     const blobStream = blob.createWriteStream({
