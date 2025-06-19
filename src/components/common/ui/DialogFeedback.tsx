@@ -35,8 +35,9 @@ export const DialogFeedback: FC = () => {
   }
 
   const handleToast = () => {
+    
     const i: Toast = {
-      content: "Thank you for your feedback !",
+      content: "✅️ Thank you for your feedback !",
       type: "default",
       isOpen: true,
     }
@@ -167,7 +168,7 @@ export const DialogFeedback: FC = () => {
           ))}
         </div>
         <div>
-          <label className="text-lg flex flex-col gap-3 font-medium px-2 mb-3">
+          <label className="text-lg flex flex-col gap-3 font-medium px-2 mb-2">
             How can we improve your experience ?
           </label>
           <textarea
@@ -177,13 +178,6 @@ export const DialogFeedback: FC = () => {
             placeholder="Write your feedback here..."
             className="rounded-md w-full min-h-32 bg-content-xl-a p-3 text-base focus:outline-none focus:ring-1 focus:ring-content-l-a"
           />
-        </div>
-
-        {/* ファイル添付セクション */}
-        <div>
-          <label className="text-lg flex flex-col gap-3 font-medium px-2 mb-3">
-            Attach image or video (optional)
-          </label>
           <div className="space-y-3">
             <input
               ref={fileInputRef}
@@ -195,43 +189,42 @@ export const DialogFeedback: FC = () => {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full py-3 px-4 border-2 border-dashed border-content-l-a rounded-md text-content-l hover:border-content-h-a transition-colors">
-              <div className="flex items-center justify-center gap-2">
-                <Icon name="plus" className="size-5" />
-                <span>Choose file</span>
-              </div>
-              <p className="text-sm text-content-m mt-1">
-                Images (JPEG, PNG, GIF, WebP) or videos (MP4, WebM, MOV) • Max
-                30MB
+              className="b-button !bg-content-xxl-a rounded-md items-center gap-2 hover:!bg-content-xl-a">
+              <Icon name="clip" className="size-4" />
+              <p className="text-sm text-content-m">
+                Files{" "}
+                <span className="text-overline text-content-l-a">(Max 30MB)</span>
               </p>
             </button>
 
             {/* プレビュー */}
             {previewUrl && selectedFile && (
               <div className="relative">
-                <div className="bg-content-xl-a rounded-md p-3">
+                <div className="rounded-md p-2 border-[1px] border-content-l-a w-fit">
                   {selectedFile.type.startsWith("image/") ? (
                     <img
                       src={previewUrl}
                       alt="Preview"
-                      className="w-full h-32 object-cover rounded"
+                      className="max-h-32 w-auto mx-auto rounded"
+                      style={{ display: "block" }}
                     />
                   ) : (
                     <video
                       src={previewUrl}
                       controls
-                      className="w-full h-32 object-cover rounded"
+                      className="max-h-32 w-auto mx-auto rounded"
+                      style={{ display: "block" }}
                     />
                   )}
-                  <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center justify-between mt-1">
                     <span className="text-sm text-content-m truncate">
                       {selectedFile.name}
                     </span>
                     <button
                       type="button"
                       onClick={handleRemoveFile}
-                      className="text-system-error hover:text-red-600">
-                      <Icon name="trash" className="size-4" />
+                      className="text-system-error-m hover:text-system-error-h cursor-pointer p-0.5 rounded-sm">
+                      <Icon name="trash" className="size-6" />
                     </button>
                   </div>
                 </div>
@@ -240,7 +233,9 @@ export const DialogFeedback: FC = () => {
           </div>
         </div>
 
-        {message && <p className="text-sm text-system-error">{message}</p>}
+        {/* ファイル添付セクション */}
+
+        {message && <p className="text-sm text-system-error-h">{message}</p>}
         <button
           type="submit"
           className={`w-full py-2 rounded-full text-white font-semibold cursor-pointer ${
