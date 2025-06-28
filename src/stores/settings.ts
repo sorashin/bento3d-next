@@ -114,14 +114,14 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   currentFillament:{
     series:'Polymaker Panchroma',
     color:{
-      name:'CottonWhite',
-      sampleImage:'/images/samples/cotton-white.png',
-      hex:'#DDE0DC',
-      threeHEX:'#DDE0DC',
+      name:'SapphireBlue',
+      sampleImage:'/images/samples/sapphire-blue.png',
+      hex:'#338FE8',
+      threeHEX:'#338FE8',
       metalness:0,
       roughness:0.5,
-      url:'https://www.matterhackers.com/store/l/polymaker-panchroma-matte-pla-filament-175mm-1kg/sk/M1W5HVYP?aff=7670',
-      ogImage:'/images/ogps/cotton-white.png'
+      url:'https://www.matterhackers.com/store/l/polymaker-panchroma-matte-pla-filament-175mm-1kg/sk/MKAC7KEK?aff=7670',
+      ogImage:'/images/ogps/sapphire-blue.png'
     }
   },
   setFillament: (fillament:FillamentState) => set({ currentFillament:fillament }),
