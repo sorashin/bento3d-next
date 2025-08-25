@@ -58,7 +58,7 @@ export const Ad: FC = () => {
           className="size-3 stroke-[4px] text-content-m group-hover:text-content-h"
         />
       </button>
-      {/* <a
+      <a
         className="rounded-sm overflow-hidden block"
         href="https://www.jensentek.com/3d-printing"
         target="_blank"
@@ -77,15 +77,15 @@ export const Ad: FC = () => {
           <source src="/images/ads/ad_jentekbento.mp4" type="video/mp4" />
           <img src="/images/ads/ad002.png" alt="Advertisement" className="w-full h-full object-cover" />
         </video>
-      </a> */}
-      <button
+      </a>
+      {/* <button
         className="rounded-sm overflow-hidden block"
         onClick={() => {
           openDialog("ad")
           clickAd()
         }}>
         <img src="/images/ads/ad002.png" alt="" />
-      </button>
+      </button> */}
     </div>
   )
 }
