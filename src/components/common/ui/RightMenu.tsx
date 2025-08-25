@@ -87,11 +87,18 @@ export const RightMenu: React.FC = () => {
                 <Icon name="arrow-up-right" className="size-5" />
                 <span className="absolute left-0 bottom-0 w-0 border-b-[1px] border-content-l group-hover:w-full transition-all"></span>
               </div>
-              <div className="flex flex-row items-center gap-1 text-sm relative group py-0.5 mb-2 text-content-m w-fit">
+              <div className="flex flex-row items-center gap-1 text-sm relative group py-0.5 text-content-m w-fit">
                 <a href="https://polar-tadpole-97b.notion.site/Bento3D-e40483712b304d389d7c2da26196e113#d826cb9d4d844200a0fbd5f7df783f14">
                   How to fix broken STLs
                 </a>
                 <Icon name="arrow-up-right" className="size-5" />
+                <span className="absolute left-0 bottom-0 w-0 border-b-[1px] border-content-l group-hover:w-full transition-all"></span>
+              </div>
+              <div className="flex flex-row items-center gap-1 text-sm relative group py-0.5 mb-2 text-content-m w-fit">
+                <a href="https://buymeacoffee.com/lodgefabq" target="_blank" rel="noreferrer">
+                  Support Us
+                </a>
+                <Icon name="coffee" className="size-5" />
                 <span className="absolute left-0 bottom-0 w-0 border-b-[1px] border-content-l group-hover:w-full transition-all"></span>
               </div>
             </div>

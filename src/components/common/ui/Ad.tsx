@@ -8,7 +8,7 @@ import { useSettingsStore } from "@/stores/settings"
 
 export const Ad: FC = () => {
   const [showAds, setShowAds] = useState(true)
-  const {  isGAInitialized } = useSettingsStore((state) => state)
+  const { openDialog, isGAInitialized } = useSettingsStore((state) => state)
 
   const onAdViewable = () => {
     ReactGA.event({
@@ -53,9 +53,12 @@ export const Ad: FC = () => {
           closeAd()
         }}
         className="group absolute top-2 right-2 rounded-full bg-content-l hover:scale-105 transition-all p-1 z-10 cursor-pointer">
-        <Icon name="close" className="size-3 stroke-[4px] text-content-m group-hover:text-content-h" />
+        <Icon
+          name="close"
+          className="size-3 stroke-[4px] text-content-m group-hover:text-content-h"
+        />
       </button>
-      <a
+      {/* <a
         className="rounded-sm overflow-hidden block"
         href="https://www.jensentek.com/3d-printing"
         target="_blank"
@@ -72,10 +75,17 @@ export const Ad: FC = () => {
           className="w-full h-full object-cover"
           poster="/images/ads/ad_jentekbento.png">
           <source src="/images/ads/ad_jentekbento.mp4" type="video/mp4" />
-          {/* Fallback image for browsers that don't support video */}
           <img src="/images/ads/ad002.png" alt="Advertisement" className="w-full h-full object-cover" />
         </video>
-      </a>
+      </a> */}
+      <button
+        className="rounded-sm overflow-hidden block"
+        onClick={() => {
+          openDialog("ad")
+          clickAd()
+        }}>
+        <img src="/images/ads/ad002.png" alt="" />
+      </button>
     </div>
   )
 }
