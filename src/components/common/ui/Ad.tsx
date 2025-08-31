@@ -60,7 +60,7 @@ export const Ad: FC = () => {
       </button>
       <a
         className="rounded-sm overflow-hidden block"
-        href="https://www.jensentek.com/3d-printing"
+        href="https://www.treatstock.com/c/jensentek"
         target="_blank"
         rel="noreferrer"
         onClick={() => {
@@ -75,7 +75,11 @@ export const Ad: FC = () => {
           className="w-full h-full object-cover"
           poster="/images/ads/ad_jentekbento.png">
           <source src="/images/ads/ad_jentekbento.mp4" type="video/mp4" />
-          <img src="/images/ads/ad002.png" alt="Advertisement" className="w-full h-full object-cover" />
+          <img
+            src="/images/ads/ad002.png"
+            alt="Advertisement"
+            className="w-full h-full object-cover"
+          />
         </video>
       </a>
       {/* <button
