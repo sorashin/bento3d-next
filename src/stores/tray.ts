@@ -39,6 +39,7 @@ interface TrayStore {
   setIsStack: (isStack: boolean) => void;
   setThickness: (thickness: number) => void;
   setFillet: (fillet: number) => void;
+  updateMm2Pixel: () => void;
 }
 
 interface FakeTrayStore{
@@ -414,6 +415,10 @@ export const useTrayStore = create<TrayStore>((set) => ({
       grid: fullyRecalculatedGrid
     };
   }),
+  updateMm2Pixel: () => set(state => ({
+    ...state,
+    mm2pixel: calculateMm2Pixel(state.totalWidth, state.totalDepth)
+  })),
   
 }));
 
