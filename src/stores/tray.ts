@@ -172,9 +172,17 @@ const getWindowSize = () => {
 // mm2pixelを計算するヘルパー関数
 const calculateMm2Pixel = (width: number, depth: number) => {
   const { width: pixelSizeW, height: pixelSizeD } = getWindowSize();
-  const screenScale = 2/3; // 画面の短辺に対して何割の大きさにするか
-  // 大きい方の寸法に合わせてスケールを決定
-  return width - depth > 0 ? pixelSizeW / width*screenScale : pixelSizeD / depth*screenScale;
+  const margin = 100; // UI要素用のマージン
+  const availableW = pixelSizeW - margin;
+  const availableD = pixelSizeD - margin;
+  
+  if (pixelSizeW > pixelSizeD) {
+    // 横長画面：depthを基準にスケール決定（trayのdepthが画面内に収まるように）
+    return availableD / depth;
+  } else {
+    // 縦長画面：widthを基準にスケール決定（trayのwidthが画面内に収まるように）
+    return availableW / width;
+  }
 };
 
 // Zustand ストアを作成
