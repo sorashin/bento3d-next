@@ -158,7 +158,7 @@ const Dim: React.FC<DimProps> = ({ colId, rowId, position, offset }) => {
           style={{
             transform:
               position === "left" || position === "right"
-                ? "rotate(90deg) translateX(-10%)"
+                ? "rotate(90deg) translateX(-60%)"
                 : "none",
           }}>
           <select
