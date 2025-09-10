@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react"
+import React from "react"
 
 import ReactGA from "react-ga4"
 import Icon from "@/components/common/ui/Icon"
@@ -34,7 +34,7 @@ export const RightMenu: React.FC = () => {
   return (
     <>
       <motion.div
-        className={`absolute h-auto top-8 right-8 w-full md:w-[240px] py-2 z-20 bg-surface-sheet-l rounded-md backdrop-blur-sm flex flex-col gap-2 items-center justify-center`}
+        className={`absolute h-auto top-20 md:top-8 right-4 md:right-8 w-fit md:w-[240px] py-2 z-20 bg-surface-sheet-l rounded-md backdrop-blur-sm flex flex-col gap-2 items-center justify-center`}
         layout>
         <motion.div
           className="flex flex-row justify-between w-full px-2"
