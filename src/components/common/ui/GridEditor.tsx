@@ -2,6 +2,7 @@ import Icon from "@/components/common/ui/Icon"
 import { useTrayStore } from "@/stores/tray"
 import { motion } from "framer-motion"
 import Dim from "./Dim"
+import { useEffect } from "react"
 
 export const GridEditor = () => {
   const {
@@ -16,7 +17,25 @@ export const GridEditor = () => {
     addColumn,
     removeColumn,
     setSelectedColumnId,
+    updateMm2Pixel,
   } = useTrayStore((state) => state)
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+    
+    const handleResize = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        updateMm2Pixel()
+      }, 150)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      clearTimeout(timeoutId)
+    }
+  }, [updateMm2Pixel])
 
   return (
     <>
