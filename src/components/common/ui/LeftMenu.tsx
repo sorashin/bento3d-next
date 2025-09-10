@@ -36,6 +36,7 @@ export const LeftMenu = () => {
     useTrayStore((state) => state)
   const navigate = useNavigate()
   const location = useLocation()
+  
 
   // URLのパスからslugを取得して、対応するモードインデックスを設定
   useEffect(() => {
@@ -57,21 +58,22 @@ export const LeftMenu = () => {
     setThickness(2)
     setFillet(2)
   }, [])
+  
   useEffect(() => {
     handleMenuReset()
   }, [currentMode])
 
   return (
     <motion.div
-      className="absolute top-8 left-8 z-20 w-[240px] h-fit flex flex-col gap-2 items-start font-display bg-surface-sheet-l backdrop-blur-lg rounded-md p-1"
+      className="absolute top-20 md:top-8 left-4 md:left-8 z-20 md:w-[240px] h-fit flex flex-col gap-2 items-start font-display bg-surface-sheet-l backdrop-blur-lg rounded-md p-1"
       layout>
       <motion.div className="flex flex-row items-center gap-2 w-full" layout>
-        <button className="b-button bg-surface-sheet-h flex flex-row items-center gap-2 min-w-[180px] hover:bg-[rgba(255,255,255,.56)] px-4 b-dropdown group relative">
+        <button className="b-button bg-surface-sheet-h flex flex-row items-center gap-2 md:min-w-[180px] hover:bg-[rgba(255,255,255,.56)] px-4 b-dropdown group relative">
           <Icon
             name={modes[currentMode].img}
             className="w-8 h-8 stroke-3 stroke-content-m"
           />
-          <p className="flex-grow text-left font-semibold text-content-h-a">
+          <p className="flex-grow text-left font-semibold text-content-h-a md:block hidden">
             {modes[currentMode].label}
           </p>
 
