@@ -30,6 +30,14 @@ const pageComponents: Record<string, any> = {
     import("./pages/tray/index").then((module) => ({
       default: module.Page,
     })),
+  "order/success": () =>
+    import("./pages/order/success").then((module) => ({
+      default: module.Page,
+    })),
+  "order/cancel": () =>
+    import("./pages/order/cancel").then((module) => ({
+      default: module.Page,
+    })),
 }
 
 // ModularInitializerコンポーネント - modularの初期化だけを担当

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 
 import ReactGA from "react-ga4"
 import Icon from "@/components/common/ui/Icon"
@@ -10,11 +10,22 @@ import { useSettingsStore } from "@/stores/settings"
 import { useTrayStore } from "@/stores/tray"
 import GeometryExporter from "./GeometryExporter"
 import { useNavigationStore } from "@/stores/navigation"
+import { useModularStore } from "@/stores/modular"
+import { STLExporter } from "three-stdlib"
+import {
+  DoubleSide,
+  Mesh as ThreeMesh,
+  MeshStandardMaterial,
+  Object3D,
+} from "three"
 
 export const RightMenu: React.FC = () => {
   const { openDialog, openDrawer } = useSettingsStore((state) => state)
   const { totalWidth, totalHeight, totalDepth } = useTrayStore((state) => state)
   const { currentNav } = useNavigationStore((state) => state)
+  const { manifoldGeometries } = useModularStore((state) => state)
+  const [isOrdering, setIsOrdering] = useState(false)
+
   const latestUpdate = updates.sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )[0]
@@ -30,6 +41,70 @@ export const RightMenu: React.FC = () => {
       label: label,
     })
   }
+
+  const handleOrderClick = async () => {
+    if (isOrdering) return
+
+    setIsOrdering(true)
+    try {
+      // Find the tray geometry
+      const trayGeometry = manifoldGeometries.find(g => g.label === "tray")
+
+      if (!trayGeometry) {
+        alert("Please generate the tray geometry first")
+        return
+      }
+
+      // Generate STL from geometry (same logic as GeometryExporter)
+      const mesh = new ThreeMesh(
+        trayGeometry.geometry,
+        new MeshStandardMaterial({ side: DoubleSide })
+      )
+      const root = new Object3D()
+      root.add(mesh)
+      const exporter = new STLExporter()
+      const stlData = exporter.parse(root)
+      const blob = new Blob([stlData], { type: "application/octet-stream" })
+
+      // Create FormData
+      const formData = new FormData()
+      formData.append("stl", blob, `tray_W${totalWidth}xD${totalDepth}xH${totalHeight}.stl`)
+      formData.append("width", totalWidth.toString())
+      formData.append("depth", totalDepth.toString())
+      formData.append("height", totalHeight.toString())
+
+      // Send to Cloud Function
+      const cloudFunctionUrl = import.meta.env.VITE_CLOUD_FUNCTION_URL || "http://localhost:8080"
+      const response = await fetch(`${cloudFunctionUrl}/createCheckoutSession`, {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to create checkout session")
+      }
+
+      const data = await response.json()
+
+      // Track analytics
+      ReactGA.event({
+        category: "Order Button",
+        action: `W:${totalWidth} H:${totalHeight} D:${totalDepth}`,
+        label: "Order 3D Print",
+      })
+
+      // Redirect to Stripe Checkout
+      window.location.href = data.url
+    } catch (error) {
+      console.error("Error creating order:", error)
+      alert(`Failed to create order: ${error instanceof Error ? error.message : "Unknown error"}`)
+    } finally {
+      setIsOrdering(false)
+    }
+  }
+
+  const isOrderDisabled = totalWidth > 400 || totalDepth > 400 || totalHeight > 100 || manifoldGeometries.length === 0
 
   return (
     <>
@@ -76,6 +151,23 @@ export const RightMenu: React.FC = () => {
               Download STLs
             </p>
             <GeometryExporter />
+
+            <div className="w-full px-2 mt-4 mb-2">
+              <button
+                onClick={handleOrderClick}
+                disabled={isOrderDisabled || isOrdering}
+                className="b-button bg-content-h text-surface-base hover:bg-content-m w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                data-tooltip-content={
+                  isOrderDisabled
+                    ? "Max size: 400x400x100mm"
+                    : "Order 3D print service"
+                }
+                data-tooltip-id={"hint-tooltip"}>
+                <Icon name="3dp" className="size-4" />
+                {isOrdering ? "Processing..." : "Order 3D Print"}
+              </button>
+            </div>
+
             <div className="flex w-full flex-col items-end px-2">
               <div className="flex flex-row items-center gap-1 text-sm relative group py-0.5 text-content-m w-fit">
                 <a
