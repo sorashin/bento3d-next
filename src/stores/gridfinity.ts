@@ -14,7 +14,19 @@ interface GridfinityStore {
   // 状態
   totalRows: number;
   totalCols: number;
+  workAreaWidth: number;
+  workAreaHeight: number;
+  workAreaDimension: number;
   bins: Bin[];
+  // アクション
+  setTotalRows: (rows: number) => void;
+  setTotalCols: (cols: number) => void;
+  setWorkAreaWidth: (width: number) => void;
+  setWorkAreaHeight: (height: number) => void;
+  setWorkAreaDimension: (dimension: number) => void;
+  addBin: (bin: Bin) => void;
+  removeBin: (index: number) => void;
+  updateBin: (index: number, bin: Bin) => void;
 }
 
 // Zustand ストアを作成
@@ -22,25 +34,20 @@ export const useGridfinityStore = create<GridfinityStore>((set) => ({
   // 初期状態
   totalRows: 10,
   totalCols: 8,
-  bins: [
-    {
-        "u": 3,
-        "rows": 3,
-        "cols": 4,
-        "unitSize": 42,
-        "start": [0, 0],
-        "end": [2, 3],
-        "layer": 0
-      },
-      {
-        "u": 3,
-        "rows": 1,
-        "cols": 1,
-        "unitSize": 42,
-        "start": [4, 6],
-        "end": [2, 3],
-        "layer": 0
-      }
-  ],
+  workAreaWidth: 0,
+  workAreaHeight: 0,
+  workAreaDimension: 0,
+  bins: [],
+  // アクション
+  setTotalRows: (rows) => set({ totalRows: rows }),
+  setTotalCols: (cols) => set({ totalCols: cols }),
+  setWorkAreaWidth: (width) => set({ workAreaWidth: width }),
+  setWorkAreaHeight: (height) => set({ workAreaHeight: height }),
+  setWorkAreaDimension: (dimension) => set({ workAreaDimension: dimension }),
+  addBin: (bin) => set((state) => ({ bins: [...state.bins, bin] })),
+  removeBin: (index) => set((state) => ({ bins: state.bins.filter((_, i) => i !== index) })),
+  updateBin: (index, bin) => set((state) => ({
+    bins: state.bins.map((b, i) => i === index ? bin : b)
+  })),
 }));
 

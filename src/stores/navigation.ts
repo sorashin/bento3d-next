@@ -8,16 +8,12 @@ type Navigation = {
 export const nevigations: Record<string, Navigation[]> = {
     "gridfinity":[{
         index:0,
-        label:"gridfinity",
-        icon:"gridfinity",
+        label:"Plan",
+        icon:"grid",
     },{
         index:1,
-        label:"tray",
-        icon:"tray",
-    },{
-        index:2,
-        label:"modular",
-        icon:"modular",
+        label:"Preview",
+        icon:"download",
     }],
     "tray":[{
         index:0,
