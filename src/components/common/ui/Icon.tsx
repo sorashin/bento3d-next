@@ -3,12 +3,23 @@ import React, { Suspense, lazy, memo } from "react"
 // アイコンコンポーネントのキャッシュ
 const iconCache: Record<string, React.ComponentType<any>> = {}
 
+// アイコン名を正規化する関数
+const normalizeIconName = (name: string): string => {
+  // gridfinity用のlabel（bin001, bin001_base, bin001_unionなど）はboxアイコンにマッピング
+  if (/^bin\d+(_(base|union|diff))?$/.test(name)) {
+    return "box"
+  }
+  // その他の場合は元の名前を使用
+  return name
+}
+
 // アイコンを取得する関数（キャッシュがあれば再利用）
 const loadIcon = (name: string) => {
-  if (!iconCache[name]) {
-    iconCache[name] = lazy(() => import(`../../../assets/icons/${name}.svg`))
+  const normalizedName = normalizeIconName(name)
+  if (!iconCache[normalizedName]) {
+    iconCache[normalizedName] = lazy(() => import(`../../../assets/icons/${normalizedName}.svg`))
   }
-  return iconCache[name]
+  return iconCache[normalizedName]
 }
 
 interface IconProps {

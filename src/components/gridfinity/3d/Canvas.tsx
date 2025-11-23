@@ -7,12 +7,7 @@ import { useEffect } from "react"
 import { Object3D } from "three"
 
 const Canvas = () => {
-  const { geometries } = useModularStore()
-  const renderGeometries = () => {
-    return geometries.map((geometry) => {
-      return geometry.geometry
-    })
-  }
+  const { manifoldGeometries } = useModularStore()
   useEffect(() => {
     Object3D.DEFAULT_UP.set(0, 0, 1) //Z軸を上にする
   }, [])
@@ -21,9 +16,9 @@ const Canvas = () => {
       <ThreeCanvas
         orthographic
         camera={{
-          position: [100, 100, 100], // clipping 問題解決するため zを１００にする
+          position: [100, -100, 100], // clipping 問題解決するため zを１００にする
           fov: 40,
-          zoom: 10,
+          zoom: 4,
           near: 0.1,
           far: 10000,
         }}
@@ -54,7 +49,7 @@ const Canvas = () => {
           args={[100, 100, "#555555", "#444444"]}
           rotation={[Math.PI / 2, 0, 0]}
         />
-        <Model geometries={renderGeometries()} />
+        <Model geometries={manifoldGeometries.map((geometry) => geometry.geometry)} />
       </ThreeCanvas>
     </div>
   )

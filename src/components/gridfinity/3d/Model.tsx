@@ -5,6 +5,7 @@ type ModelProps = {
 }
 
 export default function Model({ geometries }: ModelProps) {
+  
   return (
     <group rotation={[Math.PI, 0, 0]}>
       {geometries.map((geometry, index) => (
@@ -12,6 +13,7 @@ export default function Model({ geometries }: ModelProps) {
           <meshStandardMaterial color={"pink"} />
         </mesh>
       ))}
+      
     </group>
   )
 }

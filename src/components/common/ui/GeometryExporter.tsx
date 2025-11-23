@@ -2,41 +2,17 @@ import { useModularStore } from "@/stores/modular"
 import { showSaveFilePicker } from "@/utils/filePicker"
 import { FC, useCallback, useEffect, useMemo, useState } from "react"
 import {
-  BufferGeometry,
   DoubleSide,
   Mesh as ThreeMesh,
   MeshStandardMaterial,
   Object3D,
-  BufferAttribute,
 } from "three"
 import { STLExporter } from "three-stdlib"
 import Icon from "./Icon"
 import { useTrayStore } from "@/stores/tray"
 import { useParams } from "react-router-dom"
 import Module from "manifold-3d"
-
-// Convert Manifold Mesh to Three.js BufferGeometry
-function mesh2geometry(mesh: any) {
-  const geometry = new BufferGeometry()
-  geometry.setAttribute("position", new BufferAttribute(mesh.vertProperties, 3))
-  geometry.setIndex(new BufferAttribute(mesh.triVerts, 1))
-  return geometry
-}
-
-// Convert Three.js BufferGeometry to Manifold Mesh
-function geometry2mesh(geometry: BufferGeometry) {
-  const positions = geometry.getAttribute("position")
-  const indices = geometry.getIndex()
-
-  const vertProperties = new Float32Array(
-    (positions.array as Float32Array).slice()
-  )
-  const triVerts = new Uint32Array(
-    indices ? (indices.array as Uint32Array).slice() : []
-  )
-
-  return { vertProperties, triVerts }
-}
+import { mesh2geometry, geometry2mesh } from "@/utils/geometryUtils"
 
 const GeometryExporter: FC = () => {
   const [format] = useState<string | null>("stl")
