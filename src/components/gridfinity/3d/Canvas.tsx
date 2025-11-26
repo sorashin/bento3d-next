@@ -4,9 +4,10 @@ import { OrbitControls, GizmoViewport, GizmoHelper } from "@react-three/drei"
 import { useModularStore } from "@/stores/modular"
 import Model from "./Model"
 import BoundingBox from "./BoundingBox"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Object3D } from "three"
 import { useGridfinityStore, Bin } from "@/stores/gridfinity"
+import Icon from "@/components/common/ui/Icon"
 
 // binsの中に含まれるuの値で最も大きい値を選出する関数
 const getMaxU = (bins: Bin[]): number => {
@@ -16,6 +17,7 @@ const getMaxU = (bins: Bin[]): number => {
 
 const Canvas = () => {
   const { manifoldGeometries } = useModularStore()
+  const [isBoundingBoxVisible, setIsBoundingBoxVisible] = useState(true)
   useEffect(() => {
     Object3D.DEFAULT_UP.set(0, 0, 1) //Z軸を上にする
   }, [])
@@ -35,7 +37,16 @@ const Canvas = () => {
   }, [])
   
   return (
-    <div className="flex-1">
+    <div className="flex-1 relative">
+      <button
+        onClick={() => setIsBoundingBoxVisible(!isBoundingBoxVisible)}
+        className="absolute bottom-4 left-4 z-10 b-button bg-content-xxl-a hover:bg-content-xl-a"
+        title={isBoundingBoxVisible ? "バウンディングボックスを非表示" : "バウンディングボックスを表示"}>
+        <Icon
+          name="major"
+          className="size-8"
+        />
+      </button>
       <ThreeCanvas
         orthographic
         camera={{
@@ -77,7 +88,8 @@ const Canvas = () => {
           height={7 * maxU + 4.4}
           depth={42 * totalRows}
           showText={true}
-          color="#666666">
+          color="#666666"
+          isShow={isBoundingBoxVisible}>
           <Model
             geometries={manifoldGeometries.map((geometry) => geometry.geometry)}
           />

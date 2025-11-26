@@ -11,6 +11,7 @@ type BoundingBoxProps = {
   depth?: number
   showText?: boolean
   color?: string
+  isShow?: boolean
 }
 
 export default function BoundingBox({
@@ -20,6 +21,7 @@ export default function BoundingBox({
   depth,
   showText = true,
   color = "#666666",
+  isShow = true,
 }: BoundingBoxProps) {
   const groupRef = useRef<Group>(null)
   const boxRef = useRef<LineSegments>(null)
@@ -73,11 +75,11 @@ export default function BoundingBox({
   return (
     <group>
       <group ref={groupRef}>{children}</group>
-      <lineSegments ref={boxRef}>
+      <lineSegments ref={boxRef} visible={isShow}>
         <edgesGeometry />
         <lineBasicMaterial color={color} />
       </lineSegments>
-      {showText &&
+      {isShow && showText &&
         (width !== undefined ||
           height !== undefined ||
           depth !== undefined) && (
@@ -110,7 +112,7 @@ export default function BoundingBox({
             )}
             {depth !== undefined && (
               <Text
-                position={[boxCenter.x, boxCenter.y + textOffset, 0]}
+                position={[boxCenter.x, -boxCenter.y - textOffset, 0]}
                 fontSize={5}
                 color={color}
                 anchorX="center"
