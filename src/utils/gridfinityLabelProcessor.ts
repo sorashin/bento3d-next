@@ -7,7 +7,7 @@ import { Bin } from "@/stores/gridfinity"
  * 
  * ルール:
  * - 各Binごとに、base用のgeometry（1つ）とunion用のgeometry（rows × cols個）が順番に並んでいる
- * - labelの命名規則: bin{番号}_base, bin{番号}_union
+ * - labelの命名規則: bin_{rows}x{cols}_u{u}_{binNumber}_base, bin_{rows}x{cols}_u{u}_{binNumber}_union
  * 
  * @param geometries - modular store内のgeometries配列
  * @param bins - GridfinityStoreのbins配列
@@ -30,7 +30,7 @@ export function gridfinityLabelProcessor(
     if (geometryIndex < geometries.length) {
       const baseGeometry = geometries[geometryIndex]
       result.push({
-        label: `bin${binNumber}_base`,
+        label: `bin_${bin.rows}x${bin.cols}_u${bin.u}_${binNumber}_base`,
         id: JSON.stringify(baseGeometry.id), // GeometryIdentifierを文字列に変換
         geometry: baseGeometry.geometry,
       })
@@ -42,7 +42,7 @@ export function gridfinityLabelProcessor(
       if (geometryIndex < geometries.length) {
         const unionGeometry = geometries[geometryIndex]
         result.push({
-          label: `bin${binNumber}_union`,
+          label: `bin_${bin.rows}x${bin.cols}_u${bin.u}_${binNumber}_union`,
           id: JSON.stringify(unionGeometry.id), // GeometryIdentifierを文字列に変換
           geometry: unionGeometry.geometry,
         })

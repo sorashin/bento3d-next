@@ -1,15 +1,16 @@
 import { useState, useRef, useCallback } from "react"
-import { useGridfinityStore, Bin } from "@/stores/gridfinity"
+import { useGridfinityStore } from "@/stores/gridfinity"
+import { GridBin } from "./GridBin"
 
 export const GridView = () => {
-  const { totalRows, totalCols, bins, addBin } = useGridfinityStore()
+  const { totalRows, totalCols, bins, addBin, updateBin, removeBin } = useGridfinityStore()
   const [isDragging, setIsDragging] = useState(false)
+  const [resizingBinIndex, setResizingBinIndex] = useState<number | null>(null)
   const [startCell, setStartCell] = useState<[number, number] | null>(null)
   const [endCell, setEndCell] = useState<[number, number] | null>(null)
   const gridRef = useRef<HTMLDivElement>(null)
 
   // マウス座標からグリッドセルの座標を取得
-  // totalRows: 横方向（列数）、totalCols: 縦方向（行数）
   const getCellFromMouse = useCallback((e: React.MouseEvent<HTMLDivElement>): [number, number] | null => {
     if (!gridRef.current) return null
     
@@ -17,14 +18,13 @@ export const GridView = () => {
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
     
-    // totalRowsが横方向（列数）、totalColsが縦方向（行数）
     const cellWidth = rect.width / totalRows
     const cellHeight = rect.height / totalCols
     
     const col = Math.floor(x / cellWidth)
     const row = Math.floor(y / cellHeight)
     
-    // 範囲チェック: colは0～totalRows-1、rowは0～totalCols-1
+    // 範囲チェック
     if (col >= 0 && col < totalRows && row >= 0 && row < totalCols) {
       return [col, row]
     }
@@ -40,14 +40,31 @@ export const GridView = () => {
     }
   }, [getCellFromMouse])
 
+  const handleResizeStart = useCallback((index: number) => {
+    const bin = bins[index]
+    setResizingBinIndex(index)
+    setStartCell(bin.start)
+    setEndCell(bin.end)
+  }, [bins])
+
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const cell = getCellFromMouse(e)
+    if (!cell) return
+
     if (isDragging && startCell) {
-      const cell = getCellFromMouse(e)
-      if (cell) {
-        setEndCell(cell)
-      }
+      setEndCell(cell)
+    } else if (resizingBinIndex !== null && startCell) {
+      // リサイズ中は左上固定で右下を動かす
+      const [startCol, startRow] = startCell
+      let [mouseCol, mouseRow] = cell
+      
+      // 左上より小さくならないように制限（1x1以上）
+      mouseCol = Math.max(mouseCol, startCol)
+      mouseRow = Math.max(mouseRow, startRow)
+      
+      setEndCell([mouseCol, mouseRow])
     }
-  }, [isDragging, startCell, getCellFromMouse])
+  }, [isDragging, resizingBinIndex, startCell, getCellFromMouse])
 
   // Bin同士が重複しているかチェック
   const isOverlapping = useCallback((bin1: { start: [number, number], end: [number, number] }, bin2: { start: [number, number], end: [number, number] }): boolean => {
@@ -56,54 +73,63 @@ export const GridView = () => {
     const [minCol2, minRow2] = bin2.start
     const [maxCol2, maxRow2] = bin2.end
     
-    // 重複チェック: 一方のBinがもう一方のBinと重なっているか
     return !(
-      maxCol1 < minCol2 || // bin1がbin2の左側
-      maxCol2 < minCol1 || // bin2がbin1の左側
-      maxRow1 < minRow2 || // bin1がbin2の上側
-      maxRow2 < minRow1   // bin2がbin1の上側
+      maxCol1 < minCol2 ||
+      maxCol2 < minCol1 ||
+      maxRow1 < minRow2 ||
+      maxRow2 < minRow1
     )
   }, [])
 
   const handleMouseUp = useCallback(() => {
-    if (isDragging && startCell && endCell) {
-      // 選択範囲の左上と右下を計算
-      // startCell/endCell: [col, row] = [横方向, 縦方向]
+    if (startCell && endCell) {
       const minCol = Math.min(startCell[0], endCell[0])
       const maxCol = Math.max(startCell[0], endCell[0])
       const minRow = Math.min(startCell[1], endCell[1])
       const maxRow = Math.max(startCell[1], endCell[1])
       
-      // ブロックのサイズを計算
-      // rows: 横方向のサイズ（列数）、cols: 縦方向のサイズ（行数）
-      const horizontalSize = maxCol - minCol + 1  // 横方向（rows）
-      const verticalSize = maxRow - minRow + 1    // 縦方向（cols）
+      const horizontalSize = maxCol - minCol + 1
+      const verticalSize = maxRow - minRow + 1
       
-      // 新しいBinを作成
-      const newBin: Bin = {
-        u: 3,
-        rows: horizontalSize,  // 横方向のサイズ
-        cols: verticalSize,    // 縦方向のサイズ
-        unitSize: 42,
-        start: [minCol, minRow],
-        end: [maxCol, maxRow],
-        layer: 0,
+      const newBinData = {
+        start: [minCol, minRow] as [number, number],
+        end: [maxCol, maxRow] as [number, number],
+        rows: horizontalSize,
+        cols: verticalSize,
       }
-      
-      // 既存のBinと重複していないかチェック
-      const hasOverlap = bins.some(existingBin => 
-        isOverlapping(newBin, existingBin)
-      )
+
+      // 重複チェック（自分自身は除外）
+      const hasOverlap = bins.some((existingBin, index) => {
+        if (index === resizingBinIndex) return false
+        return isOverlapping(newBinData, existingBin)
+      })
       
       if (!hasOverlap) {
-        addBin(newBin)
+        if (resizingBinIndex !== null) {
+          // リサイズ更新
+          const existingBin = bins[resizingBinIndex]
+          updateBin(resizingBinIndex, {
+            ...existingBin,
+            ...newBinData,
+          })
+        } else if (isDragging) {
+          // 新規作成
+          addBin({
+            u: 3,
+            unitSize: 42,
+            layer: 0,
+            ...newBinData,
+          })
+        }
       }
-      
-      setIsDragging(false)
-      setStartCell(null)
-      setEndCell(null)
     }
-  }, [isDragging, startCell, endCell, addBin, bins, isOverlapping])
+      
+    // リセット
+    setIsDragging(false)
+    setResizingBinIndex(null)
+    setStartCell(null)
+    setEndCell(null)
+  }, [isDragging, resizingBinIndex, startCell, endCell, addBin, updateBin, bins, isOverlapping])
 
   // 選択範囲を計算（previewBin用）
   const getSelectionRect = () => {
@@ -114,16 +140,17 @@ export const GridView = () => {
     const minRow = Math.min(startCell[1], endCell[1])
     const maxRow = Math.max(startCell[1], endCell[1])
     
-    // 既存のBinと重複しているかチェック
     const previewBin = {
       start: [minCol, minRow] as [number, number],
       end: [maxCol, maxRow] as [number, number],
     }
-    const hasOverlap = bins.some(existingBin => 
-      isOverlapping(previewBin, existingBin)
-    )
+
+    const hasOverlap = bins.some((existingBin, index) => {
+      // リサイズ中の自分自身とは重複チェックしない
+      if (index === resizingBinIndex) return false
+      return isOverlapping(previewBin, existingBin)
+    })
     
-    // totalRowsが横方向（列数）、totalColsが縦方向（行数）
     return {
       left: (minCol / totalRows) * 100,
       top: (minRow / totalCols) * 100,
@@ -133,74 +160,86 @@ export const GridView = () => {
     }
   }
 
-  // 既存のBinを表示するためのスタイルを計算
-  // totalRowsが横方向（列数）、totalColsが縦方向（行数）
-  // bin.rows: 横方向のサイズ、bin.cols: 縦方向のサイズ
-  const getBinStyle = (bin: Bin) => {
-    const cellWidth = 100 / totalRows  // 横方向の列数
-    const cellHeight = 100 / totalCols // 縦方向の行数
-    
-    return {
-      left: `${bin.start[0] * cellWidth}%`,
-      top: `${bin.start[1] * cellHeight}%`,
-      width: `${bin.rows * cellWidth}%`,   // rowsは横方向のサイズ
-      height: `${bin.cols * cellHeight}%`, // colsは縦方向のサイズ
-    }
-  }
-
   const selectionRect = getSelectionRect()
+  const ratio = (totalRows && totalCols) ? totalRows / totalCols : 1
 
   return (
     <div className="w-full h-full flex items-center justify-center p-8">
       <div
         ref={gridRef}
-        className="relative border-2 border-content-l rounded-md overflow-hidden bg-white"
+        className="relative border-2 border-content-l rounded-md overflow-hidden bg-white p-1"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         style={{
-          width: "min(80vw, 1200px)",
-          height: "min(80vh, 800px)",
-          aspectRatio: `${totalRows} / ${totalCols}`, // 横/縦
+          width: `min(80vw, 1200px, calc(min(80vh, 800px) * ${ratio}))`,
+          height: `min(80vh, 800px, calc(min(80vw, 1200px) / ${ratio}))`,
+          aspectRatio: `${totalRows} / ${totalCols}`,
           display: "grid",
-          gridTemplateColumns: `repeat(${totalRows}, 1fr)`, // 横方向（列数）
-          gridTemplateRows: `repeat(${totalCols}, 1fr)`,   // 縦方向（行数）
+          gridTemplateColumns: `repeat(${totalRows}, 1fr)`,
+          gridTemplateRows: `repeat(${totalCols}, 1fr)`,
+          // gap: `4px`,
         }}>
         {/* グリッド線 */}
-        {/* 横方向の線（縦方向の行数-1本） */}
-        {Array.from({ length: totalCols - 1 }).map((_, i) => (
+        {/* {Array.from({ length: totalCols - 1 }).map((_, i) => (
           <div
             key={`row-${i}`}
-            className="absolute w-full border-t border-content-xl-a"
+            className="absolute w-full h-full border-t border-content-xl-a bg-system-error-l"
             style={{ top: `${((i + 1) / totalCols) * 100}%` }}
           />
         ))}
-        {/* 縦方向の線（横方向の列数-1本） */}
         {Array.from({ length: totalRows - 1 }).map((_, i) => (
           <div
             key={`col-${i}`}
             className="absolute h-full border-l border-content-xl-a"
             style={{ left: `${((i + 1) / totalRows) * 100}%` }}
           />
-        ))}
-        
-        {/* 既存のBin */}
-        {bins.map((bin, index) => (
+        ))} */}
+        {/* グリッド線 */}
+        {Array.from({ length: totalCols  }).map((_, i) => (
+          Array.from({ length: totalRows  }).map((_, j) => (
           <div
-            key={index}
-            className="absolute bg-primary/30 border-2 border-primary rounded-sm pointer-events-none"
-            style={getBinStyle(bin)}
-          />
+            key={`col-${i}-${j}`}
+            className="absolute"
+            style={{ 
+              top: `${(1 / totalCols) * 100 * i}%`,
+              left: `${(1 / totalRows) * 100 * j}%`,
+              width: `${(1 / totalRows) * 100}%`,
+              height: `${(1 / totalCols) * 100}%`,
+             }}
+          >
+            <div className={`w-full h-full pr-1 pb-1 ${j==0?"pl-1":""} ${i==0 ? "pt-1" : ""}`} >
+              <div className="w-full h-full bg-content-xxl-a rounded-sm hover:bg-content-xl-a" />
+            </div>
+          </div>
+        ))
         ))}
         
+
+        {/* 既存のBin (リサイズ中は非表示) */}
+        {bins.map(
+          (bin, index) =>
+            index !== resizingBinIndex && (
+              <GridBin
+                key={index}
+                bin={bin}
+                totalRows={totalRows}
+                totalCols={totalCols}
+                index={index}
+                onResizeStart={handleResizeStart}
+                onDelete={removeBin}
+              />
+            )
+        )}
+
         {/* 選択範囲（previewBin） */}
         {selectionRect && (
           <div
             className={`absolute border-2 border-dashed rounded-sm pointer-events-none ${
               selectionRect.hasOverlap
                 ? "bg-system-error-l/30 border-system-error-h"
-                : "bg-primary/20 border-primary"
+                : "bg-sub-blue/20 border-sub-blue"
             }`}
             style={{
               left: `${selectionRect.left}%`,
@@ -214,4 +253,3 @@ export const GridView = () => {
     </div>
   )
 }
-

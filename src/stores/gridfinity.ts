@@ -1,5 +1,8 @@
 import { create } from 'zustand';
 
+export const BIN_U_MIN = 2;
+export const BIN_U_MAX = 10;
+
 export type Bin = {
   u: number;
   rows: number;

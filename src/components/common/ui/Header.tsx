@@ -57,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({ onClickDL }) => {
               label={item.label}
               icon={item.icon}
               isActive={currentNav === index}
-              isLoading={index == 2 && isPreviewLoad}
+              isLoading={(index === 1 || index === 2) && isPreviewLoad}
               onClick={() => {
                 // gridfinityのPreview（index == 1）またはDownload（index == 2）のとき
                 if (index == 1 || index == 2) {

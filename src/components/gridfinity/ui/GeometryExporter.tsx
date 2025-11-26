@@ -15,7 +15,7 @@ const GeometryExporter: FC = () => {
   return (
     <div className="p-0">
       {manifoldGeometries.length > 0 ? (
-        <ul className="grid grid-cols-1 w-full gap-2">
+        <ul className="grid grid-cols-1 w-full gap-2 max-h-80 overflow-y-auto">
           {manifoldGeometries.map((geometry) => (
             <li
               key={geometry.id}
@@ -38,14 +38,14 @@ const GeometryExporter: FC = () => {
                 a.click()
                 URL.revokeObjectURL(url)
               }}
-              className="flex justify-between items-center p-2 flex-col gap-1 cursor-pointer rounded-md hover:bg-surface-sheet-m transition">
+              className="flex justify-between items-center p-2 gap-1 cursor-pointer rounded-md hover:bg-surface-sheet-m transition">
               <Icon
-                name={geometry.label || "box"}
-                className="stroke-[2px] stroke-content-m size-2/3"
+                name={"bin"}
+                className="stroke-[2px] text-content-h size-9"
               />
-              <button className="b-button bg-surface-ev1 !text-white items-center !py-1 w-full justify-center hover:!bg-content-h-a">
-                <Icon name="download" className="size-4" />
-                {geometry.label || "gridfinity"}
+              <p className="text-content-m text-sm grow">{geometry.label || "no-name"}</p>
+              <button className="b-button bg-surface-ev1 !text-white items-center !py-1 justify-center hover:!bg-content-h-a">
+                <Icon name="download" className="size-6" />
               </button>
             </li>
           ))}

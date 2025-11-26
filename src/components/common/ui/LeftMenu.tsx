@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState, ReactNode } from "react"
 import Icon from "@/components/common/ui/Icon"
 import { Tooltip } from "react-tooltip"
 import { useSettingsStore } from "@/stores/settings"
@@ -24,9 +24,24 @@ const modes = [
       "/images/cases/002.png",
     ],
   },
+  {
+    label: "Gridfinity",
+    slug: "gridfinity",
+    img: "gridfinity",
+    sampleImg: [
+      "/images/gridfinity/000.jpg",
+      "/images/gridfinity/001.jpg",
+      "/images/gridfinity/002.png",
+    ],
+  },
 ]
 
-export const LeftMenu = () => {
+interface LeftMenuProps {
+  renderSettings?: () => ReactNode
+  onModeChange?: (currentMode: number) => void
+}
+
+export const LeftMenu = ({ renderSettings, onModeChange }: LeftMenuProps) => {
   const [currentMode, setCurrentMode] = useState(0)
   const { currentNav } = useNavigationStore((state) => state)
   const { isSettingsOpen, setIsSettingsOpen } = useSettingsStore(
@@ -60,8 +75,14 @@ export const LeftMenu = () => {
   }, [])
   
   useEffect(() => {
-    handleMenuReset()
-  }, [currentMode])
+    if (onModeChange) {
+      onModeChange(currentMode)
+    }
+    // renderSettingsが提供されていない場合のみhandleMenuResetを実行（tray/bento3d用）
+    if (!renderSettings) {
+      handleMenuReset()
+    }
+  }, [currentMode, onModeChange, renderSettings, handleMenuReset])
 
   return (
     <motion.div
@@ -131,68 +152,76 @@ export const LeftMenu = () => {
       </motion.div>
       {isSettingsOpen && (
         <motion.div className="flex flex-col gap-2 w-full">
-          <label htmlFor="thickness" className="text-content-m-a text-xs">
-            Thickness
-          </label>
-          <div className="flex items-center w-full relative">
-            <input
-              value={thickness}
-              type="range"
-              min={1}
-              max={5}
-              step={0.1}
-              onChange={(e) => setThickness(parseFloat(e.target.value))}
-              className="b-input-range h-8 w-full cursor-pointer appearance-none overflow-hidden rounded-lg bg-content-xxl-a transition-all hover:bg-[rgba(28,28,28,.08)]"></input>
-            <span className="absolute right-2 text-sm text-content-m-a">
-              {thickness}
-            </span>
-          </div>
-          {currentMode !== 1 && (
+          {renderSettings ? (
+            // gridfinityのケース
+            renderSettings()
+          ) : (
+            // tray/bento3dのケース
             <>
-              <label htmlFor="isStack" className="text-content-m-a text-xs">
-                Stack
+              <label htmlFor="thickness" className="text-content-m-a text-xs">
+                Thickness
               </label>
-              <ul className="grid grid-cols-2 w-full rounded-md bg-content-xxl-a">
-                <li
-                  onClick={() => setIsStack(false)}
-                  className={`cursor-pointer flex flex-col items-center rounded-sm p-1 text-content-m-a ${
-                    !isStack ? "bg-white" : "hover:bg-content-xxl-a"
-                  }`}>
-                  <Icon name="unstackable" className="size-8 "></Icon>
-                  <span className="text-xs text-center font-sans">
-                    unstackable
-                  </span>
-                </li>
-                <li
-                  onClick={() => setIsStack(true)}
-                  className={`cursor-pointer flex flex-col items-center rounded-sm p-1 text-content-m-a ${
-                    isStack ? "bg-white" : "hover:bg-content-xxl-a"
-                  }`}>
-                  <Icon name="stack" className="size-8 "></Icon>
-                  <span className="text-xs text-center font-sans">
-                    stackable
-                  </span>
-                </li>
-              </ul>
+              <div className="flex items-center w-full relative">
+                <input
+                  value={thickness}
+                  type="range"
+                  min={1}
+                  max={5}
+                  step={0.1}
+                  onChange={(e) => setThickness(parseFloat(e.target.value))}
+                  className="b-input-range h-8 w-full cursor-pointer appearance-none overflow-hidden rounded-lg bg-content-xxl-a transition-all hover:bg-[rgba(28,28,28,.08)]"></input>
+                <span className="absolute right-2 text-sm text-content-m-a">
+                  {thickness}
+                </span>
+              </div>
+              {currentMode !== 1 && (
+                <>
+                  <label htmlFor="isStack" className="text-content-m-a text-xs">
+                    Stack
+                  </label>
+                  <ul className="grid grid-cols-2 w-full rounded-md bg-content-xxl-a">
+                    <li
+                      onClick={() => setIsStack(false)}
+                      className={`cursor-pointer flex flex-col items-center rounded-sm p-1 text-content-m-a ${
+                        !isStack ? "bg-white" : "hover:bg-content-xxl-a"
+                      }`}>
+                      <Icon name="unstackable" className="size-8 "></Icon>
+                      <span className="text-xs text-center font-sans">
+                        unstackable
+                      </span>
+                    </li>
+                    <li
+                      onClick={() => setIsStack(true)}
+                      className={`cursor-pointer flex flex-col items-center rounded-sm p-1 text-content-m-a ${
+                        isStack ? "bg-white" : "hover:bg-content-xxl-a"
+                      }`}>
+                      <Icon name="stack" className="size-8 "></Icon>
+                      <span className="text-xs text-center font-sans">
+                        stackable
+                      </span>
+                    </li>
+                  </ul>
+                </>
+              )}
+
+              <label htmlFor="thickness" className="text-content-m-a text-xs">
+                Fillet
+              </label>
+              <div className="flex items-center w-full relative">
+                <input
+                  value={fillet}
+                  type="range"
+                  min={1}
+                  max={5}
+                  step={0.1}
+                  onChange={(e) => setFillet(parseFloat(e.target.value))}
+                  className="b-input-range h-8 w-full cursor-pointer appearance-none overflow-hidden rounded-lg bg-content-xxl-a transition-all hover:bg-[rgba(28,28,28,.08)]"></input>
+                <span className="absolute right-2 text-sm text-content-m-a">
+                  {fillet}
+                </span>
+              </div>
             </>
           )}
-
-          <label htmlFor="thickness" className="text-content-m-a text-xs">
-            Fillet
-          </label>
-          <div className="flex items-center w-full relative">
-            <input
-              value={fillet}
-              type="range"
-              min={1}
-              max={5}
-              step={0.1}
-              onChange={(e) => setFillet(parseFloat(e.target.value))}
-              className="b-input-range h-8 w-full cursor-pointer appearance-none overflow-hidden rounded-lg bg-content-xxl-a transition-all hover:bg-[rgba(28,28,28,.08)]"></input>
-            <span className="absolute right-2 text-sm text-content-m-a">
-              {fillet}
-            </span>
-          </div>
         </motion.div>
       )}
 

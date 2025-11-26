@@ -1,7 +1,7 @@
 import Canvas from "@/components/gridfinity/3d/Canvas"
 import { Header } from "@/components/common/ui/Header"
-import { LeftBar } from "@/components/gridfinity/ui/LeftBar"
-import { RightBar } from "@/components/gridfinity/ui/RightBar"
+import { LeftMenu } from "@/components/gridfinity/ui/LeftMenu"
+import { RightMenu } from "@/components/gridfinity/ui/RightMenu"
 import { GridView } from "@/components/gridfinity/ui/GridView"
 import { useModularStore } from "@/stores/modular"
 import { gridfinityLabelProcessor } from "@/utils/gridfinityLabelProcessor"
@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState, useCallback } from "react"
 import { useGridfinityStore } from "@/stores/gridfinity"
 import { geometryBooleanProcessor } from "@/utils/geometryBooleanProcessor"
 import { useNavigationStore, nevigations } from "@/stores/navigation"
+import { useSettingsStore } from "@/stores/settings"
 import Module from "manifold-3d"
 
 export function Page() {
@@ -16,6 +17,7 @@ export function Page() {
   const gridfinityState = useGridfinityStore()
   const { bins } = gridfinityState
   const { currentNav, setCurrentNavArray } = useNavigationStore()
+  const { setIsPreviewLoad } = useSettingsStore()
   const [manifoldModule, setManifoldModule] = useState<Awaited<ReturnType<typeof Module>> | null>(null)
 
   // navigation設定をgridfinity用に設定
@@ -34,14 +36,15 @@ export function Page() {
   }, [])
 
   // geometry処理
-  useMemo(() => {
+  useEffect(() => {
     if (!manifoldModule) return
     const gs = geometryBooleanProcessor(
       gridfinityLabelProcessor(geometries, bins),
       manifoldModule
     )
     setManifoldGeometries(gs)
-  }, [geometries, bins, manifoldModule, setManifoldGeometries])
+    setIsPreviewLoad(false)
+  }, [geometries, bins, manifoldModule, setManifoldGeometries, setIsPreviewLoad])
 
   // Preview画面への切り替え時にgraph更新を実行
   const handleDLView = useCallback(async () => {
@@ -61,12 +64,12 @@ export function Page() {
     <>
       
       <Header onClickDL={handleDLView} />
-      <LeftBar />
-      <RightBar />
+      <LeftMenu />
+      <RightMenu />
       
       {/* Plan画面 */}
       {currentNav === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none bg-surface-base">
           <div className="w-full h-full pointer-events-auto">
             <GridView />
           </div>

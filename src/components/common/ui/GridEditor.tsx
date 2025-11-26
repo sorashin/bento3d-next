@@ -98,7 +98,7 @@ export const GridEditor = () => {
                     />
                     <Icon
                       name="trash"
-                      className="cursor-pointer"
+                      className="cursor-pointer stroke-2 text-content-m"
                       onClick={() => {
                         removeColumn(row.id, col.id)
                       }}

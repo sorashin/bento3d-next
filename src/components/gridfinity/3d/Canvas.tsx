@@ -3,7 +3,7 @@ import { OrbitControls, GizmoViewport, GizmoHelper } from "@react-three/drei"
 
 import { useModularStore } from "@/stores/modular"
 import Model from "./Model"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { Object3D } from "three"
 
 const Canvas = () => {
@@ -11,20 +11,31 @@ const Canvas = () => {
   useEffect(() => {
     Object3D.DEFAULT_UP.set(0, 0, 1) //Z軸を上にする
   }, [])
+  
+  // CSS変数からsurface-baseの色を取得
+  const surfaceBaseColor = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return getComputedStyle(document.documentElement)
+        .getPropertyValue('--color-surface-base')
+        .trim() || '#E7E7E7'
+    }
+    return '#E7E7E7'
+  }, [])
+  
   return (
     <div className="flex-1">
       <ThreeCanvas
         orthographic
         camera={{
-          position: [100, -100, 100], // clipping 問題解決するため zを１００にする
+          position: [0, -100, 100], // clipping 問題解決するため zを１００にする
           fov: 40,
           zoom: 4,
-          near: 0.1,
+          near: 0.01,
           far: 10000,
         }}
         frameloop="demand">
-        {/* <color attach="background" args={["#1e293b"]} /> */}
-        <ambientLight intensity={0.8} />
+        <color attach="background" args={[surfaceBaseColor]} />
+        <ambientLight intensity={1.8} />
         <directionalLight
           position={[5, 5, 5]}
           intensity={1}
@@ -45,10 +56,10 @@ const Canvas = () => {
           enableZoom={true}
           zoomSpeed={0.5}
         />
-        <gridHelper
+        {/* <gridHelper
           args={[100, 100, "#555555", "#444444"]}
           rotation={[Math.PI / 2, 0, 0]}
-        />
+        /> */}
         <Model geometries={manifoldGeometries.map((geometry) => geometry.geometry)} />
       </ThreeCanvas>
     </div>

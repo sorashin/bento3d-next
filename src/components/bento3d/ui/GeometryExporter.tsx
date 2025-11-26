@@ -8,7 +8,7 @@ import {
   Object3D,
 } from "three"
 import { STLExporter } from "three-stdlib"
-import Icon from "./Icon"
+import Icon from "@/components/common/ui/Icon"
 import { useTrayStore } from "@/stores/tray"
 import { useParams } from "react-router-dom"
 import Module from "manifold-3d"

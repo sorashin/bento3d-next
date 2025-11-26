@@ -42,6 +42,14 @@
   --color-system-warning: rgba(254, 161, 41, 1.0);
   --color-system-success: #00FF00;
   --color-system-info: #4597F7;
+  --color-sub-blue: #338FE8;
+  --color-sub-brown: #6B4D33;
+  --color-sub-dark-green: #5A704D;
+  --color-sub-light-green: #E2DD58;
+  --color-sub-purple: #2E303C;
+  --color-sub-red: #F3785D;
+  --color-sub-orange: #FEA129;
+  --color-sub-yellow: #FFD700;
 
   --font-sans: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   --font-display: "F5.6", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -104,6 +112,15 @@ html, body, #root {
       0px 182px 109px rgba(0, 0, 0, 0.05),
       0px 81px 81px rgba(0, 0, 0, 0.09),
       0px 20px 45px rgba(0, 0, 0, 0.1);
+  }
+  .bin-shadow-inner {
+    box-shadow:
+
+      inset 113px 114px 45px rgba(47, 102, 155, 0.01),
+      inset 73px 73px 41px rgba(47, 102, 155, 0.02),
+      inset 41px 41px 35px rgba(47, 102, 155, 0.08),
+      inset 18px 18px 26px rgba(47, 102, 155, 0.16),
+      inset 5px 5px 14px rgba(47, 102, 155, 0.2);
   }
 
   .range-slider {
