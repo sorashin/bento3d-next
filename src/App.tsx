@@ -9,7 +9,7 @@ import {
 } from "react-router-dom"
 import ReactGA from "react-ga4"
 import { useSettingsStore } from "./stores/settings"
-import { useNavigationStore } from "./stores/navigation"
+import { useNavigationStore, nevigations } from "./stores/navigation"
 
 // NotFoundコンポーネント作成
 const NotFound = () => (
@@ -115,6 +115,15 @@ const PageLoader = ({ slug }: { slug: string }) => {
 // GraphRendererコンポーネント - URLパラメータを取得しPageLoaderに渡す
 const GraphRenderer = () => {
   const { slug } = useParams<{ slug: string }>()
+  const { setCurrentNavArray, setCurrentNav } = useNavigationStore()
+
+  // slugが変更されたときにnavigation storeを更新
+  useEffect(() => {
+    if (slug && nevigations[slug]) {
+      setCurrentNavArray(nevigations[slug])
+      setCurrentNav(0) // slugが変わったら最初のナビゲーションにリセット
+    }
+  }, [slug, setCurrentNavArray, setCurrentNav])
 
   return (
     <>

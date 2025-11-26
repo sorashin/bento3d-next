@@ -35,16 +35,20 @@ export function Page() {
     initManifold()
   }, [])
 
-  // geometry処理
+  // geometry処理 - 3D画面(currentNav === 1)の時だけ実行
   useEffect(() => {
+    // Plan画面(currentNav === 0)では重い処理をスキップ
+    if (currentNav === 0) return
     if (!manifoldModule) return
+    
+    const labeledGeometries = gridfinityLabelProcessor(geometries, bins, nodes)
     const gs = geometryBooleanProcessor(
-      gridfinityLabelProcessor(geometries, bins, nodes),
+      labeledGeometries,
       manifoldModule
     )
     setManifoldGeometries(gs)
     setIsPreviewLoad(false)
-  }, [geometries, bins, nodes, manifoldModule, setManifoldGeometries, setIsPreviewLoad])
+  }, [geometries, bins, nodes, manifoldModule, setManifoldGeometries, setIsPreviewLoad, currentNav])
 
   // Preview画面への切り替え時にgraph更新を実行
   const handleDLView = useCallback(async () => {
