@@ -5,7 +5,7 @@ import { RightMenu } from "@/components/gridfinity/ui/RightMenu"
 import { GridView } from "@/components/gridfinity/ui/GridView"
 import { useModularStore } from "@/stores/modular"
 import { gridfinityLabelProcessor } from "@/utils/gridfinityLabelProcessor"
-import { useEffect, useMemo, useState, useCallback } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useGridfinityStore } from "@/stores/gridfinity"
 import { geometryBooleanProcessor } from "@/utils/geometryBooleanProcessor"
 import { useNavigationStore, nevigations } from "@/stores/navigation"
@@ -13,7 +13,7 @@ import { useSettingsStore } from "@/stores/settings"
 import Module from "manifold-3d"
 
 export function Page() {
-  const { geometries, setManifoldGeometries, inputNodeId, updateNodeProperty, evaluateGraph } = useModularStore()
+  const { geometries, setManifoldGeometries, inputNodeId, updateNodeProperty, evaluateGraph, nodes } = useModularStore()
   const gridfinityState = useGridfinityStore()
   const { bins } = gridfinityState
   const { currentNav, setCurrentNavArray } = useNavigationStore()
@@ -39,12 +39,12 @@ export function Page() {
   useEffect(() => {
     if (!manifoldModule) return
     const gs = geometryBooleanProcessor(
-      gridfinityLabelProcessor(geometries, bins),
+      gridfinityLabelProcessor(geometries, bins, nodes),
       manifoldModule
     )
     setManifoldGeometries(gs)
     setIsPreviewLoad(false)
-  }, [geometries, bins, manifoldModule, setManifoldGeometries, setIsPreviewLoad])
+  }, [geometries, bins, nodes, manifoldModule, setManifoldGeometries, setIsPreviewLoad])
 
   // Preview画面への切り替え時にgraph更新を実行
   const handleDLView = useCallback(async () => {
