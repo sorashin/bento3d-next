@@ -133,7 +133,7 @@ export const LeftMenu = ({ renderSettings, onModeChange }: LeftMenuProps) => {
         <motion.button
           className={`b-button ${
             currentNav !== 2
-              ? "!text-content-m-a !cursor-pointer !hover:bg-surface-sheet-l"
+              ? "!text-content-m-a !cursor-pointer hover:bg-content-xl-a"
               : "!text-content-xl-a !cursor-default !hover:bg-transparent"
           }`}
           onClick={() => {

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { calculateGridSize } from '@/utils/gridfinityUtils';
 
 export const BIN_U_MIN = 2;
 export const BIN_U_MAX = 10;
@@ -35,8 +36,8 @@ interface GridfinityStore {
 // Zustand ストアを作成
 export const useGridfinityStore = create<GridfinityStore>((set) => ({
   // 初期状態
-  totalRows: 10,
-  totalCols: 8,
+  totalRows: 3,
+  totalCols: 3,
   workAreaWidth: 0,
   workAreaHeight: 0,
   workAreaDimension: 0,
@@ -47,10 +48,20 @@ export const useGridfinityStore = create<GridfinityStore>((set) => ({
   setWorkAreaWidth: (width) => set({ workAreaWidth: width }),
   setWorkAreaHeight: (height) => set({ workAreaHeight: height }),
   setWorkAreaDimension: (dimension) => set({ workAreaDimension: dimension }),
-  addBin: (bin) => set((state) => ({ bins: [...state.bins, bin] })),
-  removeBin: (index) => set((state) => ({ bins: state.bins.filter((_, i) => i !== index) })),
-  updateBin: (index, bin) => set((state) => ({
-    bins: state.bins.map((b, i) => i === index ? bin : b)
-  })),
+  addBin: (bin) => set((state) => {
+    const newBins = [...state.bins, bin];
+    const { totalRows, totalCols } = calculateGridSize(newBins);
+    return { bins: newBins, totalRows, totalCols };
+  }),
+  removeBin: (index) => set((state) => {
+    const newBins = state.bins.filter((_, i) => i !== index);
+    const { totalRows, totalCols } = calculateGridSize(newBins);
+    return { bins: newBins, totalRows, totalCols };
+  }),
+  updateBin: (index, bin) => set((state) => {
+    const newBins = state.bins.map((b, i) => i === index ? bin : b);
+    const { totalRows, totalCols } = calculateGridSize(newBins);
+    return { bins: newBins, totalRows, totalCols };
+  }),
 }));
 

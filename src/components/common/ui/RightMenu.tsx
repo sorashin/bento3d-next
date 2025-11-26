@@ -41,14 +41,14 @@ export const RightMenu: React.FC<RightMenuProps> = ({
           layout>
           <div className="flex justify-end">
             <button
-              className="b-button bg-transparent"
+              className="b-button bg-transparent hover:bg-content-xxl-a"
               onClick={() => openDialog("feedback")}
               data-tooltip-content={"Feedback"}
               data-tooltip-id={"hint-tooltip"}>
               💬
             </button>
             <button
-              className="b-button bg-transparent relative"
+              className="b-button bg-transparent relative hover:bg-content-xxl-a"
               onClick={() => openDrawer("update")}
               data-tooltip-content={"Updates"}
               data-tooltip-id={"hint-tooltip"}>
@@ -58,7 +58,7 @@ export const RightMenu: React.FC<RightMenuProps> = ({
               )}
             </button>
             <a
-              className="b-button bg-transparent"
+              className="b-button bg-transparent hover:bg-content-xxl-a"
               href="https://polar-tadpole-97b.notion.site/Bento3D-e40483712b304d389d7c2da26196e113?pvs=4"
               target="_blank"
               rel="noreferrer"
