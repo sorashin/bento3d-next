@@ -3,14 +3,26 @@ import { OrbitControls, GizmoViewport, GizmoHelper } from "@react-three/drei"
 
 import { useModularStore } from "@/stores/modular"
 import Model from "./Model"
+import BoundingBox from "./BoundingBox"
 import { useEffect, useMemo } from "react"
 import { Object3D } from "three"
+import { useGridfinityStore, Bin } from "@/stores/gridfinity"
+
+// binsの中に含まれるuの値で最も大きい値を選出する関数
+const getMaxU = (bins: Bin[]): number => {
+  if (bins.length === 0) return 0
+  return Math.max(...bins.map((bin) => bin.u))
+}
 
 const Canvas = () => {
   const { manifoldGeometries } = useModularStore()
   useEffect(() => {
     Object3D.DEFAULT_UP.set(0, 0, 1) //Z軸を上にする
   }, [])
+  const { totalRows, totalCols, bins } = useGridfinityStore((state) => state)
+  
+  // binsの中に含まれるuの値で最も大きい値を選出
+  const maxU = useMemo(() => getMaxU(bins), [bins])
   
   // CSS変数からsurface-baseの色を取得
   const surfaceBaseColor = useMemo(() => {
@@ -30,7 +42,7 @@ const Canvas = () => {
           position: [0, -100, 100], // clipping 問題解決するため zを１００にする
           fov: 40,
           zoom: 4,
-          near: 0.01,
+          near: 0.001,
           far: 10000,
         }}
         frameloop="demand">
@@ -60,7 +72,16 @@ const Canvas = () => {
           args={[100, 100, "#555555", "#444444"]}
           rotation={[Math.PI / 2, 0, 0]}
         /> */}
-        <Model geometries={manifoldGeometries.map((geometry) => geometry.geometry)} />
+        <BoundingBox
+          width={42 * totalCols}
+          height={7 * maxU + 4.4}
+          depth={42 * totalRows}
+          showText={true}
+          color="#666666">
+          <Model
+            geometries={manifoldGeometries.map((geometry) => geometry.geometry)}
+          />
+        </BoundingBox>
       </ThreeCanvas>
     </div>
   )

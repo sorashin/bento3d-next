@@ -1,8 +1,10 @@
 import { create } from 'zustand';
-import { calculateGridSize } from '@/utils/gridfinityUtils';
+import { calculateGridSize, normalizeBins } from '@/utils/gridfinityUtils';
 
 export const BIN_U_MIN = 2;
 export const BIN_U_MAX = 10;
+export const VIRTUAL_GRID_MAX_ROWS = 15;
+export const VIRTUAL_GRID_MAX_COLS = 15;
 
 export type Bin = {
   u: number;
@@ -34,14 +36,28 @@ interface GridfinityStore {
 }
 
 // Zustand ストアを作成
-export const useGridfinityStore = create<GridfinityStore>((set) => ({
-  // 初期状態
-  totalRows: 3,
-  totalCols: 3,
-  workAreaWidth: 0,
-  workAreaHeight: 0,
-  workAreaDimension: 0,
-  bins: [],
+export const useGridfinityStore = create<GridfinityStore>((set) => {
+  // 初期bin: 3x3 u3
+  const initialBin: Bin = {
+    u: 3,
+    rows: 3,
+    cols: 3,
+    unitSize: 42,
+    start: [0, 0],
+    end: [2, 2],
+    layer: 0,
+  };
+  const initialBins = normalizeBins([initialBin]);
+  const { totalRows, totalCols } = calculateGridSize(initialBins);
+
+  return {
+    // 初期状態
+    totalRows,
+    totalCols,
+    workAreaWidth: 0,
+    workAreaHeight: 0,
+    workAreaDimension: 0,
+    bins: initialBins,
   // アクション
   setTotalRows: (rows) => set({ totalRows: rows }),
   setTotalCols: (cols) => set({ totalCols: cols }),
@@ -49,19 +65,20 @@ export const useGridfinityStore = create<GridfinityStore>((set) => ({
   setWorkAreaHeight: (height) => set({ workAreaHeight: height }),
   setWorkAreaDimension: (dimension) => set({ workAreaDimension: dimension }),
   addBin: (bin) => set((state) => {
-    const newBins = [...state.bins, bin];
+    const newBins = normalizeBins([...state.bins, bin]);
     const { totalRows, totalCols } = calculateGridSize(newBins);
     return { bins: newBins, totalRows, totalCols };
   }),
   removeBin: (index) => set((state) => {
-    const newBins = state.bins.filter((_, i) => i !== index);
+    const newBins = normalizeBins(state.bins.filter((_, i) => i !== index));
     const { totalRows, totalCols } = calculateGridSize(newBins);
     return { bins: newBins, totalRows, totalCols };
   }),
   updateBin: (index, bin) => set((state) => {
-    const newBins = state.bins.map((b, i) => i === index ? bin : b);
+    const newBins = normalizeBins(state.bins.map((b, i) => i === index ? bin : b));
     const { totalRows, totalCols } = calculateGridSize(newBins);
     return { bins: newBins, totalRows, totalCols };
   }),
-}));
+  };
+});
 

@@ -1,6 +1,7 @@
-import { useState, useRef, useCallback } from "react"
-import { useGridfinityStore } from "@/stores/gridfinity"
+import { useState, useRef, useCallback, useMemo } from "react"
+import { useGridfinityStore, VIRTUAL_GRID_MAX_ROWS, VIRTUAL_GRID_MAX_COLS } from "@/stores/gridfinity"
 import { GridBin } from "./GridBin"
+import { DimensionLabel } from "./DimensionLabel"
 
 export const GridView = () => {
   const { totalRows, totalCols, bins, addBin, updateBin, removeBin } = useGridfinityStore()
@@ -10,7 +11,51 @@ export const GridView = () => {
   const [endCell, setEndCell] = useState<[number, number] | null>(null)
   const gridRef = useRef<HTMLDivElement>(null)
 
-  // マウス座標からグリッドセルの座標を取得
+  // virtualGridを計算: 既存bins + 作成中のbinを包含し、上下左右に1マス余白を持つ
+  const virtualGrid = useMemo(() => {
+    let minX = 0
+    let minY = 0
+    let maxX = totalRows
+    let maxY = totalCols
+
+    // 既存binsの範囲を計算
+    bins.forEach((bin) => {
+      if (bin.start[0] < minX) minX = bin.start[0]
+      if (bin.start[1] < minY) minY = bin.start[1]
+      const endX = bin.start[0] + bin.rows
+      const endY = bin.start[1] + bin.cols
+      if (endX > maxX) maxX = endX
+      if (endY > maxY) maxY = endY
+    })
+
+    // 作成中/リサイズ中のbinを考慮
+    if (startCell && endCell) {
+      const minCol = Math.min(startCell[0], endCell[0])
+      const maxCol = Math.max(startCell[0], endCell[0])
+      const minRow = Math.min(startCell[1], endCell[1])
+      const maxRow = Math.max(startCell[1], endCell[1])
+      
+      if (minCol < minX) minX = minCol
+      if (minRow < minY) minY = minRow
+      const previewEndX = maxCol + 1
+      const previewEndY = maxRow + 1
+      if (previewEndX > maxX) maxX = previewEndX
+      if (previewEndY > maxY) maxY = previewEndY
+    }
+
+    // 上下左右に1マス余白を追加
+    const calculatedRows = maxX - minX + 2 // +1 (範囲) + 1 (右余白)
+    const calculatedCols = maxY - minY + 2 // +1 (範囲) + 1 (下余白)
+    
+    return {
+      rows: Math.min(calculatedRows, VIRTUAL_GRID_MAX_ROWS),
+      cols: Math.min(calculatedCols, VIRTUAL_GRID_MAX_COLS),
+      offsetX: minX - 1, // 左に1マス余白
+      offsetY: minY - 1, // 上に1マス余白
+    }
+  }, [totalRows, totalCols, bins, startCell, endCell])
+
+  // マウス座標からグリッドセルの座標を取得（virtualGridベース、オフセット適用）
   const getCellFromMouse = useCallback((e: React.MouseEvent<HTMLDivElement>): [number, number] | null => {
     if (!gridRef.current) return null
     
@@ -18,18 +63,19 @@ export const GridView = () => {
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
     
-    const cellWidth = rect.width / totalRows
-    const cellHeight = rect.height / totalCols
+    const cellWidth = rect.width / virtualGrid.rows
+    const cellHeight = rect.height / virtualGrid.cols
     
     const col = Math.floor(x / cellWidth)
     const row = Math.floor(y / cellHeight)
     
-    // 範囲チェック
-    if (col >= 0 && col < totalRows && row >= 0 && row < totalCols) {
-      return [col, row]
+    // 範囲チェック（virtualGridの範囲内）
+    if (col >= 0 && col < virtualGrid.rows && row >= 0 && row < virtualGrid.cols) {
+      // オフセットを適用して実際の座標を返す
+      return [col + virtualGrid.offsetX, row + virtualGrid.offsetY]
     }
     return null
-  }, [totalRows, totalCols])
+  }, [virtualGrid])
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const cell = getCellFromMouse(e)
@@ -131,7 +177,7 @@ export const GridView = () => {
     setEndCell(null)
   }, [isDragging, resizingBinIndex, startCell, endCell, addBin, updateBin, bins, isOverlapping])
 
-  // 選択範囲を計算（previewBin用）
+  // 選択範囲を計算（previewBin用）- virtualGridベース（オフセット適用）
   const getSelectionRect = () => {
     if (!startCell || !endCell) return null
     
@@ -151,23 +197,30 @@ export const GridView = () => {
       return isOverlapping(previewBin, existingBin)
     })
     
+    // virtualGridベースで位置を計算（オフセットを考慮）
+    const displayCol = minCol - virtualGrid.offsetX
+    const displayRow = minRow - virtualGrid.offsetY
+    const rows = maxCol - minCol + 1
+    const cols = maxRow - minRow + 1
     return {
-      left: (minCol / totalRows) * 100,
-      top: (minRow / totalCols) * 100,
-      width: ((maxCol - minCol + 1) / totalRows) * 100,
-      height: ((maxRow - minRow + 1) / totalCols) * 100,
+      left: (displayCol / virtualGrid.rows) * 100,
+      top: (displayRow / virtualGrid.cols) * 100,
+      width: (rows / virtualGrid.rows) * 100,
+      height: (cols / virtualGrid.cols) * 100,
       hasOverlap,
+      rows,
+      cols,
     }
   }
 
   const selectionRect = getSelectionRect()
-  const ratio = (totalRows && totalCols) ? totalRows / totalCols : 1
+  const ratio = (virtualGrid.rows && virtualGrid.cols) ? virtualGrid.rows / virtualGrid.cols : 1
 
   return (
     <div className="w-full h-full flex items-center justify-center p-8">
       <div
         ref={gridRef}
-        className="relative border-2 border-content-l rounded-md overflow-hidden bg-white p-1"
+        className="relative overflow-hidden "
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -175,57 +228,83 @@ export const GridView = () => {
         style={{
           width: `min(80vw, 1200px, calc(min(80vh, 800px) * ${ratio}))`,
           height: `min(80vh, 800px, calc(min(80vw, 1200px) / ${ratio}))`,
-          aspectRatio: `${totalRows} / ${totalCols}`,
+          aspectRatio: `${virtualGrid.rows} / ${virtualGrid.cols}`,
           display: "grid",
-          gridTemplateColumns: `repeat(${totalRows}, 1fr)`,
-          gridTemplateRows: `repeat(${totalCols}, 1fr)`,
-          // gap: `4px`,
+          gridTemplateColumns: `repeat(${virtualGrid.rows}, 1fr)`,
+          gridTemplateRows: `repeat(${virtualGrid.cols}, 1fr)`,
         }}>
-        {/* グリッド線 */}
-        {/* {Array.from({ length: totalCols - 1 }).map((_, i) => (
-          <div
-            key={`row-${i}`}
-            className="absolute w-full h-full border-t border-content-xl-a bg-system-error-l"
-            style={{ top: `${((i + 1) / totalCols) * 100}%` }}
-          />
-        ))}
-        {Array.from({ length: totalRows - 1 }).map((_, i) => (
-          <div
-            key={`col-${i}`}
-            className="absolute h-full border-l border-content-xl-a"
-            style={{ left: `${((i + 1) / totalRows) * 100}%` }}
-          />
-        ))} */}
-        {/* グリッド線 */}
-        {Array.from({ length: totalCols  }).map((_, i) => (
-          Array.from({ length: totalRows  }).map((_, j) => (
-          <div
-            key={`col-${i}-${j}`}
-            className="absolute"
-            style={{ 
-              top: `${(1 / totalCols) * 100 * i}%`,
-              left: `${(1 / totalRows) * 100 * j}%`,
-              width: `${(1 / totalRows) * 100}%`,
-              height: `${(1 / totalCols) * 100}%`,
-             }}
-          >
-            <div className={`w-full h-full pr-1 pb-1 ${j==0?"pl-1":""} ${i==0 ? "pt-1" : ""}`} >
-              <div className="w-full h-full bg-content-xxl-a rounded-sm hover:bg-content-xl-a" />
+        {/* virtualGridのセル */}
+        {Array.from({ length: virtualGrid.cols }).map((_, i) =>
+          Array.from({ length: virtualGrid.rows }).map((_, j) => (
+            <div
+              key={`cell-${i}-${j}`}
+              className="absolute"
+              style={{
+                top: `${(1 / virtualGrid.cols) * 100 * i}%`,
+                left: `${(1 / virtualGrid.rows) * 100 * j}%`,
+                width: `${(1 / virtualGrid.rows) * 100}%`,
+                height: `${(1 / virtualGrid.cols) * 100}%`,
+              }}>
+              <div
+                className={`w-full h-full pr-1 pb-1 ${j == 0 ? "pl-1" : ""} ${
+                  i == 0 ? "pt-1" : ""
+                }`}>
+                <div className="w-full h-full bg-content-xxl-a rounded-sm hover:bg-sub-blue/26 transition-colors" />
+              </div>
             </div>
-          </div>
-        ))
-        ))}
-        
+          ))
+        )}
 
-        {/* 既存のBin (リサイズ中は非表示) */}
+        {/* totalRows x totalCols の範囲を示すボーダー（オフセット考慮） */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            left: `${((0 - virtualGrid.offsetX) / virtualGrid.rows) * 100}%`,
+            top: `${((0 - virtualGrid.offsetY) / virtualGrid.cols) * 100}%`,
+            width: `${(totalRows / virtualGrid.rows) * 100}%`,
+            height: `${(totalCols / virtualGrid.cols) * 100}%`,
+          }}
+        />
+
+        {/* 下側の寸法表示（totalCols x 42 mm）*/}
+        <div
+          className="absolute pointer-events-none text-content-m"
+          style={{
+            left: `${((0 - virtualGrid.offsetX) / virtualGrid.rows) * 100}%`,
+            top: `calc(${
+              ((0 - virtualGrid.offsetY + totalCols) / virtualGrid.cols) * 100
+            }% + 8px)`,
+            width: `${(totalRows / virtualGrid.rows) * 100}%`,
+            height: "24px",
+          }}>
+          <DimensionLabel value={totalRows * 42} orientation="horizontal" />
+        </div>
+
+        {/* 右側の寸法表示（totalRows x 42 mm）*/}
+        <div
+          className="absolute pointer-events-none text-content-m"
+          style={{
+            left: `calc(${
+              ((0 - virtualGrid.offsetX + totalRows) / virtualGrid.rows) * 100
+            }% + 8px)`,
+            top: `${((0 - virtualGrid.offsetY) / virtualGrid.cols) * 100}%`,
+            width: "24px",
+            height: `${(totalCols / virtualGrid.cols) * 100}%`,
+          }}>
+          <DimensionLabel value={totalCols * 42} orientation="vertical" />
+        </div>
+
+        {/* 既存のBin (リサイズ中は非表示) - virtualGridベースで表示（オフセット適用） */}
         {bins.map(
           (bin, index) =>
             index !== resizingBinIndex && (
               <GridBin
                 key={index}
                 bin={bin}
-                totalRows={totalRows}
-                totalCols={totalCols}
+                totalRows={virtualGrid.rows}
+                totalCols={virtualGrid.cols}
+                offsetX={virtualGrid.offsetX}
+                offsetY={virtualGrid.offsetY}
                 index={index}
                 onResizeStart={handleResizeStart}
                 onDelete={removeBin}
@@ -236,7 +315,7 @@ export const GridView = () => {
         {/* 選択範囲（previewBin） */}
         {selectionRect && (
           <div
-            className={`absolute border-2 border-dashed rounded-sm pointer-events-none ${
+            className={`absolute border-2 border-dashed rounded-sm pointer-events-none flex items-center justify-center ${
               selectionRect.hasOverlap
                 ? "bg-system-error-l/30 border-system-error-h"
                 : "bg-sub-blue/20 border-sub-blue"
@@ -246,8 +325,15 @@ export const GridView = () => {
               top: `${selectionRect.top}%`,
               width: `${selectionRect.width}%`,
               height: `${selectionRect.height}%`,
-            }}
-          />
+            }}>
+            <span className={`text-sm font-display select-none ${
+              selectionRect.hasOverlap
+                ? "text-system-error-h"
+                : "text-sub-blue"
+            }`}>
+              {selectionRect.rows} × {selectionRect.cols}
+            </span>
+          </div>
         )}
       </div>
     </div>

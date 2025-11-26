@@ -7,19 +7,25 @@ interface GridBinProps {
   bin: Bin
   totalRows: number
   totalCols: number
+  offsetX: number
+  offsetY: number
   index: number
   onResizeStart: (index: number) => void
   onDelete: (index: number) => void
 }
 
-export const GridBin = ({ bin, totalRows, totalCols, index, onResizeStart, onDelete }: GridBinProps) => {
+export const GridBin = ({ bin, totalRows, totalCols, offsetX, offsetY, index, onResizeStart, onDelete }: GridBinProps) => {
   const { updateBin } = useGridfinityStore()
   const cellWidth = 100 / totalRows
   const cellHeight = 100 / totalCols
 
+  // オフセットを適用して表示位置を計算
+  const displayX = bin.start[0] - offsetX
+  const displayY = bin.start[1] - offsetY
+
   const style = {
-    left: `${bin.start[0] * cellWidth}%`,
-    top: `${bin.start[1] * cellHeight}%`,
+    left: `${displayX * cellWidth}%`,
+    top: `${displayY * cellHeight}%`,
     width: `${bin.rows * cellWidth}%`,
     height: `${bin.cols * cellHeight}%`,
   }
