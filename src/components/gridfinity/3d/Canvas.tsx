@@ -4,6 +4,7 @@ import { OrbitControls, GizmoViewport, GizmoHelper } from "@react-three/drei"
 import { useModularStore } from "@/stores/modular"
 import Model from "./Model"
 import BoundingBox from "./BoundingBox"
+import BomSlider from "../ui/BomSlider"
 import { useEffect, useMemo, useState, useRef } from "react"
 import { Object3D, Group, Box3, Vector3 } from "three"
 import { useGridfinityStore, Bin } from "@/stores/gridfinity"
@@ -115,15 +116,18 @@ const Canvas = () => {
   
   return (
     <div className="flex-1 relative">
-      <button
-        onClick={() => setIsBoundingBoxVisible(!isBoundingBoxVisible)}
-        className="absolute bottom-4 left-4 z-10 b-button bg-content-xxl-a hover:bg-content-xl-a"
-        title={isBoundingBoxVisible ? "バウンディングボックスを非表示" : "バウンディングボックスを表示"}>
-        <Icon
-          name="major"
-          className="size-8"
-        />
-      </button>
+      <div className="absolute bottom-4 left-4 z-10 flex gap-2">
+        <button
+          onClick={() => setIsBoundingBoxVisible(!isBoundingBoxVisible)}
+          className="b-button bg-content-xxl-a hover:bg-content-xl-a"
+          title={isBoundingBoxVisible ? "バウンディングボックスを非表示" : "バウンディングボックスを表示"}>
+          <Icon
+            name="major"
+            className="size-8"
+          />
+        </button>
+        <BomSlider />
+      </div>
       <ThreeCanvas
         orthographic
         camera={{
@@ -169,7 +173,7 @@ const Canvas = () => {
             color="#666666"
             isShow={isBoundingBoxVisible}>
             <Model
-              geometries={manifoldGeometries.map((geometry) => geometry.geometry)}
+              manifoldGeometries={manifoldGeometries}
             />
           </BoundingBox>
         </group>

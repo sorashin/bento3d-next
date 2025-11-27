@@ -5,11 +5,11 @@ import { Bin } from '@/stores/gridfinity';
  * Returns { totalRows, totalCols } where:
  * totalRows is the count along the X axis (width)
  * totalCols is the count along the Y axis (height)
- * Defaults to 3x3 if no bins exist.
+ * Defaults to 1x1 if no bins exist.
  */
 export const calculateGridSize = (bins: Bin[]) => {
   if (bins.length === 0) {
-    return { totalRows: 3, totalCols: 3 };
+    return { totalRows: 1, totalCols: 1 };
   }
 
   let maxX = 0;
@@ -27,8 +27,8 @@ export const calculateGridSize = (bins: Bin[]) => {
   });
 
   return {
-    totalRows: Math.max(3, maxX),
-    totalCols: Math.max(3, maxY),
+    totalRows: Math.max(1, maxX),
+    totalCols: Math.max(1, maxY),
   };
 };
 
