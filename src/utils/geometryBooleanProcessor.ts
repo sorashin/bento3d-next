@@ -1,8 +1,9 @@
 import { BufferGeometry } from "three"
 import { ManifoldGeometriesWithInfo } from "@/stores/modular"
 import { mesh2geometry, geometry2mesh } from "./geometryUtils"
+import Module from "manifold-3d"
 
-type ManifoldModule = Awaited<ReturnType<typeof import("manifold-3d")>>
+type ManifoldModule = Awaited<ReturnType<typeof Module>>
 
 /**
  * 命名規則に基づいてgeometryをboolean処理する汎用関数
