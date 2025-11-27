@@ -11,6 +11,10 @@ import { geometryBooleanProcessor } from "@/utils/geometryBooleanProcessor"
 import { useNavigationStore, nevigations } from "@/stores/navigation"
 import { useSettingsStore } from "@/stores/settings"
 import Module from "manifold-3d"
+import { Toast } from "@/components/common/ui/Toast"
+import DialogAd from "@/components/common/ui/DialogAd"
+import DialogFeedback from "@/components/common/ui/DialogFeedback"
+import DrawerUpdates from "@/components/common/ui/DrawerUpdates"
 
 export function Page() {
   const { geometries, setManifoldGeometries, inputNodeId, updateNodeProperty, evaluateGraph, nodes } = useModularStore()
@@ -66,11 +70,14 @@ export function Page() {
 
   return (
     <>
-      
       <Header onClickDL={handleDLView} />
       <LeftMenu />
       <RightMenu />
-      
+      <DialogAd />
+      <DialogFeedback />
+      <DrawerUpdates />
+      <Toast />
+
       {/* Plan画面 */}
       {currentNav === 0 && (
         <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none bg-surface-base">
@@ -79,12 +86,8 @@ export function Page() {
           </div>
         </div>
       )}
-      {
-        currentNav === 1 && (
-          <Canvas />
-        )
-      }
-      
+      {currentNav === 1 && <Canvas />}
+
       {/* Preview画面はCanvasが既に表示されている */}
     </>
   )
