@@ -29,6 +29,13 @@ export function Page() {
     setCurrentNavArray(nevigations["gridfinity"])
   }, [setCurrentNavArray])
 
+  // グラフが読み込まれたら非同期でevaluateGraphを実行
+  useEffect(() => {
+    if (nodes.length > 0) {
+      evaluateGraph()
+    }
+  }, [nodes.length, evaluateGraph])
+
   // manifoldModuleを初期化
   useEffect(() => {
     const initManifold = async () => {

@@ -192,10 +192,10 @@ html, body, #root {
     
   }
   .b-dropdown-contents {
-    @apply absolute min-w-32 origin-top-left scale-0 transition-all duration-150 ease-in-out gap-1 p-1 rounded-sm opacity-0;
+    @apply absolute min-w-32 origin-top-left scale-0 transition-all duration-150 ease-in-out gap-1 p-1 rounded-sm opacity-0 pointer-events-none;
   }
   .b-dropdown:hover > .b-dropdown-contents {
-    @apply scale-100 opacity-100;
+    @apply scale-100 opacity-100 pointer-events-auto;
   }
 
   

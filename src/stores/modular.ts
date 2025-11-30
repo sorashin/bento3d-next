@@ -129,7 +129,7 @@ export const useModularStore = create<ModularState>((set, get) => ({
         setInputNodeId(inputNode.id);
       }
       
-      get().evaluateGraph();
+      // evaluateGraphの呼び出しを削除 - ページ側で必要に応じて呼び出す
     } catch (error) {
       console.error(`Error loading graph for ${slug}:`, error);
     }
