@@ -12,6 +12,9 @@ export default defineConfig({
     topLevelAwait(),
     svgr({ include: "**/*.svg" })
   ],
+  build: {
+    target: 'esnext'
+  },
   optimizeDeps: {
     exclude: ['nodi-modular', 'manifold-3d']
   },
