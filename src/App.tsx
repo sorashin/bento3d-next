@@ -116,14 +116,16 @@ const PageLoader = ({ slug }: { slug: string }) => {
 const GraphRenderer = () => {
   const { slug } = useParams<{ slug: string }>()
   const { setCurrentNavArray, setCurrentNav } = useNavigationStore()
+  const { setManifoldGeometries } = useModularStore()
 
-  // slugが変更されたときにnavigation storeを更新
+  // slugが変更されたときにnavigation storeを更新し、manifoldGeometriesをリセット
   useEffect(() => {
     if (slug && nevigations[slug]) {
       setCurrentNavArray(nevigations[slug])
       setCurrentNav(0) // slugが変わったら最初のナビゲーションにリセット
+      setManifoldGeometries([]) // slugが変わったらmanifoldGeometriesをリセット
     }
-  }, [slug, setCurrentNavArray, setCurrentNav])
+  }, [slug, setCurrentNavArray, setCurrentNav, setManifoldGeometries])
 
   return (
     <>
