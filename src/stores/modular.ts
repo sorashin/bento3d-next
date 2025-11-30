@@ -5,6 +5,10 @@ import { convertGeometryInterop } from '@/utils/geometryUtils';
 import init from 'nodi-modular';
 import gridfinity from "@/assets/graph/gridfinity.json";
 
+// WebAssemblyの初期化状態をグローバルに管理
+let initPromise: Promise<void> | null = null;
+let isInitialized = false;
+
 // ジオメトリ情報の型を定義
 export interface GeometryWithId {
   id: GeometryIdentifier;  // stringではなくGeometryIdentifier型に修正
@@ -69,7 +73,39 @@ export const useModularStore = create<ModularState>((set, get) => ({
   
 
   initializeModular: async () => {
-    await init();
+    // 既に初期化済みの場合はスキップ
+    if (isInitialized) {
+      const { modular } = get();
+      if (!modular) {
+        set({ modular: Modular.new() });
+      }
+      return;
+    }
+
+    // 既に初期化中の場合は、そのPromiseを待つ
+    if (initPromise) {
+      await initPromise;
+      const { modular } = get();
+      if (!modular) {
+        set({ modular: Modular.new() });
+      }
+      return;
+    }
+
+    // 初回初期化
+    initPromise = (async () => {
+      try {
+        await init();
+        isInitialized = true;
+      } catch (error) {
+        // エラーが発生した場合は、Promiseをリセットして再試行可能にする
+        initPromise = null;
+        isInitialized = false;
+        throw error;
+      }
+    })();
+    
+    await initPromise;
     set({ modular: Modular.new() });
   },
 
@@ -93,7 +129,7 @@ export const useModularStore = create<ModularState>((set, get) => ({
         setInputNodeId(inputNode.id);
       }
       
-      get().evaluateGraph();
+      // evaluateGraphの呼び出しを削除 - ページ側で必要に応じて呼び出す
     } catch (error) {
       console.error(`Error loading graph for ${slug}:`, error);
     }

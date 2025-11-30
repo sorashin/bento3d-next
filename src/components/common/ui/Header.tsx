@@ -57,9 +57,10 @@ export const Header: React.FC<HeaderProps> = ({ onClickDL }) => {
               label={item.label}
               icon={item.icon}
               isActive={currentNav === index}
-              isLoading={index == 2 && isPreviewLoad}
+              isLoading={(index === 1 || index === 2) && isPreviewLoad}
               onClick={() => {
-                if (index == 2) {
+                // gridfinityのPreview（index == 1）またはDownload（index == 2）のとき
+                if (index == 1 || index == 2) {
                   setIsPreviewLoad(true)
                   handleToast()
                   // currentNavが変更されるとnodeのevaluationが走ってその後のレンダリング処理がブロックされるため、タイムアウトを設ける
