@@ -192,10 +192,12 @@ html, body, #root {
     
   }
   .b-dropdown-contents {
-    @apply absolute min-w-32 origin-top-left scale-0 transition-all duration-150 ease-in-out gap-1 p-1 rounded-sm opacity-0 pointer-events-none;
+    @apply absolute min-w-32 origin-top-left scale-0 transition-all duration-150 ease-in-out gap-1 p-1 rounded-sm opacity-0;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
   .b-dropdown:hover > .b-dropdown-contents {
-    @apply scale-100 opacity-100 pointer-events-auto;
+    @apply scale-100 opacity-100;
   }
 
   
@@ -260,4 +262,8 @@ html, body, #root {
     height: 100%;
     background: #ffffff;
     border-radius: theme("borderRadius.lg");
+  }
+  .b-backdrop-blur-md {
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }

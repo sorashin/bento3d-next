@@ -1,10 +1,15 @@
 [
   {
+    "title": "Gridfinity Mode is Released",
+    "image": "/images/updates/2025-11-30.mp4",
+    "date": "2025-11-30",
+    "style": "left-4 bottom-2 text-content-h"
+  },
+  {
     "title": "Fixed Col Height Input overlaying on 🗑️",
     "image": "/images/updates/2025-09-11.png",
     "date": "2025-09-11",
     "style": "left-4 bottom-2 text-content-h"
-    
   },
   {
     "title": "Fixed broken STL issue & Wavy lines are back",

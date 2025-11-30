@@ -12,12 +12,14 @@ const modes = [
     label: "Partition",
     slug: "tray",
     img: "bento-partition",
+    isNew: false,
     sampleImg: ["/images/partitions/000.png", "/images/partitions/004.jpg"],
   },
   {
     label: "Partition & Box",
     slug: "bento3d",
     img: "bento-box",
+    isNew: false,
     sampleImg: [
       "/images/cases/000.jpg",
       "/images/cases/001.jpg",
@@ -28,6 +30,7 @@ const modes = [
     label: "Gridfinity",
     slug: "gridfinity",
     img: "gridfinity",
+    isNew: true,
     sampleImg: [
       "/images/gridfinity/000.png",
       "/images/gridfinity/001.png",
@@ -86,7 +89,7 @@ export const LeftMenu = ({ renderSettings, onModeChange }: LeftMenuProps) => {
 
   return (
     <motion.div
-      className="absolute top-20 md:top-8 left-4 md:left-8 z-20 md:w-[240px] h-fit flex flex-col gap-2 items-start font-display bg-surface-sheet-l backdrop-blur-lg rounded-md p-1"
+      className="absolute top-20 md:top-8 left-4 md:left-8 z-30 md:w-[240px] h-fit flex flex-col gap-2 items-start font-display bg-surface-sheet-l backdrop-blur-lg rounded-md p-1"
       layout>
       <motion.div className="flex flex-row items-center gap-2 w-full" layout>
         <button className="b-button bg-surface-sheet-h flex flex-row items-center gap-2 md:min-w-[180px] hover:bg-[rgba(255,255,255,.56)] px-4 b-dropdown group relative">
@@ -102,15 +105,20 @@ export const LeftMenu = ({ renderSettings, onModeChange }: LeftMenuProps) => {
             name="chevron-down"
             className="size-4 text-content-m group-hover:translate-y-0.5 transition-all"
           />
-          <div className="b-dropdown-contents left-0 top-[calc(100%+8px)] origin-[20%_0%] bg-surface-base shadow-lg rounded-sm p-2 z-10">
+          <div className="b-dropdown-contents left-0 top-[calc(100%+8px)] origin-[20%_0%] bg-content-dark-h-a backdrop-blur-md shadow-lg rounded-sm p-2 b-backdrop-blur-md">
             <ul className="flex flex-row gap-2">
               {modes.map((mode, index) => (
                 <li
                   key={index}
-                  className="flex flex-col items-center gap-2 w-[240px] hover:bg-[rgba(255,255,255,.72)] group child-group p-2 rounded-[6px]"
+                  className="flex flex-col items-center gap-2 w-[240px] bg-transparent hover:bg-content-dark-h-a group child-group p-2 rounded-[6px] transition-all"
                   onClick={() => handleModeChange(mode.slug)}>
-                  <p className="w-full text-left text-lg mb-4 ml-2 mt-2 font-semibold text-content-h-a">
+                  <p className="relative w-full text-left text-lg mb-4 ml-2 mt-2 font-semibold text-content-h-a">
                     {mode.label}
+                    {mode.isNew && (
+                      <span className="absolute left-0 top-full text-xs bg-sub-blue text-white px-2 py-1 rounded-sm">
+                        New
+                      </span>
+                    )}
                   </p>
                   <Icon
                     name={mode.img}
