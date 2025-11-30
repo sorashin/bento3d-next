@@ -29,8 +29,8 @@ const modes = [
     slug: "gridfinity",
     img: "gridfinity",
     sampleImg: [
-      "/images/gridfinity/000.jpg",
-      "/images/gridfinity/001.jpg",
+      "/images/gridfinity/000.png",
+      "/images/gridfinity/001.png",
       "/images/gridfinity/002.png",
     ],
   },
