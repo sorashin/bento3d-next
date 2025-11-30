@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState, useRef } from "react"
 import { Object3D, Group, Box3, Vector3 } from "three"
 import { useGridfinityStore, Bin } from "@/stores/gridfinity"
 import Icon from "@/components/common/ui/Icon"
+import { useNavigationStore } from "@/stores/navigation"
 
 // binsの中に含まれるuの値で最も大きい値を選出する関数
 const getMaxU = (bins: Bin[]): number => {
@@ -93,7 +94,8 @@ const CameraController = ({
 
 const Canvas = () => {
   const { manifoldGeometries } = useModularStore()
-  const [isBoundingBoxVisible, setIsBoundingBoxVisible] = useState(true)
+  const [isBoundingBoxVisible, setIsBoundingBoxVisible] = useState(false)
+  const { currentNav } = useNavigationStore()
   const modelGroupRef = useRef<Group>(null)
   
   useEffect(() => {
@@ -104,30 +106,27 @@ const Canvas = () => {
   // binsの中に含まれるuの値で最も大きい値を選出
   const maxU = useMemo(() => getMaxU(bins), [bins])
   
-  // CSS変数からsurface-baseの色を取得
-  const surfaceBaseColor = useMemo(() => {
-    if (typeof window !== 'undefined') {
-      return getComputedStyle(document.documentElement)
-        .getPropertyValue('--color-surface-base')
-        .trim() || '#E7E7E7'
-    }
-    return '#E7E7E7'
-  }, [])
+  
   
   return (
     <div className="flex-1 relative">
-      <div className="absolute bottom-4 left-4 z-10 flex gap-2">
+      
+      {currentNav == 1 && <div className="absolute bottom-8 inset-x-0 flex justify-center items-center gap-2 pointer-events-none">
+        <div className="flex flex-row items-center gap-2 bg-content-dark-l-a rounded-md shadow-sm p-2 z-10 pointer-events-auto">
         <button
           onClick={() => setIsBoundingBoxVisible(!isBoundingBoxVisible)}
-          className="b-button bg-content-xxl-a hover:bg-content-xl-a"
-          title={isBoundingBoxVisible ? "バウンディングボックスを非表示" : "バウンディングボックスを表示"}>
-          <Icon
-            name="major"
-            className="size-8"
-          />
+          className="b-button hover:bg-content-xl-a cursor-pointer"
+          title={
+            isBoundingBoxVisible
+              ? "バウンディングボックスを非表示"
+              : "バウンディングボックスを表示"
+          }>
+          <Icon name="major" className="size-8" />
         </button>
         <BomSlider />
-      </div>
+        </div>
+        
+      </div>}
       <ThreeCanvas
         orthographic
         camera={{
@@ -138,7 +137,7 @@ const Canvas = () => {
           far: 10000,
         }}
         frameloop="demand">
-        <color attach="background" args={[surfaceBaseColor]} />
+        <color attach="background" args={["#dddddd"]} />
         <ambientLight intensity={1.8} />
         <directionalLight
           position={[5, 5, 5]}
@@ -172,14 +171,12 @@ const Canvas = () => {
             showText={true}
             color="#666666"
             isShow={isBoundingBoxVisible}>
-            <Model
-              manifoldGeometries={manifoldGeometries}
-            />
+            <Model manifoldGeometries={manifoldGeometries} />
           </BoundingBox>
         </group>
-        <CameraController 
-          modelRef={modelGroupRef} 
-          geometryCount={manifoldGeometries.length} 
+        <CameraController
+          modelRef={modelGroupRef}
+          geometryCount={manifoldGeometries.length}
         />
       </ThreeCanvas>
     </div>

@@ -12,7 +12,7 @@ export const nevigations: Record<string, Navigation[]> = {
         icon:"grid",
     },{
         index:1,
-        label:"Preview",
+        label:"Download",
         icon:"download",
     }],
     "tray":[{

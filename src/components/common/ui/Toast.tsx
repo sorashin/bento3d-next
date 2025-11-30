@@ -17,7 +17,7 @@ export const Toast: FC<ToastProps> = () => {
           t.isOpen && (
             <motion.div
               key={i}
-              className={`fixed flex justify-center inset-x-0 top-24 z-10 ${
+              className={`fixed flex justify-center inset-x-0 top-24 z-30 ${
                 t.type === "error"
                   ? "bg-red-500"
                   : t.type === "warn"

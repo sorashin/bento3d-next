@@ -115,8 +115,9 @@ const PageLoader = ({ slug }: { slug: string }) => {
 // GraphRendererコンポーネント - URLパラメータを取得しPageLoaderに渡す
 const GraphRenderer = () => {
   const { slug } = useParams<{ slug: string }>()
-  const { setCurrentNavArray, setCurrentNav } = useNavigationStore()
-  const { setManifoldGeometries } = useModularStore()
+  const setCurrentNavArray = useNavigationStore((state) => state.setCurrentNavArray)
+  const setCurrentNav = useNavigationStore((state) => state.setCurrentNav)
+  const setManifoldGeometries = useModularStore((state) => state.setManifoldGeometries)
 
   // slugが変更されたときにnavigation storeを更新し、manifoldGeometriesをリセット
   useEffect(() => {

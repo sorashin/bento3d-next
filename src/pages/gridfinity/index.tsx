@@ -17,11 +17,17 @@ import DialogFeedback from "@/components/common/ui/DialogFeedback"
 import DrawerUpdates from "@/components/common/ui/DrawerUpdates"
 
 export function Page() {
-  const { geometries, setManifoldGeometries, inputNodeId, updateNodeProperty, evaluateGraph, nodes } = useModularStore()
+  const geometries = useModularStore((state) => state.geometries)
+  const setManifoldGeometries = useModularStore((state) => state.setManifoldGeometries)
+  const inputNodeId = useModularStore((state) => state.inputNodeId)
+  const updateNodeProperty = useModularStore((state) => state.updateNodeProperty)
+  const evaluateGraph = useModularStore((state) => state.evaluateGraph)
+  const nodes = useModularStore((state) => state.nodes)
   const gridfinityState = useGridfinityStore()
   const { bins } = gridfinityState
-  const { currentNav, setCurrentNavArray } = useNavigationStore()
-  const { setIsPreviewLoad } = useSettingsStore()
+  const currentNav = useNavigationStore((state) => state.currentNav)
+  const setCurrentNavArray = useNavigationStore((state) => state.setCurrentNavArray)
+  const setIsPreviewLoad = useSettingsStore((state) => state.setIsPreviewLoad)
   const [manifoldModule, setManifoldModule] = useState<Awaited<ReturnType<typeof Module>> | null>(null)
 
   // navigation設定をgridfinity用に設定
@@ -87,7 +93,7 @@ export function Page() {
 
       {/* Plan画面 */}
       {currentNav === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none bg-surface-base">
+        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none bg-[#dddddd]">
           <div className="w-full h-full pointer-events-auto">
             <GridView />
           </div>
