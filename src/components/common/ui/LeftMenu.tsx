@@ -110,7 +110,7 @@ export const LeftMenu = ({ renderSettings, onModeChange }: LeftMenuProps) => {
               {modes.map((mode, index) => (
                 <li
                   key={index}
-                  className="flex flex-col items-center gap-2 w-[240px] bg-transparent hover:bg-content-dark-h-a group child-group p-2 rounded-[6px] transition-all"
+                  className="flex flex-col items-center gap-2 w-[240px] bg-transparent hover:bg-content-dark-h-a hover:shadow-md group child-group p-2 rounded-[6px] transition-all"
                   onClick={() => handleModeChange(mode.slug)}>
                   <p className="relative w-full text-left text-lg mb-4 ml-2 mt-2 font-semibold text-content-h-a">
                     {mode.label}
