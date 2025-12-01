@@ -47,6 +47,9 @@ export const Header: React.FC<HeaderProps> = ({ onClickDL }) => {
     setToast([...toast, i])
   }
 
+  // 最後のメニュー（Download）のindexを取得
+  const lastMenuIndex = currentNavArray.length - 1
+
   return (
     <header className="absolute inset-x-0 top-0 pt-8 px-4 flex flex-col justify-between z-20">
       <div className="flex justify-between md:justify-center items-center gap-2 w-full font-display">
@@ -57,10 +60,10 @@ export const Header: React.FC<HeaderProps> = ({ onClickDL }) => {
               label={item.label}
               icon={item.icon}
               isActive={currentNav === index}
-              isLoading={(index === 1 || index === 2) && isPreviewLoad}
+              isLoading={index === lastMenuIndex && isPreviewLoad}
               onClick={() => {
-                // gridfinityのPreview（index == 1）またはDownload（index == 2）のとき
-                if (index == 1 || index == 2) {
+                // 最後のメニュー（Download）のときのみgraph読み込みを実行
+                if (index === lastMenuIndex) {
                   setIsPreviewLoad(true)
                   handleToast()
                   // currentNavが変更されるとnodeのevaluationが走ってその後のレンダリング処理がブロックされるため、タイムアウトを設ける
