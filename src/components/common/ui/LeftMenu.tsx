@@ -111,7 +111,13 @@ export const LeftMenu = ({ renderSettings, onModeChange }: LeftMenuProps) => {
                 <li
                   key={index}
                   className="flex flex-col items-center gap-2 w-[240px] bg-transparent hover:bg-content-dark-h-a hover:shadow-md group child-group p-2 rounded-[6px] transition-all"
-                  onClick={() => handleModeChange(mode.slug)}>
+                  onClick={(e) => {
+                    handleModeChange(mode.slug)
+                    // クリック後にフォーカスを外して、DOM要素が選択されないようにする
+                    if (e.currentTarget instanceof HTMLElement) {
+                      e.currentTarget.blur()
+                    }
+                  }}>
                   <p className="relative w-full text-left text-lg mb-4 ml-2 mt-2 font-semibold text-content-h-a">
                     {mode.label}
                     {mode.isNew && (
@@ -144,10 +150,12 @@ export const LeftMenu = ({ renderSettings, onModeChange }: LeftMenuProps) => {
               ? "!text-content-m-a !cursor-pointer hover:bg-content-xl-a"
               : "!text-content-xl-a !cursor-default !hover:bg-transparent"
           }`}
-          onClick={() => {
+          onClick={(e) => {
             if (currentNav !== 2) {
               setIsSettingsOpen(!isSettingsOpen)
             }
+            // クリック後にフォーカスを外して、DOM要素が選択されないようにする
+            e.currentTarget.blur()
           }}
           layout
           data-tooltip-content={"settings"}
@@ -189,7 +197,13 @@ export const LeftMenu = ({ renderSettings, onModeChange }: LeftMenuProps) => {
                   </label>
                   <ul className="grid grid-cols-2 w-full rounded-md bg-content-xxl-a">
                     <li
-                      onClick={() => setIsStack(false)}
+                      onClick={(e) => {
+                        setIsStack(false)
+                        // クリック後にフォーカスを外して、DOM要素が選択されないようにする
+                        if (e.currentTarget instanceof HTMLElement) {
+                          e.currentTarget.blur()
+                        }
+                      }}
                       className={`cursor-pointer flex flex-col items-center rounded-sm p-1 text-content-m-a ${
                         !isStack ? "bg-white" : "hover:bg-content-xxl-a"
                       }`}>
@@ -199,7 +213,13 @@ export const LeftMenu = ({ renderSettings, onModeChange }: LeftMenuProps) => {
                       </span>
                     </li>
                     <li
-                      onClick={() => setIsStack(true)}
+                      onClick={(e) => {
+                        setIsStack(true)
+                        // クリック後にフォーカスを外して、DOM要素が選択されないようにする
+                        if (e.currentTarget instanceof HTMLElement) {
+                          e.currentTarget.blur()
+                        }
+                      }}
                       className={`cursor-pointer flex flex-col items-center rounded-sm p-1 text-content-m-a ${
                         isStack ? "bg-white" : "hover:bg-content-xxl-a"
                       }`}>

@@ -114,7 +114,11 @@ const Canvas = () => {
       {currentNav == 1 && <div className="absolute bottom-8 inset-x-0 flex justify-center items-center gap-2 pointer-events-none">
         <div className="flex flex-row items-center gap-2 bg-content-dark-l-a rounded-md shadow-sm p-2 z-10 pointer-events-auto">
         <button
-          onClick={() => setIsBoundingBoxVisible(!isBoundingBoxVisible)}
+          onClick={(e) => {
+            setIsBoundingBoxVisible(!isBoundingBoxVisible)
+            // クリック後にフォーカスを外して、DOM要素が選択されないようにする
+            e.currentTarget.blur()
+          }}
           className="b-button hover:bg-content-xl-a cursor-pointer"
           title={
             isBoundingBoxVisible
