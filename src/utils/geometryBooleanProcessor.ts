@@ -111,40 +111,52 @@ export function geometryBooleanProcessor(
       const { vertProperties, triVerts } = geometry2mesh(group.base.geometry)
       const baseMesh = new Mesh({ numProp: 3, vertProperties, triVerts })
       baseMesh.merge()
-      let resultManifold = new Manifold(baseMesh)
+      const baseManifold = new Manifold(baseMesh)
 
-      // unionを順次適用
+      // union用のManifold配列を作成（baseを含む）
+      const unionManifolds: InstanceType<typeof Manifold>[] = [baseManifold]
+      
       for (const unionGeometry of group.unions) {
         try {
           const { vertProperties, triVerts } = geometry2mesh(unionGeometry.geometry)
           const unionMesh = new Mesh({ numProp: 3, vertProperties, triVerts })
           unionMesh.merge()
           const unionManifold = new Manifold(unionMesh)
-          resultManifold = Manifold.union(resultManifold, unionManifold)
+          unionManifolds.push(unionManifold)
         } catch (error) {
           console.error(
             `Error processing union geometry: label=${unionGeometry.label}, id=${unionGeometry.id}`,
             error
           )
-          // unionに失敗した場合はスキップして続行
+          // 変換に失敗した場合はスキップ
         }
       }
 
-      // diffを順次適用
+      // バッチunion: 配列を渡して一度に処理（スタックオーバーフロー対策）
+      let resultManifold = Manifold.union(unionManifolds)
+
+      // diff用のManifold配列を作成
+      const diffManifolds: InstanceType<typeof Manifold>[] = []
+      
       for (const diffGeometry of group.diffs) {
         try {
           const { vertProperties, triVerts } = geometry2mesh(diffGeometry.geometry)
           const diffMesh = new Mesh({ numProp: 3, vertProperties, triVerts })
           diffMesh.merge()
           const diffManifold = new Manifold(diffMesh)
-          resultManifold = Manifold.difference(resultManifold, diffManifold)
+          diffManifolds.push(diffManifold)
         } catch (error) {
           console.error(
             `Error processing diff geometry: label=${diffGeometry.label}, id=${diffGeometry.id}`,
             error
           )
-          // diffに失敗した場合はスキップして続行
+          // 変換に失敗した場合はスキップ
         }
+      }
+
+      // diffが存在する場合はバッチdifference
+      if (diffManifolds.length > 0) {
+        resultManifold = Manifold.difference([resultManifold, ...diffManifolds])
       }
 
       // 結果をThree.js geometryに変換
