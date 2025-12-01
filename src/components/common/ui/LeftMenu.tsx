@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState, ReactNode } from "react"
 import Icon from "@/components/common/ui/Icon"
 import { Tooltip } from "react-tooltip"
 import { useSettingsStore } from "@/stores/settings"
@@ -12,21 +12,39 @@ const modes = [
     label: "Partition",
     slug: "tray",
     img: "bento-partition",
+    isNew: false,
     sampleImg: ["/images/partitions/000.png", "/images/partitions/004.jpg"],
   },
   {
     label: "Partition & Box",
     slug: "bento3d",
     img: "bento-box",
+    isNew: false,
     sampleImg: [
       "/images/cases/000.jpg",
       "/images/cases/001.jpg",
       "/images/cases/002.png",
     ],
   },
+  {
+    label: "Gridfinity",
+    slug: "gridfinity",
+    img: "gridfinity",
+    isNew: true,
+    sampleImg: [
+      "/images/gridfinity/000.png",
+      "/images/gridfinity/001.png",
+      "/images/gridfinity/002.png",
+    ],
+  },
 ]
 
-export const LeftMenu = () => {
+interface LeftMenuProps {
+  renderSettings?: () => ReactNode
+  onModeChange?: (currentMode: number) => void
+}
+
+export const LeftMenu = ({ renderSettings, onModeChange }: LeftMenuProps) => {
   const [currentMode, setCurrentMode] = useState(0)
   const { currentNav } = useNavigationStore((state) => state)
   const { isSettingsOpen, setIsSettingsOpen } = useSettingsStore(
@@ -60,12 +78,18 @@ export const LeftMenu = () => {
   }, [])
   
   useEffect(() => {
-    handleMenuReset()
-  }, [currentMode])
+    if (onModeChange) {
+      onModeChange(currentMode)
+    }
+    // renderSettingsが提供されていない場合のみhandleMenuResetを実行（tray/bento3d用）
+    if (!renderSettings) {
+      handleMenuReset()
+    }
+  }, [currentMode, onModeChange, renderSettings, handleMenuReset])
 
   return (
     <motion.div
-      className="absolute top-20 md:top-8 left-4 md:left-8 z-20 md:w-[240px] h-fit flex flex-col gap-2 items-start font-display bg-surface-sheet-l backdrop-blur-lg rounded-md p-1"
+      className="absolute top-20 md:top-8 left-4 md:left-8 z-30 md:w-[240px] h-fit flex flex-col gap-2 items-start font-display bg-surface-sheet-l backdrop-blur-lg rounded-md p-1"
       layout>
       <motion.div className="flex flex-row items-center gap-2 w-full" layout>
         <button className="b-button bg-surface-sheet-h flex flex-row items-center gap-2 md:min-w-[180px] hover:bg-[rgba(255,255,255,.56)] px-4 b-dropdown group relative">
@@ -81,15 +105,26 @@ export const LeftMenu = () => {
             name="chevron-down"
             className="size-4 text-content-m group-hover:translate-y-0.5 transition-all"
           />
-          <div className="b-dropdown-contents left-0 top-[calc(100%+8px)] origin-[20%_0%] bg-surface-base shadow-lg rounded-sm p-2 z-10">
+          <div className="b-dropdown-contents left-0 top-[calc(100%+8px)] origin-[20%_0%] bg-content-dark-h-a backdrop-blur-md shadow-lg rounded-sm p-2 b-backdrop-blur-md">
             <ul className="flex flex-row gap-2">
               {modes.map((mode, index) => (
                 <li
                   key={index}
-                  className="flex flex-col items-center gap-2 w-[240px] hover:bg-[rgba(255,255,255,.72)] group child-group p-2 rounded-[6px]"
-                  onClick={() => handleModeChange(mode.slug)}>
-                  <p className="w-full text-left text-lg mb-4 ml-2 mt-2 font-semibold text-content-h-a">
+                  className="flex flex-col items-center gap-2 w-[240px] bg-transparent hover:bg-content-dark-h-a hover:shadow-md group child-group p-2 rounded-[6px] transition-all"
+                  onClick={(e) => {
+                    handleModeChange(mode.slug)
+                    // クリック後にフォーカスを外して、DOM要素が選択されないようにする
+                    if (e.currentTarget instanceof HTMLElement) {
+                      e.currentTarget.blur()
+                    }
+                  }}>
+                  <p className="relative w-full text-left text-lg mb-4 ml-2 mt-2 font-semibold text-content-h-a">
                     {mode.label}
+                    {mode.isNew && (
+                      <span className="absolute left-0 top-full text-xs bg-sub-blue text-white px-2 py-1 rounded-sm">
+                        New
+                      </span>
+                    )}
                   </p>
                   <Icon
                     name={mode.img}
@@ -112,13 +147,15 @@ export const LeftMenu = () => {
         <motion.button
           className={`b-button ${
             currentNav !== 2
-              ? "!text-content-m-a !cursor-pointer !hover:bg-surface-sheet-l"
+              ? "!text-content-m-a !cursor-pointer hover:bg-content-xl-a"
               : "!text-content-xl-a !cursor-default !hover:bg-transparent"
           }`}
-          onClick={() => {
+          onClick={(e) => {
             if (currentNav !== 2) {
               setIsSettingsOpen(!isSettingsOpen)
             }
+            // クリック後にフォーカスを外して、DOM要素が選択されないようにする
+            e.currentTarget.blur()
           }}
           layout
           data-tooltip-content={"settings"}
@@ -131,68 +168,88 @@ export const LeftMenu = () => {
       </motion.div>
       {isSettingsOpen && (
         <motion.div className="flex flex-col gap-2 w-full">
-          <label htmlFor="thickness" className="text-content-m-a text-xs">
-            Thickness
-          </label>
-          <div className="flex items-center w-full relative">
-            <input
-              value={thickness}
-              type="range"
-              min={1}
-              max={5}
-              step={0.1}
-              onChange={(e) => setThickness(parseFloat(e.target.value))}
-              className="b-input-range h-8 w-full cursor-pointer appearance-none overflow-hidden rounded-lg bg-content-xxl-a transition-all hover:bg-[rgba(28,28,28,.08)]"></input>
-            <span className="absolute right-2 text-sm text-content-m-a">
-              {thickness}
-            </span>
-          </div>
-          {currentMode !== 1 && (
+          {renderSettings ? (
+            // gridfinityのケース
+            renderSettings()
+          ) : (
+            // tray/bento3dのケース
             <>
-              <label htmlFor="isStack" className="text-content-m-a text-xs">
-                Stack
+              <label htmlFor="thickness" className="text-content-m-a text-xs">
+                Thickness
               </label>
-              <ul className="grid grid-cols-2 w-full rounded-md bg-content-xxl-a">
-                <li
-                  onClick={() => setIsStack(false)}
-                  className={`cursor-pointer flex flex-col items-center rounded-sm p-1 text-content-m-a ${
-                    !isStack ? "bg-white" : "hover:bg-content-xxl-a"
-                  }`}>
-                  <Icon name="unstackable" className="size-8 "></Icon>
-                  <span className="text-xs text-center font-sans">
-                    unstackable
-                  </span>
-                </li>
-                <li
-                  onClick={() => setIsStack(true)}
-                  className={`cursor-pointer flex flex-col items-center rounded-sm p-1 text-content-m-a ${
-                    isStack ? "bg-white" : "hover:bg-content-xxl-a"
-                  }`}>
-                  <Icon name="stack" className="size-8 "></Icon>
-                  <span className="text-xs text-center font-sans">
-                    stackable
-                  </span>
-                </li>
-              </ul>
+              <div className="flex items-center w-full relative">
+                <input
+                  value={thickness}
+                  type="range"
+                  min={1}
+                  max={5}
+                  step={0.1}
+                  onChange={(e) => setThickness(parseFloat(e.target.value))}
+                  className="b-input-range h-8 w-full cursor-pointer appearance-none overflow-hidden rounded-lg bg-content-xxl-a transition-all hover:bg-[rgba(28,28,28,.08)]"></input>
+                <span className="absolute right-2 text-sm text-content-m-a">
+                  {thickness}
+                </span>
+              </div>
+              {currentMode !== 1 && (
+                <>
+                  <label htmlFor="isStack" className="text-content-m-a text-xs">
+                    Stack
+                  </label>
+                  <ul className="grid grid-cols-2 w-full rounded-md bg-content-xxl-a">
+                    <li
+                      onClick={(e) => {
+                        setIsStack(false)
+                        // クリック後にフォーカスを外して、DOM要素が選択されないようにする
+                        if (e.currentTarget instanceof HTMLElement) {
+                          e.currentTarget.blur()
+                        }
+                      }}
+                      className={`cursor-pointer flex flex-col items-center rounded-sm p-1 text-content-m-a ${
+                        !isStack ? "bg-white" : "hover:bg-content-xxl-a"
+                      }`}>
+                      <Icon name="unstackable" className="size-8 "></Icon>
+                      <span className="text-xs text-center font-sans">
+                        unstackable
+                      </span>
+                    </li>
+                    <li
+                      onClick={(e) => {
+                        setIsStack(true)
+                        // クリック後にフォーカスを外して、DOM要素が選択されないようにする
+                        if (e.currentTarget instanceof HTMLElement) {
+                          e.currentTarget.blur()
+                        }
+                      }}
+                      className={`cursor-pointer flex flex-col items-center rounded-sm p-1 text-content-m-a ${
+                        isStack ? "bg-white" : "hover:bg-content-xxl-a"
+                      }`}>
+                      <Icon name="stack" className="size-8 "></Icon>
+                      <span className="text-xs text-center font-sans">
+                        stackable
+                      </span>
+                    </li>
+                  </ul>
+                </>
+              )}
+
+              <label htmlFor="thickness" className="text-content-m-a text-xs">
+                Fillet
+              </label>
+              <div className="flex items-center w-full relative">
+                <input
+                  value={fillet}
+                  type="range"
+                  min={1}
+                  max={5}
+                  step={0.1}
+                  onChange={(e) => setFillet(parseFloat(e.target.value))}
+                  className="b-input-range h-8 w-full cursor-pointer appearance-none overflow-hidden rounded-lg bg-content-xxl-a transition-all hover:bg-[rgba(28,28,28,.08)]"></input>
+                <span className="absolute right-2 text-sm text-content-m-a">
+                  {fillet}
+                </span>
+              </div>
             </>
           )}
-
-          <label htmlFor="thickness" className="text-content-m-a text-xs">
-            Fillet
-          </label>
-          <div className="flex items-center w-full relative">
-            <input
-              value={fillet}
-              type="range"
-              min={1}
-              max={5}
-              step={0.1}
-              onChange={(e) => setFillet(parseFloat(e.target.value))}
-              className="b-input-range h-8 w-full cursor-pointer appearance-none overflow-hidden rounded-lg bg-content-xxl-a transition-all hover:bg-[rgba(28,28,28,.08)]"></input>
-            <span className="absolute right-2 text-sm text-content-m-a">
-              {fillet}
-            </span>
-          </div>
         </motion.div>
       )}
 

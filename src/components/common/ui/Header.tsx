@@ -17,8 +17,10 @@ const NavButton: React.FC<{
           ? "bg-[rgba(255,255,255,.56)] shadow-sm"
           : "transparent shadow-none hover:bg-[rgba(255,255,255,.16)]"
       } text-content-h text-xs  transition-all`}
-      onClick={() => {
+      onClick={(e) => {
         onClick()
+        // クリック後にフォーカスを外して、DOM要素が選択されないようにする
+        e.currentTarget.blur()
       }}>
       {isLoading ? (
         <div className="w-6 h-6 animate-spin rounded-full border-2 border-solid border-current border-r-transparent" />
@@ -47,6 +49,9 @@ export const Header: React.FC<HeaderProps> = ({ onClickDL }) => {
     setToast([...toast, i])
   }
 
+  // 最後のメニュー（Download）のindexを取得
+  const lastMenuIndex = currentNavArray.length - 1
+
   return (
     <header className="absolute inset-x-0 top-0 pt-8 px-4 flex flex-col justify-between z-20">
       <div className="flex justify-between md:justify-center items-center gap-2 w-full font-display">
@@ -57,9 +62,10 @@ export const Header: React.FC<HeaderProps> = ({ onClickDL }) => {
               label={item.label}
               icon={item.icon}
               isActive={currentNav === index}
-              isLoading={index == 2 && isPreviewLoad}
+              isLoading={index === lastMenuIndex && isPreviewLoad}
               onClick={() => {
-                if (index == 2) {
+                // 最後のメニュー（Download）のときのみgraph読み込みを実行
+                if (index === lastMenuIndex) {
                   setIsPreviewLoad(true)
                   handleToast()
                   // currentNavが変更されるとnodeのevaluationが走ってその後のレンダリング処理がブロックされるため、タイムアウトを設ける
