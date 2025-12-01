@@ -17,8 +17,10 @@ const NavButton: React.FC<{
           ? "bg-[rgba(255,255,255,.56)] shadow-sm"
           : "transparent shadow-none hover:bg-[rgba(255,255,255,.16)]"
       } text-content-h text-xs  transition-all`}
-      onClick={() => {
+      onClick={(e) => {
         onClick()
+        // クリック後にフォーカスを外して、DOM要素が選択されないようにする
+        e.currentTarget.blur()
       }}>
       {isLoading ? (
         <div className="w-6 h-6 animate-spin rounded-full border-2 border-solid border-current border-r-transparent" />
